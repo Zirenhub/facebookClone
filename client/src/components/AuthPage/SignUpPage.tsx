@@ -6,19 +6,44 @@ interface Props {
 
 type BirthdayType = {
   day: number;
-  month: string;
+  month: number;
   year: number;
 };
 
 function SignUpPage({ setSignUp }: Props) {
-  const [birthday, setBirthday] = useState<BirthdayType | null>(null);
+  const [birthday, setBirthday] = useState<BirthdayType>({
+    day: 12,
+    month: 4,
+    year: 2002,
+  });
 
   function handleBirthday(e: React.SyntheticEvent) {
     const target = e.target as HTMLInputElement;
-    setBirthday({
-      ...birthday,
-      month: target.value,
-    });
+    const targetVal = Number(target.value);
+    const max = Number(target.max);
+    const min = Number(target.min);
+    if (target.id === 'birthdayMonth') {
+      if (targetVal <= max && targetVal >= min) {
+        setBirthday({
+          ...birthday,
+          month: targetVal,
+        });
+      }
+    } else if (target.id === 'birthdayDay') {
+      if (targetVal <= max && targetVal >= min) {
+        setBirthday({
+          ...birthday,
+          day: targetVal,
+        });
+      }
+    } else if (target.id === 'birthdayYear') {
+      if (targetVal <= max && targetVal >= min) {
+        setBirthday({
+          ...birthday,
+          year: targetVal,
+        });
+      }
+    }
   }
 
   return (
@@ -47,7 +72,7 @@ function SignUpPage({ setSignUp }: Props) {
                   type="text"
                   name="firstName"
                   placeholder="First Name"
-                  className="border-2 rounded p-2 sm:max-w-[200px] bg-gray-100"
+                  className="border-2 rounded p-2 w-full bg-gray-100"
                 />
               </label>
               <label>
@@ -55,7 +80,7 @@ function SignUpPage({ setSignUp }: Props) {
                   type="text"
                   name="lastName"
                   placeholder="Last Name"
-                  className="border-2 rounded p-2 sm:max-w-[200px] bg-gray-100"
+                  className="border-2 rounded p-2 w-full bg-gray-100"
                 />
               </label>
             </div>
@@ -76,14 +101,47 @@ function SignUpPage({ setSignUp }: Props) {
               />
             </label>
             <p className="text-gray-500 text-sm self-start">Birthday</p>
-            <label>
-              <select value={this.state.value} onChange={handleBirthday}>
-                <option value="grapefruit">Grapefruit</option>
-                <option value="lime">Lime</option>
-                <option value="coconut">Coconut</option>
-                <option value="mango">Mango</option>
-              </select>
-            </label>
+            <div className="flex sm:flex-row flex-col justify-between w-full pb-5 gap-5">
+              <label>
+                <input
+                  type="number"
+                  value={birthday.day}
+                  id="birthdayDay"
+                  min="1"
+                  max="31"
+                  name="birthdayDay"
+                  onChange={handleBirthday}
+                  className="border-2 rounded p-2 w-full"
+                />
+              </label>
+              <label>
+                <input
+                  type="number"
+                  // value={
+                  //   birthday.month < 10 ? `0${birthday.month}` : birthday.month
+                  // }
+                  value={birthday.month}
+                  id="birthdayMonth"
+                  min="1"
+                  max="12"
+                  name="birthdayMonth"
+                  onChange={handleBirthday}
+                  className="border-2 rounded p-2 w-full"
+                />
+              </label>
+              <label>
+                <input
+                  type="number"
+                  value={birthday.year}
+                  id="birthdayYear"
+                  min="1900"
+                  max={new Date().getFullYear()}
+                  name="birthdayYear"
+                  onChange={handleBirthday}
+                  className="border-2 rounded p-2 w-full"
+                />
+              </label>
+            </div>
           </form>
         </div>
       </div>
