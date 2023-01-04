@@ -8,12 +8,24 @@
     @apply m-0;
     @apply p-0;
     @apply box-border;
+    @apply overflow-y-hidden;
+    @apply overflow-x-hidden;
     @apply h-full;
   }
 
   html {
     @apply h-full;
-    @apply font-ubuntu
+    @apply overflow-y-hidden;
+    @apply overflow-x-hidden;
+    @apply font-ubuntu;
+  }
+
+  *,
+  *::before,
+  *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
   }
 
   #root {
