@@ -1,18 +1,21 @@
 import express, { Express, Request, Response } from 'express';
 import mongoose from 'mongoose';
+import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
+
+import authRoute from './routes/authRoute';
 
 dotenv.config();
 
 const app: Express = express();
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-// app.use(cookieParser());
+app.use(cookieParser());
+
 const port = process.env.PORT || 5000;
 
-app.get('/api/v1', (req: Request, res: Response) => {
-  res.json({ status: 'success', data: null, message: null });
-});
+app.use('/api/v1/auth', authRoute);
 
 mongoose.connect(process.env.DB_URI!).then(() => {
   app.listen(port, () =>
