@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 interface Props {
   setSignUp: React.Dispatch<React.SetStateAction<boolean>>;
@@ -11,33 +11,36 @@ type BirthdayType = {
 };
 
 function SignUpPage({ setSignUp }: Props) {
+  const [info, setInfo] = useState(null); // collect all info here instead of seperate
+  const [firstName, setFirstName] = useState<string>('');
+  const [lastName, setLastName] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
   const [birthday, setBirthday] = useState<BirthdayType>({
     day: 12,
     month: 4,
     year: 2002,
   });
+  const [gender, setGender] = useState<string | null>(null);
+  const [customGender, setCustomGender] = useState<string>('');
 
   function handleBirthday(e: React.SyntheticEvent) {
     const target = e.target as HTMLInputElement;
     const targetVal = Number(target.value);
     const max = Number(target.max);
     const min = Number(target.min);
-    if (target.id === 'birthdayMonth') {
-      if (targetVal <= max && targetVal >= min) {
+    if (targetVal <= max && targetVal >= min) {
+      if (target.id === 'birthdayMonth') {
         setBirthday({
           ...birthday,
           month: targetVal,
         });
-      }
-    } else if (target.id === 'birthdayDay') {
-      if (targetVal <= max && targetVal >= min) {
+      } else if (target.id === 'birthdayDay') {
         setBirthday({
           ...birthday,
           day: targetVal,
         });
-      }
-    } else if (target.id === 'birthdayYear') {
-      if (targetVal <= max && targetVal >= min) {
+      } else if (target.id === 'birthdayYear') {
         setBirthday({
           ...birthday,
           year: targetVal,
@@ -45,6 +48,26 @@ function SignUpPage({ setSignUp }: Props) {
       }
     }
   }
+
+  function handleGender(e: React.SyntheticEvent) {
+    const target = e.target as HTMLInputElement;
+    setGender(target.value);
+  }
+
+  function handleInfo(e: React.SyntheticEvent) {
+    const target = e.target as HTMLInputElement;
+    if (target.id === 'firstName') {
+      setFirstName(target.value);
+    } else if (target.id === 'lastName') {
+      setLastName(target.value);
+    } else if (target.id === 'email') {
+      setEmail(target.value);
+    } else if (target.id === 'password') {
+      setPassword(target.value);
+    }
+  }
+
+  function handleSubmit() {}
 
   return (
     <div className="z-10 bg-gray-200/40 absolute top-0 left-0 w-full h-full flex justify-center items-center">
@@ -65,12 +88,18 @@ function SignUpPage({ setSignUp }: Props) {
           <div className="bg-gray-300 min-h-[1px]" />
         </div>
         <div className="flex px-3">
-          <form className="gap-2 w-full flex flex-col items-center">
-            <div className="flex sm:flex-row flex-col gap-2">
+          <form
+            className="gap-2 w-full flex flex-col items-center"
+            onSubmit={handleSubmit}
+          >
+            <div className="flex gap-2">
               <label>
                 <input
                   type="text"
                   name="firstName"
+                  id="firstName"
+                  value={firstName}
+                  onChange={handleInfo}
                   placeholder="First Name"
                   className="border-2 rounded p-2 w-full bg-gray-100"
                 />
@@ -79,29 +108,40 @@ function SignUpPage({ setSignUp }: Props) {
                 <input
                   type="text"
                   name="lastName"
+                  id="lastName"
+                  value={lastName}
+                  onChange={handleInfo}
                   placeholder="Last Name"
                   className="border-2 rounded p-2 w-full bg-gray-100"
                 />
               </label>
             </div>
-            <label className="sm:w-full">
+            <label className="w-full">
               <input
                 type="email"
                 name="email"
+                id="email"
+                value={email}
+                onChange={handleInfo}
                 placeholder="Email"
                 className="border-2 rounded p-2 w-full bg-gray-100"
               />
             </label>
-            <label className="sm:w-full">
+            <label className="w-full">
               <input
                 type="password"
                 name="password"
+                id="password"
+                value={password}
+                onChange={handleInfo}
                 placeholder="Password"
                 className="border-2 rounded p-2 w-full bg-gray-100"
               />
             </label>
-            <p className="text-gray-500 text-sm self-start">Birthday</p>
-            <div className="flex sm:flex-row flex-col justify-between w-full pb-5 gap-5">
+            <p className="text-gray-500 text-sm self-start">
+              Birthday DD/MM/YYYY
+            </p>
+            <div className="flex justify-between w-full gap-5">
               <label>
                 <input
                   type="number"
@@ -142,6 +182,48 @@ function SignUpPage({ setSignUp }: Props) {
                 />
               </label>
             </div>
+            <div className="w-full">
+              <fieldset
+                className="flex gap-5 justify-between"
+                onChange={handleGender}
+              >
+                <legend className="text-gray-500 text-sm self-start">
+                  Gender
+                </legend>
+                <label className="p-2 rounded border-2 flex justify-between w-full">
+                  Male
+                  <input type="radio" name="gender" value="male" />
+                </label>
+                <label className="p-2 rounded border-2 flex justify-between w-full">
+                  Female
+                  <input type="radio" name="gender" value="female" />
+                </label>
+                <label className="p-2 rounded border-2 flex justify-between w-full">
+                  Custom
+                  <input type="radio" name="gender" value="custom" />
+                </label>
+              </fieldset>
+            </div>
+            {gender === 'custom' && (
+              <label className="w-full">
+                <input
+                  type="text"
+                  name="gender"
+                  value={customGender}
+                  placeholder="Gender"
+                  onChange={(e: React.SyntheticEvent) => {
+                    const target = e.target as HTMLInputElement;
+                    setCustomGender(target.value);
+                  }}
+                  className="border-2 rounded p-2 w-full bg-gray-100"
+                />
+              </label>
+            )}
+            <input
+              type="submit"
+              value="Sign Up"
+              className="py-1 rounded transition-all bg-green-500 hover:bg-green-600 text-white font-bold cursor-pointer px-10 m-5"
+            />
           </form>
         </div>
       </div>
