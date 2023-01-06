@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 interface Props {
   setSignUp: React.Dispatch<React.SetStateAction<boolean>>;
@@ -10,19 +10,42 @@ type BirthdayType = {
   year: number;
 };
 
+type UserInfoType = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  birthday: BirthdayType;
+  gender: string;
+  customGender?: string;
+};
+
+type ValidationErrorsType = {
+  firstName: string | null;
+  lastName: string | null;
+  email: string | null;
+  password: string | null;
+  birthday: string | null;
+  gender: string | null;
+};
+
 function SignUpPage({ setSignUp }: Props) {
-  const [info, setInfo] = useState(null); // collect all info here instead of seperate
-  const [firstName, setFirstName] = useState<string>('');
-  const [lastName, setLastName] = useState<string>('');
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [birthday, setBirthday] = useState<BirthdayType>({
-    day: 12,
-    month: 4,
-    year: 2002,
+  const [userInfo, setUserInfo] = useState<UserInfoType>({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    gender: '',
+    birthday: { day: 1, month: 1, year: 2023 },
   });
-  const [gender, setGender] = useState<string | null>(null);
-  const [customGender, setCustomGender] = useState<string>('');
+  const [errors, setErrors] = useState<ValidationErrorsType>({
+    firstName: null,
+    lastName: null,
+    email: null,
+    password: null,
+    birthday: null,
+    gender: null,
+  });
 
   function handleBirthday(e: React.SyntheticEvent) {
     const target = e.target as HTMLInputElement;
@@ -30,44 +53,160 @@ function SignUpPage({ setSignUp }: Props) {
     const max = Number(target.max);
     const min = Number(target.min);
     if (targetVal <= max && targetVal >= min) {
-      if (target.id === 'birthdayMonth') {
-        setBirthday({
-          ...birthday,
-          month: targetVal,
-        });
-      } else if (target.id === 'birthdayDay') {
-        setBirthday({
-          ...birthday,
-          day: targetVal,
-        });
-      } else if (target.id === 'birthdayYear') {
-        setBirthday({
-          ...birthday,
-          year: targetVal,
-        });
-      }
+      setUserInfo((current) => {
+        return {
+          ...current,
+          birthday: {
+            ...current.birthday,
+            [`${target.id}`]: targetVal,
+          },
+        };
+      });
     }
+  }
+
+  function validateGender() {
+    if (
+      (userInfo.gender !== 'male' && userInfo.gender !== 'female') ||
+      (userInfo.gender === 'custom' && !userInfo.customGender)
+    ) {
+      setErrors((current) => {
+        return {
+          ...current,
+          gender: 'Please provide a gender.',
+        };
+      });
+    }
+    setErrors((current) => {
+      return {
+        ...current,
+        gender: null,
+      };
+    });
   }
 
   function handleGender(e: React.SyntheticEvent) {
     const target = e.target as HTMLInputElement;
-    setGender(target.value);
+    setUserInfo((current) => {
+      return {
+        ...current,
+        gender: target.value,
+      };
+    });
+  }
+
+  function validateInfo() {
+    if (!userInfo.firstName) {
+      setErrors((current) => {
+        return {
+          ...current,
+          firstName: 'Please provide a first name.',
+        };
+      });
+    }
+    if (!userInfo.lastName) {
+      setErrors((current) => {
+        return {
+          ...current,
+          lastName: 'Please provide a last name.',
+        };
+      });
+    }
+    if (!userInfo.email) {
+      setErrors((current) => {
+        return {
+          ...current,
+          email: 'Please provide a email.',
+        };
+      });
+    }
+    if (!userInfo.password || userInfo.password.length < 8) {
+      setErrors((current) => {
+        return {
+          ...current,
+          password: 'Password should be greater than or 8 characters.',
+        };
+      });
+    }
   }
 
   function handleInfo(e: React.SyntheticEvent) {
     const target = e.target as HTMLInputElement;
-    if (target.id === 'firstName') {
-      setFirstName(target.value);
-    } else if (target.id === 'lastName') {
-      setLastName(target.value);
-    } else if (target.id === 'email') {
-      setEmail(target.value);
-    } else if (target.id === 'password') {
-      setPassword(target.value);
-    }
+    setUserInfo((current) => {
+      return {
+        ...current,
+        [`${target.id}`]: target.value,
+      };
+    });
   }
 
-  function handleSubmit() {}
+  useEffect(() => {
+    console.log(errors);
+  }, [errors]);
+
+  async function handleSubmit(e: React.SyntheticEvent) {
+    e.preventDefault();
+    validateGender();
+    validateInfo();
+
+    // const { firstName, lastName, email, password, gender, customGender } =
+    //   userInfo;
+    // let canSend = true;
+    // if (!firstName) {
+    //   setErrors((current) => {
+    //     return {
+    //       ...current,
+    //       firstName: 'Please provide a first name.',
+    //     };
+    //   });
+    //   canSend = false;
+    // }
+    // if (!lastName) {
+    //   setErrors((current) => {
+    //     return {
+    //       ...current,
+    //       lastName: 'Please provide a last name.',
+    //     };
+    //   });
+    // }
+    // if (!email) {
+    //   setErrors((current) => {
+    //     return {
+    //       ...current,
+    //       email: 'Please provide a email.',
+    //     };
+    //   });
+    // }
+    // if (!password || password.length < 8) {
+    //   setErrors((current) => {
+    //     return {
+    //       ...current,
+    //       password: 'Password should be greater than or 8 characters.',
+    //     };
+    //   });
+    // }
+    // if (!gender) {
+    //   setErrors((current) => {
+    //     return {
+    //       ...current,
+    //       gender: 'Please provide a gender.',
+    //     };
+    //   });
+    // } else if (gender === 'custom' && !customGender) {
+    //   setErrors((current) => {
+    //     return {
+    //       ...current,
+    //       gender: 'Please provide a custom gender.',
+    //     };
+    //   });
+    // }
+
+    // const res = await fetch('/api/v1/auth/signup', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify(userInfo),
+    // });
+  }
 
   return (
     <div className="z-10 bg-gray-200/40 absolute top-0 left-0 w-full h-full flex justify-center items-center">
@@ -98,46 +237,54 @@ function SignUpPage({ setSignUp }: Props) {
                   type="text"
                   name="firstName"
                   id="firstName"
-                  value={firstName}
+                  value={userInfo.firstName}
                   onChange={handleInfo}
                   placeholder="First Name"
                   className="border-2 rounded p-2 w-full bg-gray-100"
                 />
+                {errors?.firstName && <p>{errors.firstName}</p>}
               </label>
               <label>
                 <input
                   type="text"
                   name="lastName"
                   id="lastName"
-                  value={lastName}
+                  value={userInfo.lastName}
                   onChange={handleInfo}
                   placeholder="Last Name"
                   className="border-2 rounded p-2 w-full bg-gray-100"
                 />
+                {errors?.lastName && <p>{errors.lastName}</p>}
               </label>
             </div>
-            <label className="w-full">
-              <input
-                type="email"
-                name="email"
-                id="email"
-                value={email}
-                onChange={handleInfo}
-                placeholder="Email"
-                className="border-2 rounded p-2 w-full bg-gray-100"
-              />
-            </label>
-            <label className="w-full">
-              <input
-                type="password"
-                name="password"
-                id="password"
-                value={password}
-                onChange={handleInfo}
-                placeholder="Password"
-                className="border-2 rounded p-2 w-full bg-gray-100"
-              />
-            </label>
+            <div className="flex flex-col w-full">
+              <label>
+                <input
+                  type="email"
+                  name="email"
+                  id="email"
+                  value={userInfo.email}
+                  onChange={handleInfo}
+                  placeholder="Email"
+                  className="border-2 rounded p-2 w-full bg-gray-100"
+                />
+              </label>
+              {errors?.email && <p>{errors.email}</p>}
+            </div>
+            <div className="flex flex-col w-full">
+              <label>
+                <input
+                  type="password"
+                  name="password"
+                  id="password"
+                  value={userInfo.password}
+                  onChange={handleInfo}
+                  placeholder="Password"
+                  className="border-2 rounded p-2 w-full bg-gray-100"
+                />
+              </label>
+              {errors?.password && <p>{errors.password}</p>}
+            </div>
             <p className="text-gray-500 text-sm self-start">
               Birthday DD/MM/YYYY
             </p>
@@ -145,8 +292,8 @@ function SignUpPage({ setSignUp }: Props) {
               <label>
                 <input
                   type="number"
-                  value={birthday.day}
-                  id="birthdayDay"
+                  value={userInfo.birthday.day}
+                  id="day"
                   min="1"
                   max="31"
                   name="birthdayDay"
@@ -157,11 +304,8 @@ function SignUpPage({ setSignUp }: Props) {
               <label>
                 <input
                   type="number"
-                  // value={
-                  //   birthday.month < 10 ? `0${birthday.month}` : birthday.month
-                  // }
-                  value={birthday.month}
-                  id="birthdayMonth"
+                  value={userInfo.birthday.month}
+                  id="month"
                   min="1"
                   max="12"
                   name="birthdayMonth"
@@ -172,8 +316,8 @@ function SignUpPage({ setSignUp }: Props) {
               <label>
                 <input
                   type="number"
-                  value={birthday.year}
-                  id="birthdayYear"
+                  value={userInfo.birthday.year}
+                  id="year"
                   min="1900"
                   max={new Date().getFullYear()}
                   name="birthdayYear"
@@ -182,6 +326,7 @@ function SignUpPage({ setSignUp }: Props) {
                 />
               </label>
             </div>
+            {errors?.birthday && <p>{errors.birthday}</p>}
             <div className="w-full">
               <fieldset
                 className="flex gap-5 justify-between"
@@ -204,21 +349,28 @@ function SignUpPage({ setSignUp }: Props) {
                 </label>
               </fieldset>
             </div>
-            {gender === 'custom' && (
+            {userInfo.gender === 'custom' && (
               <label className="w-full">
                 <input
                   type="text"
                   name="gender"
-                  value={customGender}
-                  placeholder="Gender"
+                  value={userInfo.customGender || ''}
+                  placeholder="Gender*"
                   onChange={(e: React.SyntheticEvent) => {
                     const target = e.target as HTMLInputElement;
-                    setCustomGender(target.value);
+                    setUserInfo((current) => {
+                      return {
+                        ...current,
+                        customGender: target.value,
+                      };
+                    });
                   }}
                   className="border-2 rounded p-2 w-full bg-gray-100"
                 />
               </label>
             )}
+            {errors?.gender && <p>{errors.gender}</p>}
+
             <input
               type="submit"
               value="Sign Up"
