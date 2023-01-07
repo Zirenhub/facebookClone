@@ -31,26 +31,31 @@ function SignUpPage({ setSignUp }: Props) {
     email: '',
     password: '',
     gender: '',
-    birthday: new Date(),
+    birthday: moment().toDate(),
   });
   const [errors, setErrors] = useState<ValidationErrorsType | null>(null);
 
   function handleBirthday(e: React.SyntheticEvent) {
     const target = e.target as HTMLInputElement;
     const targetVal = Number(target.value);
+    if (Number.isNaN(targetVal)) {
+      return;
+    }
     const max = Number(target.max);
     const min = Number(target.min);
+
     if (targetVal <= max && targetVal >= min) {
       setUserInfo((current) => {
         return {
           ...current,
-          birthday: moment()
+          birthday: moment(current.birthday)
             .set(target.id as any, targetVal)
             .toDate(),
         };
       });
     }
   }
+  console.log(userInfo.birthday);
 
   function handleGender(e: React.SyntheticEvent) {
     const target = e.target as HTMLInputElement;
@@ -227,7 +232,7 @@ function SignUpPage({ setSignUp }: Props) {
             <div className="flex justify-between w-full gap-5">
               <label>
                 <input
-                  type="number"
+                  type="text"
                   value={userInfo.birthday.getDay()}
                   id="date"
                   min="1"
@@ -240,10 +245,10 @@ function SignUpPage({ setSignUp }: Props) {
               <label>
                 <input
                   type="number"
-                  value={userInfo.birthday.getMonth()}
+                  value={userInfo.birthday.getMonth() + 1}
                   id="month"
-                  min="1"
-                  max="12"
+                  min="0"
+                  max="11"
                   name="birthdayMonth"
                   onChange={handleBirthday}
                   className="border-2 rounded p-2 w-full"
