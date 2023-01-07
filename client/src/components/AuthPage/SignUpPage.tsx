@@ -1,32 +1,27 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import moment from 'moment';
 
 interface Props {
   setSignUp: React.Dispatch<React.SetStateAction<boolean>>;
 }
-
-type BirthdayType = {
-  day: number;
-  month: number;
-  year: number;
-};
 
 type UserInfoType = {
   firstName: string;
   lastName: string;
   email: string;
   password: string;
-  birthday: BirthdayType;
+  birthday: Date;
   gender: string;
   customGender?: string;
 };
 
 type ValidationErrorsType = {
-  firstName: string | null;
-  lastName: string | null;
-  email: string | null;
-  password: string | null;
-  birthday: string | null;
-  gender: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  email?: string | null;
+  password?: string | null;
+  birthday?: string | null;
+  gender?: string | null;
 };
 
 function SignUpPage({ setSignUp }: Props) {
@@ -36,16 +31,9 @@ function SignUpPage({ setSignUp }: Props) {
     email: '',
     password: '',
     gender: '',
-    birthday: { day: 1, month: 1, year: 2023 },
+    birthday: new Date(),
   });
-  const [errors, setErrors] = useState<ValidationErrorsType>({
-    firstName: null,
-    lastName: null,
-    email: null,
-    password: null,
-    birthday: null,
-    gender: null,
-  });
+  const [errors, setErrors] = useState<ValidationErrorsType | null>(null);
 
   function handleBirthday(e: React.SyntheticEvent) {
     const target = e.target as HTMLInputElement;
@@ -56,33 +44,12 @@ function SignUpPage({ setSignUp }: Props) {
       setUserInfo((current) => {
         return {
           ...current,
-          birthday: {
-            ...current.birthday,
-            [`${target.id}`]: targetVal,
-          },
+          birthday: moment()
+            .set(target.id as any, targetVal)
+            .toDate(),
         };
       });
     }
-  }
-
-  function validateGender() {
-    if (
-      (userInfo.gender !== 'male' && userInfo.gender !== 'female') ||
-      (userInfo.gender === 'custom' && !userInfo.customGender)
-    ) {
-      setErrors((current) => {
-        return {
-          ...current,
-          gender: 'Please provide a gender.',
-        };
-      });
-    }
-    setErrors((current) => {
-      return {
-        ...current,
-        gender: null,
-      };
-    });
   }
 
   function handleGender(e: React.SyntheticEvent) {
@@ -95,41 +62,6 @@ function SignUpPage({ setSignUp }: Props) {
     });
   }
 
-  function validateInfo() {
-    if (!userInfo.firstName) {
-      setErrors((current) => {
-        return {
-          ...current,
-          firstName: 'Please provide a first name.',
-        };
-      });
-    }
-    if (!userInfo.lastName) {
-      setErrors((current) => {
-        return {
-          ...current,
-          lastName: 'Please provide a last name.',
-        };
-      });
-    }
-    if (!userInfo.email) {
-      setErrors((current) => {
-        return {
-          ...current,
-          email: 'Please provide a email.',
-        };
-      });
-    }
-    if (!userInfo.password || userInfo.password.length < 8) {
-      setErrors((current) => {
-        return {
-          ...current,
-          password: 'Password should be greater than or 8 characters.',
-        };
-      });
-    }
-  }
-
   function handleInfo(e: React.SyntheticEvent) {
     const target = e.target as HTMLInputElement;
     setUserInfo((current) => {
@@ -140,72 +72,76 @@ function SignUpPage({ setSignUp }: Props) {
     });
   }
 
-  useEffect(() => {
-    console.log(errors);
-  }, [errors]);
-
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
-    validateGender();
-    validateInfo();
+    setErrors(null);
+    function validateInfo() {
+      let valid = true;
+      if (!userInfo.firstName) {
+        setErrors((current) => {
+          return {
+            ...current,
+            firstName: 'Please provide a first name.',
+          };
+        });
+        valid = false;
+      }
+      if (!userInfo.lastName) {
+        setErrors((current) => {
+          return {
+            ...current,
+            lastName: 'Please provide a last name.',
+          };
+        });
+        valid = false;
+      }
+      if (!userInfo.email) {
+        setErrors((current) => {
+          return {
+            ...current,
+            email: 'Please provide a email.',
+          };
+        });
+        valid = false;
+      }
+      if (!userInfo.password || userInfo.password.length < 8) {
+        setErrors((current) => {
+          return {
+            ...current,
+            password: 'Password must be at least 8 characters long.',
+          };
+        });
+        valid = false;
+      }
+      return valid;
+    }
+    function validateGender() {
+      let valid = true;
+      const { gender, customGender } = userInfo;
+      if (!gender || (gender === 'custom' && !customGender)) {
+        setErrors((current) => {
+          return {
+            ...current,
+            gender: 'Please provide a gender.',
+          };
+        });
+        valid = false;
+      }
+      return valid;
+    }
 
-    // const { firstName, lastName, email, password, gender, customGender } =
-    //   userInfo;
-    // let canSend = true;
-    // if (!firstName) {
-    //   setErrors((current) => {
-    //     return {
-    //       ...current,
-    //       firstName: 'Please provide a first name.',
-    //     };
-    //   });
-    //   canSend = false;
-    // }
-    // if (!lastName) {
-    //   setErrors((current) => {
-    //     return {
-    //       ...current,
-    //       lastName: 'Please provide a last name.',
-    //     };
-    //   });
-    // }
-    // if (!email) {
-    //   setErrors((current) => {
-    //     return {
-    //       ...current,
-    //       email: 'Please provide a email.',
-    //     };
-    //   });
-    // }
-    // if (!password || password.length < 8) {
-    //   setErrors((current) => {
-    //     return {
-    //       ...current,
-    //       password: 'Password should be greater than or 8 characters.',
-    //     };
-    //   });
-    // }
-    // if (!gender) {
-    //   setErrors((current) => {
-    //     return {
-    //       ...current,
-    //       gender: 'Please provide a gender.',
-    //     };
-    //   });
-    // } else if (gender === 'custom' && !customGender) {
-    //   setErrors((current) => {
-    //     return {
-    //       ...current,
-    //       gender: 'Please provide a custom gender.',
-    //     };
-    //   });
-    // }
+    const infoValidation = validateInfo();
+    const genderValidtion = validateGender();
 
-    // const res = await fetch('/api/v1/auth/signup', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(userInfo),
-    // });
+    if (infoValidation && genderValidtion) {
+      const res = await fetch('/api/v1/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userInfo),
+      });
+      const resData = await res.json();
+      console.log(resData);
+    }
   }
 
   return (
@@ -292,8 +228,8 @@ function SignUpPage({ setSignUp }: Props) {
               <label>
                 <input
                   type="number"
-                  value={userInfo.birthday.day}
-                  id="day"
+                  value={userInfo.birthday.getDay()}
+                  id="date"
                   min="1"
                   max="31"
                   name="birthdayDay"
@@ -304,7 +240,7 @@ function SignUpPage({ setSignUp }: Props) {
               <label>
                 <input
                   type="number"
-                  value={userInfo.birthday.month}
+                  value={userInfo.birthday.getMonth()}
                   id="month"
                   min="1"
                   max="12"
@@ -316,7 +252,7 @@ function SignUpPage({ setSignUp }: Props) {
               <label>
                 <input
                   type="number"
-                  value={userInfo.birthday.year}
+                  value={userInfo.birthday.getFullYear()}
                   id="year"
                   min="1900"
                   max={new Date().getFullYear()}
