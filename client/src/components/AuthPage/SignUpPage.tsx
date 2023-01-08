@@ -42,19 +42,22 @@ function SignUpPage({ setSignUp }: Props) {
   const [errors, setErrors] = useState<ValidationErrorsType | null>(null);
   const [birthdayRaw, setBirthdayRaw] = useState<BirthdayType>({
     day: 1,
-    month: 1,
+    month: 0,
     year: 2023,
   });
   const [currentYear, setCurrentYear] = useState<number>(2023); // is not hard coded
 
   function handleBirthday(e: React.SyntheticEvent) {
     const target = e.target as HTMLInputElement;
-    const targetVal = Number(target.value);
+    let targetVal = Number(target.value);
     if (Number.isNaN(targetVal)) {
       return;
     }
     const max = Number(target.max);
     if (targetVal <= max) {
+      if (target.id === 'month') {
+        targetVal -= 1; // date starts couting months from 0
+      }
       setBirthdayRaw((current) => {
         return {
           ...current,
@@ -66,7 +69,7 @@ function SignUpPage({ setSignUp }: Props) {
 
   useEffect(() => {
     const years = birthdayRaw.year;
-    const months = birthdayRaw.month - 1;
+    const months = birthdayRaw.month;
     const date = birthdayRaw.day;
 
     setUserInfo((current) => {
@@ -161,7 +164,7 @@ function SignUpPage({ setSignUp }: Props) {
     function validateBirthday() {
       let valid = true;
       const day = userInfo.birthday.getDate();
-      const month = userInfo.birthday.getMonth() + 1; // we use - 1 when setting month because momentjs.
+      const month = userInfo.birthday.getMonth();
       const year = userInfo.birthday.getFullYear();
 
       if (!moment(userInfo.birthday).isValid()) {
@@ -183,7 +186,7 @@ function SignUpPage({ setSignUp }: Props) {
         });
         valid = false;
       }
-      if (month < 1 || month > 12) {
+      if (month < 0 || month > 11) {
         setErrors((current) => {
           return {
             ...current,
@@ -321,8 +324,8 @@ function SignUpPage({ setSignUp }: Props) {
                   type="text"
                   value={
                     birthdayRaw.month < 10
-                      ? `0${birthdayRaw.month}`
-                      : birthdayRaw.month
+                      ? `0${birthdayRaw.month + 1}`
+                      : birthdayRaw.month + 1
                   }
                   id="month"
                   min="1"
