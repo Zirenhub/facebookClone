@@ -1,10 +1,10 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
-import { IUser } from '../interfaces/IUser';
+import { ICredentials } from '../interfaces/ICredentials';
 
 const Schema = mongoose.Schema;
 
-const UserSchema = new Schema<IUser>(
+const CredentialsSchema = new Schema<ICredentials>(
   {
     email: {
       type: String,
@@ -16,17 +16,25 @@ const UserSchema = new Schema<IUser>(
       type: String,
       required: true,
     },
+    profile: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: 'Profile',
+    },
   },
   { timestamps: true }
 );
 
-UserSchema.pre('save', async function (next) {
+CredentialsSchema.pre('save', async function (next) {
   if (this.isModified('password') || this.isNew) {
     this.password = await bcrypt.hash(this.password, 10);
     next();
   }
 });
 
-const UserModel = mongoose.model<IUser>('User', UserSchema);
+const CredentialsModel = mongoose.model<ICredentials>(
+  'Credentials',
+  CredentialsSchema
+);
 
-export default UserModel;
+export default CredentialsModel;
