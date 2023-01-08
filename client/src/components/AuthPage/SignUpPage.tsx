@@ -1,9 +1,15 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 
 interface Props {
   setSignUp: React.Dispatch<React.SetStateAction<boolean>>;
 }
+
+type BirthdayType = {
+  day: number;
+  month: number;
+  year: number;
+};
 
 type UserInfoType = {
   firstName: string;
@@ -34,6 +40,12 @@ function SignUpPage({ setSignUp }: Props) {
     birthday: moment().toDate(),
   });
   const [errors, setErrors] = useState<ValidationErrorsType | null>(null);
+  const [birthdayRaw, setBirthdayRaw] = useState<BirthdayType>({
+    day: 1,
+    month: 1,
+    year: 2023,
+  });
+  const [currentYear, setCurrentYear] = useState<number>(2023); // is not hard coded
 
   function handleBirthday(e: React.SyntheticEvent) {
     const target = e.target as HTMLInputElement;
@@ -42,20 +54,28 @@ function SignUpPage({ setSignUp }: Props) {
       return;
     }
     const max = Number(target.max);
-    const min = Number(target.min);
-
-    if (targetVal <= max && targetVal >= min) {
-      setUserInfo((current) => {
+    if (targetVal <= max) {
+      setBirthdayRaw((current) => {
         return {
           ...current,
-          birthday: moment(current.birthday)
-            .set(target.id as any, targetVal)
-            .toDate(),
+          [`${target.id}`]: targetVal,
         };
       });
     }
   }
-  console.log(userInfo.birthday);
+
+  useEffect(() => {
+    const years = birthdayRaw.year;
+    const months = birthdayRaw.month - 1;
+    const date = birthdayRaw.day;
+
+    setUserInfo((current) => {
+      return {
+        ...current,
+        birthday: moment({ years, months, date }).toDate(),
+      };
+    });
+  }, [birthdayRaw]);
 
   function handleGender(e: React.SyntheticEvent) {
     const target = e.target as HTMLInputElement;
@@ -76,6 +96,10 @@ function SignUpPage({ setSignUp }: Props) {
       };
     });
   }
+
+  useEffect(() => {
+    setCurrentYear(new Date().getFullYear());
+  }, []);
 
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
@@ -134,11 +158,57 @@ function SignUpPage({ setSignUp }: Props) {
       }
       return valid;
     }
+    function validateBirthday() {
+      let valid = true;
+      const day = userInfo.birthday.getDate();
+      const month = userInfo.birthday.getMonth() + 1; // we use - 1 when setting month because momentjs.
+      const year = userInfo.birthday.getFullYear();
+
+      if (!moment(userInfo.birthday).isValid()) {
+        setErrors((current) => {
+          return {
+            ...current,
+            birthday: `Invalid date`,
+          };
+        });
+        valid = false;
+      }
+
+      if (day < 1 || day > 31) {
+        setErrors((current) => {
+          return {
+            ...current,
+            birthday: `Day should be in range 01-31`,
+          };
+        });
+        valid = false;
+      }
+      if (month < 1 || month > 12) {
+        setErrors((current) => {
+          return {
+            ...current,
+            birthday: `Month should be in range 01-12`,
+          };
+        });
+        valid = false;
+      }
+      if (year < 1900 || year > currentYear) {
+        setErrors((current) => {
+          return {
+            ...current,
+            birthday: `Year should be in range 1900-${currentYear}`,
+          };
+        });
+        valid = false;
+      }
+      return valid;
+    }
 
     const infoValidation = validateInfo();
-    const genderValidtion = validateGender();
+    const genderValidation = validateGender();
+    const birthdayValidation = validateBirthday();
 
-    if (infoValidation && genderValidtion) {
+    if (infoValidation && genderValidation && birthdayValidation) {
       const res = await fetch('/api/v1/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -233,8 +303,12 @@ function SignUpPage({ setSignUp }: Props) {
               <label>
                 <input
                   type="text"
-                  value={userInfo.birthday.getDay()}
-                  id="date"
+                  value={
+                    birthdayRaw.day < 10
+                      ? `0${birthdayRaw.day}`
+                      : birthdayRaw.day
+                  }
+                  id="day"
                   min="1"
                   max="31"
                   name="birthdayDay"
@@ -244,11 +318,15 @@ function SignUpPage({ setSignUp }: Props) {
               </label>
               <label>
                 <input
-                  type="number"
-                  value={userInfo.birthday.getMonth() + 1}
+                  type="text"
+                  value={
+                    birthdayRaw.month < 10
+                      ? `0${birthdayRaw.month}`
+                      : birthdayRaw.month
+                  }
                   id="month"
-                  min="0"
-                  max="11"
+                  min="1"
+                  max="12"
                   name="birthdayMonth"
                   onChange={handleBirthday}
                   className="border-2 rounded p-2 w-full"
@@ -256,11 +334,11 @@ function SignUpPage({ setSignUp }: Props) {
               </label>
               <label>
                 <input
-                  type="number"
-                  value={userInfo.birthday.getFullYear()}
+                  type="text"
+                  value={birthdayRaw.year}
                   id="year"
                   min="1900"
-                  max={new Date().getFullYear()}
+                  max={currentYear}
                   name="birthdayYear"
                   onChange={handleBirthday}
                   className="border-2 rounded p-2 w-full"
