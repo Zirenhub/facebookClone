@@ -1,8 +1,34 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import SignUpPage from './SignUpPage';
 
 function AuthPage() {
   const [signUp, setSignUp] = useState<boolean>(false);
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [errors, setErrors] = useState<string[]>([]);
+
+  const navigate = useNavigate();
+
+  async function handleSubmit(e: React.SyntheticEvent) {
+    e.preventDefault();
+    setErrors([]);
+    if (email && password) {
+      const res = await fetch('/api/v1/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const resData = await res.json();
+      if (resData.status === 'success') {
+        navigate('/homepage');
+      } else {
+        resData.errors.forEach((error: any) => {
+          setErrors((current) => [...current, error.msg]);
+        });
+      }
+    }
+  }
 
   return (
     <>
@@ -18,11 +44,16 @@ function AuthPage() {
         </div>
         <div className="grow self-center">
           <div className="p-5 bg-white rounded m-10 shadow-md flex flex-col max-w-md">
-            <form className="flex flex-col gap-5">
+            <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
               <label>
                 <input
                   type="email"
                   name="email"
+                  value={email}
+                  onChange={(e: React.SyntheticEvent) => {
+                    const target = e.target as HTMLInputElement;
+                    setEmail(target.value);
+                  }}
                   placeholder="Email"
                   className="border-2 rounded p-2 min-w-full"
                 />
@@ -31,6 +62,11 @@ function AuthPage() {
                 <input
                   type="password"
                   name="password"
+                  value={password}
+                  onChange={(e: React.SyntheticEvent) => {
+                    const target = e.target as HTMLInputElement;
+                    setPassword(target.value);
+                  }}
                   placeholder="Password"
                   className="border-2 rounded p-2 min-w-full"
                 />
@@ -41,6 +77,13 @@ function AuthPage() {
                 className="py-3 rounded transition-all bg-blue-500 hover:bg-blue-600 text-white font-bold cursor-pointer"
               />
             </form>
+            {errors.map((error) => {
+              return (
+                <div key={error}>
+                  <p>{error}</p>
+                </div>
+              );
+            })}
             <button
               type="button"
               className="w-fit self-center mt-5 hover:underline text-blue-400"
