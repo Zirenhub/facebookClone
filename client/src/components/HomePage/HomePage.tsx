@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
-import MobileHeader from './MobileHeader';
-import MobileWritePost from './MobileWritePost';
+import MobileHeader from './Mobile/Header';
+import MobileWritePost from './Mobile/WritePost';
+import MobileAddStory from './Mobile/AddStory';
+import DesktopHeader from './Desktop/Header';
 
 function HomePage() {
   const [width, setWidth] = useState<number>(window.innerWidth);
@@ -23,10 +25,16 @@ function HomePage() {
       <div className="flex flex-col">
         <MobileHeader />
         <MobileWritePost />
+        <MobileAddStory />
       </div>
     );
   }
-  return <p>Hello desktop user</p>;
+
+  return (
+    <div>
+      <DesktopHeader />
+    </div>
+  );
 }
 
 export default HomePage;
