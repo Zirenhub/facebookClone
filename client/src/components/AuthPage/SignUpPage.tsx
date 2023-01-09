@@ -5,13 +5,13 @@ interface Props {
   setSignUp: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-type BirthdayType = {
+type BirthdayT = {
   day: number;
   month: number;
   year: number;
 };
 
-type UserInfoType = {
+type UserInfoT = {
   firstName: string;
   lastName: string;
   email: string;
@@ -21,7 +21,7 @@ type UserInfoType = {
   customGender?: string;
 };
 
-type ValidationErrorsType = {
+type ValidationErrorsT = {
   firstName?: string | null;
   lastName?: string | null;
   email?: string | null;
@@ -31,7 +31,7 @@ type ValidationErrorsType = {
 };
 
 function SignUpPage({ setSignUp }: Props) {
-  const [userInfo, setUserInfo] = useState<UserInfoType>({
+  const [userInfo, setUserInfo] = useState<UserInfoT>({
     firstName: '',
     lastName: '',
     email: '',
@@ -39,13 +39,13 @@ function SignUpPage({ setSignUp }: Props) {
     gender: '',
     birthday: moment().toDate(),
   });
-  const [errors, setErrors] = useState<ValidationErrorsType | null>(null);
-  const [birthdayRaw, setBirthdayRaw] = useState<BirthdayType>({
+  const [errors, setErrors] = useState<ValidationErrorsT | null>(null);
+  const [birthdayRaw, setBirthdayRaw] = useState<BirthdayT>({
     day: 1,
     month: 0,
     year: 2023,
   });
-  const [currentYear, setCurrentYear] = useState<number>(2023); // is not hard coded
+  const currentYear = new Date().getFullYear();
 
   function handleBirthday(e: React.SyntheticEvent) {
     const target = e.target as HTMLInputElement;
@@ -99,10 +99,6 @@ function SignUpPage({ setSignUp }: Props) {
       };
     });
   }
-
-  useEffect(() => {
-    setCurrentYear(new Date().getFullYear());
-  }, []);
 
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
