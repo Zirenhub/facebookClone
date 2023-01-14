@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import SignUpPage from './SignUpPage';
+import Loading from '../Loading';
+
+const SignUpModal = lazy(() => import('./SignUpPage'));
 
 function AuthPage() {
-  const [signUp, setSignUp] = useState<boolean>(false);
+  const [signUpIsOpen, setSignUpIsOpen] = useState<boolean>(false);
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [errors, setErrors] = useState<string[]>([]);
@@ -32,7 +34,11 @@ function AuthPage() {
 
   return (
     <>
-      {signUp && <SignUpPage setSignUp={setSignUp} />}
+      {signUpIsOpen && (
+        <Suspense fallback={<Loading />}>
+          <SignUpModal close={() => setSignUpIsOpen(false)} />
+        </Suspense>
+      )}
       <div className="bg-background flex flex-col h-full sm:flex-row sm:pb-48">
         <div className="flex flex-col grow p-5 justify-center items-center sm:items-end">
           <div className="flex flex-col items-center max-w-xl">
@@ -96,7 +102,7 @@ function AuthPage() {
             <button
               type="button"
               className="w-fit self-center p-3 font-bold rounded-md hover:bg-green-600 transition-all bg-green-500 text-white"
-              onClick={() => setSignUp(true)}
+              onClick={() => setSignUpIsOpen(true)}
             >
               Create new account
             </button>

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 
 interface Props {
-  setSignUp: React.Dispatch<React.SetStateAction<boolean>>;
+  close: () => void;
 }
 
 type BirthdayT = {
@@ -30,7 +30,7 @@ type ValidationErrorsT = {
   gender?: string | null;
 };
 
-function SignUpPage({ setSignUp }: Props) {
+function SignUpPage({ close }: Props) {
   const [userInfo, setUserInfo] = useState<UserInfoT>({
     firstName: '',
     lastName: '',
@@ -228,7 +228,7 @@ function SignUpPage({ setSignUp }: Props) {
               type="button"
               aria-label="Close"
               className="bg-close bg-contain bg-center bg-no-repeat min-h-[16px] min-w-[16px]"
-              onClick={() => setSignUp(false)}
+              onClick={close}
             />
           </div>
           <p className="text-gray-500">It&apos;s quick and easy.</p>
