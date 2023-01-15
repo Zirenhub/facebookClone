@@ -38,7 +38,7 @@ function HomePage() {
   return (
     <div>
       <Suspense fallback={<Loading />}>
-        <DesktopHeader />
+        <DesktopHeader activePage="home" />
       </Suspense>
     </div>
   );
