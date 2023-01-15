@@ -17,7 +17,7 @@ function WritePost() {
       <div className="flex items-center px-2 py-4">
         {isCreatePostModalOpen && (
           <Suspense fallback={<Loading />}>
-            <CreatePostModal />
+            <CreatePostModal close={() => setIsCreatePostModalOpen(false)} />
           </Suspense>
         )}
         <div>
@@ -32,7 +32,7 @@ function WritePost() {
             What&apos;s on your mind?
           </button>
         </div>
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center cursor-pointer">
           <div>
             <img src={pictures} alt="photos" className="h-[32px]" />
           </div>
