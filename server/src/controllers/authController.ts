@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import CredentialsModel from '../models/credentials';
 import ProfileModel from '../models/profile';
+import { IUserRequest } from '../middleware/jwtAuth';
 
 const currentYear = new Date().getFullYear();
 
@@ -162,3 +163,7 @@ export const signup = [
     }
   },
 ];
+
+export const me = async (req: IUserRequest, res: Response) => {
+  res.json({ status: 'success', data: req.user._id, message: null });
+};

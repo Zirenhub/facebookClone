@@ -4,7 +4,6 @@ import Loading from '../Loading';
 const MobileHeader = lazy(() => import('./Mobile/Header'));
 const MobileWritePost = lazy(() => import('./Mobile/WritePost'));
 const MobileAddStory = lazy(() => import('./Mobile/AddStory'));
-
 const DesktopHeader = lazy(() => import('./Desktop/Header'));
 
 function HomePage() {
