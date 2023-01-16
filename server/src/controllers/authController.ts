@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import CredentialsModel from '../models/credentials';
 import ProfileModel from '../models/profile';
 
@@ -25,10 +26,8 @@ export const login = [
         .status(400)
         .json({ status: 'error', errors: errors.array(), message: null });
     }
-
     const email: string = req.body.email;
     const password: string = req.body.password;
-
     const user = await CredentialsModel.findOne({ email });
 
     if (!user) {
@@ -40,11 +39,14 @@ export const login = [
     }
 
     const checkPassword = bcrypt.compareSync(password, user.password);
-
     if (checkPassword) {
-      // jwt token here.
-
-      res.json({ status: 'success', data: null, message: null });
+      const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET!, {
+        expiresIn: '1h',
+      });
+      res.cookie('token', token, {
+        httpOnly: true,
+      });
+      return res.json({ status: 'success', data: null, message: null });
     } else {
       res.status(403).json({
         status: 'error',
