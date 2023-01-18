@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import moment from 'moment';
+import { UserSignUp } from '../../types/UserSignUp';
+import useSignUpFormValidator from '../../hooks/useSignUpFormValidator';
 
 interface Props {
   close: () => void;
@@ -11,27 +13,8 @@ type BirthdayT = {
   year: number;
 };
 
-type UserInfoT = {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  birthday: Date;
-  gender: string;
-  customGender?: string;
-};
-
-type ValidationErrorsT = {
-  firstName?: string | null;
-  lastName?: string | null;
-  email?: string | null;
-  password?: string | null;
-  birthday?: string | null;
-  gender?: string | null;
-};
-
 function SignUpPage({ close }: Props) {
-  const [userInfo, setUserInfo] = useState<UserInfoT>({
+  const [userInfo, setUserInfo] = useState<UserSignUp>({
     firstName: '',
     lastName: '',
     email: '',
@@ -39,12 +22,12 @@ function SignUpPage({ close }: Props) {
     gender: '',
     birthday: moment().toDate(),
   });
-  const [errors, setErrors] = useState<ValidationErrorsT | null>(null);
   const [birthdayRaw, setBirthdayRaw] = useState<BirthdayT>({
     day: 1,
     month: 0,
     year: 2023,
   });
+
   const currentYear = new Date().getFullYear();
 
   function handleBirthday(e: React.SyntheticEvent) {
@@ -55,13 +38,13 @@ function SignUpPage({ close }: Props) {
     }
     const max = Number(target.max);
     if (targetVal <= max) {
-      if (target.id === 'month') {
+      if (target.name === 'month') {
         targetVal -= 1; // date starts couting months from 0
       }
       setBirthdayRaw((current) => {
         return {
           ...current,
-          [`${target.id}`]: targetVal,
+          [target.name]: targetVal,
         };
       });
     }
@@ -95,126 +78,18 @@ function SignUpPage({ close }: Props) {
     setUserInfo((current) => {
       return {
         ...current,
-        [`${target.id}`]: target.value,
+        [target.name]: target.value,
       };
     });
   }
 
+  const { errors, validate } = useSignUpFormValidator(userInfo);
+
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
-    setErrors(null);
-    function validateInfo() {
-      let valid = true;
-      if (!userInfo.firstName) {
-        setErrors((current) => {
-          return {
-            ...current,
-            firstName: 'Please provide a first name.',
-          };
-        });
-        valid = false;
-      }
-      if (!userInfo.lastName) {
-        setErrors((current) => {
-          return {
-            ...current,
-            lastName: 'Please provide a last name.',
-          };
-        });
-        valid = false;
-      }
-      if (!userInfo.email) {
-        setErrors((current) => {
-          return {
-            ...current,
-            email: 'Please provide a email.',
-          };
-        });
-        valid = false;
-      }
-      if (!userInfo.password || userInfo.password.length < 8) {
-        setErrors((current) => {
-          return {
-            ...current,
-            password: 'Password must be at least 8 characters long.',
-          };
-        });
-        valid = false;
-      }
-      return valid;
-    }
-    function validateGender() {
-      let valid = true;
-      const { gender, customGender } = userInfo;
-      if (!gender || (gender === 'custom' && !customGender)) {
-        setErrors((current) => {
-          return {
-            ...current,
-            gender: 'Please provide a gender.',
-          };
-        });
-        valid = false;
-      }
-      return valid;
-    }
-    function validateBirthday() {
-      let valid = true;
-      const day = userInfo.birthday.getDate();
-      const month = userInfo.birthday.getMonth();
-      const year = userInfo.birthday.getFullYear();
-
-      if (!moment(userInfo.birthday).isValid()) {
-        setErrors((current) => {
-          return {
-            ...current,
-            birthday: `Invalid date`,
-          };
-        });
-        valid = false;
-      }
-
-      if (day < 1 || day > 31) {
-        setErrors((current) => {
-          return {
-            ...current,
-            birthday: `Day should be in range 01-31`,
-          };
-        });
-        valid = false;
-      }
-      if (month < 0 || month > 11) {
-        setErrors((current) => {
-          return {
-            ...current,
-            birthday: `Month should be in range 01-12`,
-          };
-        });
-        valid = false;
-      }
-      if (year < 1900 || year > currentYear) {
-        setErrors((current) => {
-          return {
-            ...current,
-            birthday: `Year should be in range 1900-${currentYear}`,
-          };
-        });
-        valid = false;
-      }
-      return valid;
-    }
-
-    const infoValidation = validateInfo();
-    const genderValidation = validateGender();
-    const birthdayValidation = validateBirthday();
-
-    if (infoValidation && genderValidation && birthdayValidation) {
-      const res = await fetch('/api/v1/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userInfo),
-      });
-      const resData = await res.json();
-      console.log(resData);
+    const isValid = validate();
+    if (isValid) {
+      // validation pass, sign up user.
     }
   }
 
@@ -246,25 +121,23 @@ function SignUpPage({ close }: Props) {
                 <input
                   type="text"
                   name="firstName"
-                  id="firstName"
                   value={userInfo.firstName}
                   onChange={handleInfo}
                   placeholder="First Name"
                   className="border-2 rounded p-2 w-full bg-gray-100"
                 />
-                {errors?.firstName && <p>{errors.firstName}</p>}
+                {errors.firstName && <p>{errors.firstName}</p>}
               </label>
               <label>
                 <input
                   type="text"
                   name="lastName"
-                  id="lastName"
                   value={userInfo.lastName}
                   onChange={handleInfo}
                   placeholder="Last Name"
                   className="border-2 rounded p-2 w-full bg-gray-100"
                 />
-                {errors?.lastName && <p>{errors.lastName}</p>}
+                {errors.lastName && <p>{errors.lastName}</p>}
               </label>
             </div>
             <div className="flex flex-col w-full">
@@ -272,28 +145,26 @@ function SignUpPage({ close }: Props) {
                 <input
                   type="email"
                   name="email"
-                  id="email"
                   value={userInfo.email}
                   onChange={handleInfo}
                   placeholder="Email"
                   className="border-2 rounded p-2 w-full bg-gray-100"
                 />
               </label>
-              {errors?.email && <p>{errors.email}</p>}
+              {errors.email && <p>{errors.email}</p>}
             </div>
             <div className="flex flex-col w-full">
               <label>
                 <input
                   type="password"
                   name="password"
-                  id="password"
                   value={userInfo.password}
                   onChange={handleInfo}
                   placeholder="Password"
                   className="border-2 rounded p-2 w-full bg-gray-100"
                 />
               </label>
-              {errors?.password && <p>{errors.password}</p>}
+              {errors.password && <p>{errors.password}</p>}
             </div>
             <p className="text-gray-500 text-sm self-start">
               Birthday DD/MM/YYYY
@@ -307,10 +178,9 @@ function SignUpPage({ close }: Props) {
                       ? `0${birthdayRaw.day}`
                       : birthdayRaw.day
                   }
-                  id="day"
                   min="1"
                   max="31"
-                  name="birthdayDay"
+                  name="day"
                   onChange={handleBirthday}
                   className="border-2 rounded p-2 w-full"
                 />
@@ -323,10 +193,9 @@ function SignUpPage({ close }: Props) {
                       ? `0${birthdayRaw.month + 1}`
                       : birthdayRaw.month + 1
                   }
-                  id="month"
                   min="1"
                   max="12"
-                  name="birthdayMonth"
+                  name="month"
                   onChange={handleBirthday}
                   className="border-2 rounded p-2 w-full"
                 />
@@ -335,16 +204,15 @@ function SignUpPage({ close }: Props) {
                 <input
                   type="text"
                   value={birthdayRaw.year}
-                  id="year"
                   min="1900"
                   max={currentYear}
-                  name="birthdayYear"
+                  name="year"
                   onChange={handleBirthday}
                   className="border-2 rounded p-2 w-full"
                 />
               </label>
             </div>
-            {errors?.birthday && <p>{errors.birthday}</p>}
+            {errors.birthday && <p>{errors.birthday}</p>}
             <div className="w-full">
               <fieldset
                 className="flex gap-5 justify-between"
@@ -387,7 +255,7 @@ function SignUpPage({ close }: Props) {
                 />
               </label>
             )}
-            {errors?.gender && <p>{errors.gender}</p>}
+            {errors.gender && <p>{errors.gender}</p>}
 
             <input
               type="submit"
