@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 import CredentialsModel from '../models/credentials';
 import ProfileModel from '../models/profile';
 import { IUserRequest } from '../middleware/jwtAuth';
+import { IProfile } from '../interfaces/IProfile';
 
 const currentYear = new Date().getFullYear();
 
@@ -29,7 +30,11 @@ export const login = [
     }
     const email: string = req.body.email;
     const password: string = req.body.password;
-    const user = await CredentialsModel.findOne({ email });
+    const user = await CredentialsModel.findOne({ email })
+      .populate<{
+        profile: IProfile;
+      }>('profile')
+      .lean();
 
     if (!user) {
       return res.status(403).json({
@@ -41,7 +46,7 @@ export const login = [
 
     const checkPassword = bcrypt.compareSync(password, user.password);
     if (checkPassword) {
-      const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET!, {
+      const token = jwt.sign(user.profile, process.env.JWT_SECRET!, {
         expiresIn: '1h',
       });
       res.cookie('token', token, {
@@ -165,5 +170,5 @@ export const signup = [
 ];
 
 export const me = async (req: IUserRequest, res: Response) => {
-  res.json({ status: 'success', data: req.user._id, message: null });
+  res.json({ status: 'success', data: req.user, message: null });
 };
