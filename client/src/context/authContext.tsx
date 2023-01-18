@@ -1,48 +1,77 @@
-import React, { createContext, useCallback, useMemo, useReducer } from 'react';
+import {
+  createContext,
+  ReactNode,
+  useEffect,
+  useMemo,
+  useReducer,
+} from 'react';
 
-interface AuthContextProps {
-  state: { user: object | null };
-  dispatch: React.Dispatch<any>;
-}
-
-const AuthContext = createContext<AuthContextProps>({
-  state: { user: null },
-  dispatch: () => {},
-});
-
-interface AuthProviderProps {
-  children: React.ReactNode;
-}
-
-function AuthProvider({ children }: AuthProviderProps) {
-  const initialState = { user: null };
-
-  const authReducer = (state: typeof initialState, action: any) => {
-    switch (action.type) {
-      case 'LOGIN':
-        return { ...state, user: action.payload };
-      case 'LOGOUT':
-        return { ...state, user: null };
-      default:
-        return state;
-    }
+type TUser = {
+  __v: number;
+  _id: string;
+  firstName: string;
+  lastName: string;
+  gender: string;
+  birthday: string;
+  exp: number;
+  ait: number;
+  createdAt: string;
+  updatedAt: string;
+};
+interface ContextType {
+  state?: {
+    user: TUser | null;
   };
-
-  const [state, dispatch] = useReducer(authReducer, initialState);
-
-  const login = useCallback((username: string, password: string) => {
-    // dispatch({ type: "LOGIN", payload: loggedInUser });
-  }, []);
-
-  const logout = useCallback(() => {
-    dispatch({ type: 'LOGOUT' });
-  }, []);
-
-  const value = useMemo(() => {
-    return { state, dispatch: login, logout };
-  }, [state, login, logout]);
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  dispatch: React.Dispatch<TAction>;
 }
 
-export { AuthContext, AuthProvider };
+const AuthContext = createContext<ContextType | null>(null);
+
+interface IState {
+  user: TUser | null;
+}
+
+type TAction = { type: 'LOGIN'; payload: TUser } | { type: 'LOGOUT' };
+
+function AuthReducer(state: IState, action: TAction) {
+  switch (action.type) {
+    case 'LOGIN':
+      return { user: action.payload };
+    case 'LOGOUT':
+      return { user: null };
+
+    default:
+      return state;
+  }
+}
+interface ProviderProps {
+  children: ReactNode;
+}
+
+function AuthContextProvider({ children }: ProviderProps) {
+  const [state, dispatch] = useReducer(AuthReducer, { user: null });
+
+  console.log(state, dispatch);
+
+  const ProviderValue = useMemo(() => ({ ...state, dispatch }), [state]);
+
+  useEffect(() => {
+    async function checkLogIn() {
+      const res = await fetch('/api/v1/auth/me');
+      const resData = await res.json();
+      if (resData.status === 'success') {
+        dispatch({ type: 'LOGIN', payload: resData.data });
+      }
+    }
+
+    checkLogIn();
+  }, []);
+
+  return (
+    <AuthContext.Provider value={ProviderValue}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export { AuthContextProvider, AuthContext };
