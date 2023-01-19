@@ -12,14 +12,17 @@ function WritePost() {
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] =
     useState<boolean>(false);
 
+  if (isCreatePostModalOpen) {
+    return (
+      <Suspense fallback={<Loading />}>
+        <CreatePostModal close={() => setIsCreatePostModalOpen(false)} />
+      </Suspense>
+    );
+  }
+
   return (
     <div className="flex flex-col">
       <div className="flex items-center px-2 py-4">
-        {isCreatePostModalOpen && (
-          <Suspense fallback={<Loading />}>
-            <CreatePostModal close={() => setIsCreatePostModalOpen(false)} />
-          </Suspense>
-        )}
         <div>
           <img src={pfp} alt="profile" className="max-w-[48px]" />
         </div>

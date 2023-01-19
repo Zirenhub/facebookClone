@@ -1,11 +1,7 @@
 import pfp from '../../../assets/pfp.svg';
 import back from '../../../assets/back.svg';
 
-interface Props {
-  close: () => void;
-}
-
-function CreatePost({ close }: Props) {
+function CreatePost({ close }: { close: () => void }) {
   function handleSubmit() {}
 
   return (
