@@ -6,6 +6,7 @@ import AuthPage from './components/AuthPage/AuthPage';
 import ErrorPage from './components/ErrorPage/ErrorPage';
 import HomePage from './components/HomePage/HomePage';
 import './index.css';
+import ProtectedRoute from './components/ProtectedRoute';
 
 const router = createBrowserRouter([
   {
@@ -14,7 +15,11 @@ const router = createBrowserRouter([
   },
   {
     path: '/homepage',
-    element: <HomePage />,
+    element: (
+      <ProtectedRoute>
+        <HomePage />
+      </ProtectedRoute>
+    ),
     errorElement: <ErrorPage />, // can be used on dynamically routed pages
   },
 ]);
