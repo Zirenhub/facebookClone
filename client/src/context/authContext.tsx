@@ -19,9 +19,7 @@ type TUser = {
   updatedAt: string;
 };
 interface ContextType {
-  state?: {
-    user: TUser | null;
-  };
+  user: TUser | null;
   dispatch: React.Dispatch<TAction>;
 }
 
@@ -44,14 +42,9 @@ function AuthReducer(state: IState, action: TAction) {
       return state;
   }
 }
-interface ProviderProps {
-  children: ReactNode;
-}
 
-function AuthContextProvider({ children }: ProviderProps) {
+function AuthContextProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(AuthReducer, { user: null });
-
-  console.log(state, dispatch);
 
   const ProviderValue = useMemo(() => ({ ...state, dispatch }), [state]);
 
