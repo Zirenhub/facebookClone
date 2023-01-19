@@ -1,5 +1,6 @@
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import useAuthContext from '../../hooks/useAuthContext';
 import Loading from '../Loading';
 
 const SignUpModal = lazy(() => import('./SignUpPage'));
@@ -11,6 +12,7 @@ function AuthPage() {
   const [errors, setErrors] = useState<string[]>([]);
 
   const navigate = useNavigate();
+  const auth = useAuthContext();
 
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
@@ -23,7 +25,7 @@ function AuthPage() {
       });
       const resData = await res.json();
       if (resData.status === 'success') {
-        navigate('/homepage');
+        auth.dispatch({ type: 'LOGIN', payload: resData.data });
       } else {
         resData.errors.forEach((error: any) => {
           setErrors((current) => [...current, error.msg]);
@@ -31,6 +33,12 @@ function AuthPage() {
       }
     }
   }
+
+  useEffect(() => {
+    if (auth.user) {
+      navigate('/homepage');
+    }
+  }, [auth, navigate]);
 
   return (
     <>
