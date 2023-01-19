@@ -2,10 +2,7 @@ import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 import { UserSignUp } from '../../types/UserSignUp';
 import useSignUpFormValidator from '../../hooks/useSignUpFormValidator';
-
-interface Props {
-  close: () => void;
-}
+import signUpUser from '../../api/signUpUser';
 
 type BirthdayT = {
   day: number;
@@ -13,7 +10,7 @@ type BirthdayT = {
   year: number;
 };
 
-function SignUpPage({ close }: Props) {
+function SignUpPage({ close }: { close: () => void }) {
   const [userInfo, setUserInfo] = useState<UserSignUp>({
     firstName: '',
     lastName: '',
@@ -89,7 +86,10 @@ function SignUpPage({ close }: Props) {
     e.preventDefault();
     const isValid = validate();
     if (isValid) {
-      // validation pass, sign up user.
+      const res = await signUpUser(userInfo);
+      if (res.status === 'success') {
+        // user successfully signed up
+      }
     }
   }
 
