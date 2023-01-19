@@ -26,7 +26,7 @@ function HomePage() {
     return (
       <div className="flex flex-col">
         <Suspense fallback={<Loading />}>
-          <MobileHeader />
+          <MobileHeader activePage="home" />
           <MobileWritePost />
           <MobileAddStory />
         </Suspense>
