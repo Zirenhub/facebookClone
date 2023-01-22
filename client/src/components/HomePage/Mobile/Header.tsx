@@ -1,3 +1,4 @@
+import { lazy, Suspense, useState } from 'react';
 import facebookLogo from '../../../assets/facebook-logo.svg';
 import search from '../../../assets/search.svg';
 import menu from '../../../assets/menu-bars.svg';
@@ -7,8 +8,13 @@ import Watch from '../../svg/Watch';
 import Groups from '../../svg/Groups';
 import Messenger from '../../svg/Messenger';
 import Bell from '../../svg/Bell';
+import Loading from '../../Loading';
+
+const Bookmarks = lazy(() => import('./Bookmarks'));
 
 function Header({ activePage }: { activePage: string }) {
+  const [isBookmarksOpen, setIsBookmarksOpen] = useState<boolean>(false);
+
   const pages = [
     { name: 'home', svg: Home },
     { name: 'friends', svg: Friends },
@@ -17,6 +23,14 @@ function Header({ activePage }: { activePage: string }) {
     { name: 'notifications', svg: Bell },
     { name: 'groups', svg: Groups },
   ];
+
+  if (isBookmarksOpen) {
+    return (
+      <Suspense fallback={<Loading />}>
+        <Bookmarks close={() => setIsBookmarksOpen(false)} />
+      </Suspense>
+    );
+  }
 
   return (
     <header className="max-h-24 pb-3 border-b-2 border-slate-400">
@@ -32,9 +46,13 @@ function Header({ activePage }: { activePage: string }) {
           <div className="bg-gray-200 w-9 h-9 p-1 rounded-full">
             <img src={search} alt="search" className="block m-auto" />
           </div>
-          <div className="bg-gray-200 w-9 h-9 p-1 rounded-full">
+          <button
+            className="bg-gray-200 w-9 h-9 p-1 rounded-full"
+            onClick={() => setIsBookmarksOpen(true)}
+            type="button"
+          >
             <img src={menu} alt="menu" className="block m-auto" />
-          </div>
+          </button>
         </div>
       </div>
       <div className="flex justify-between pt-2 items-center">
