@@ -24,7 +24,7 @@ function WritePost() {
     <div className="flex flex-col">
       <div className="flex items-center px-2 py-4">
         <div>
-          <img src={pfp} alt="profile" className="max-w-[48px]" />
+          <img src={pfp} alt="profile" className="w-pfp" />
         </div>
         <div className="grow px-3">
           <button

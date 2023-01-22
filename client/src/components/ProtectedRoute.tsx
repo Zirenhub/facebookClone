@@ -3,7 +3,12 @@ import useAuthContext from '../hooks/useAuthContext';
 
 function ProtectedRoute({ children }: { children: JSX.Element }) {
   const auth = useAuthContext();
-  return auth.user ? children : <Navigate to="/" replace />;
+
+  if (auth.user) {
+    return children;
+  }
+
+  return <Navigate to="/" replace />;
 }
 
 export default ProtectedRoute;
