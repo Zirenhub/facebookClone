@@ -2,11 +2,12 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { AuthContextProvider } from './context/authContext';
-import AuthPage from './components/AuthPage/AuthPage';
-import ErrorPage from './components/ErrorPage/ErrorPage';
-import HomePage from './components/HomePage/HomePage';
 import './index.css';
+import AuthPage from './components/AuthPage/AuthPage';
+import HomePage from './components/HomePage/HomePage';
+import ProfilePage from './pages/ProfilePage';
 import ProtectedRoute from './components/ProtectedRoute';
+import ErrorPage from './components/ErrorPage/ErrorPage';
 
 const router = createBrowserRouter([
   {
@@ -20,7 +21,15 @@ const router = createBrowserRouter([
         <HomePage />
       </ProtectedRoute>
     ),
-    errorElement: <ErrorPage />, // can be used on dynamically routed pages
+  },
+  {
+    path: '/:id',
+    element: (
+      <ProtectedRoute>
+        <ProfilePage />
+      </ProtectedRoute>
+    ),
+    errorElement: <ErrorPage />,
   },
 ]);
 
