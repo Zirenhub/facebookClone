@@ -33,7 +33,8 @@ module.exports = {
       },
       backgroundImage: {
         'facebook-logo': "url('/src/assets/facebook-logo.svg')",
-        // close: "url('/src/assets/x.svg')",
+        close: "url('/src/assets/x.svg')",
+        back: "url('/src/assets/back.svg')",
       },
       width: {
         back: '21px',
