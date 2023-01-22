@@ -52,7 +52,7 @@ export const login = [
       res.cookie('token', token, {
         httpOnly: true,
       });
-      return res.json({ status: 'success', data: null, message: null });
+      return res.json({ status: 'success', data: user.profile, message: null });
     } else {
       res.status(403).json({
         status: 'error',
@@ -62,6 +62,11 @@ export const login = [
     }
   },
 ];
+
+export const logout = (req: IUserRequest, res: Response) => {
+  res.clearCookie('token');
+  return res.json({ status: 'success', data: null, message: null });
+};
 
 export const signup = [
   body('firstName').notEmpty().trim().escape(),
