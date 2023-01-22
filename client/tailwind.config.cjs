@@ -5,6 +5,8 @@ module.exports = {
     extend: {
       colors: {
         background: '#f0f2f5',
+        dimBlack: '#4b4c4f',
+        dimGray: '#8a8d91',
       },
       screens: {
         xs: '480px',
@@ -31,7 +33,11 @@ module.exports = {
       },
       backgroundImage: {
         'facebook-logo': "url('/src/assets/facebook-logo.svg')",
-        close: "url('/src/assets/x.svg')",
+        // close: "url('/src/assets/x.svg')",
+      },
+      width: {
+        back: '21px',
+        pfp: '48px',
       },
     },
   },
