@@ -5,6 +5,8 @@ import {
   useMemo,
   useReducer,
 } from 'react';
+import checkAuth from '../api/checkAuth';
+import Loading from '../components/Loading';
 
 type TUser = {
   __v: number;
@@ -20,6 +22,7 @@ type TUser = {
 };
 interface ContextType {
   user: TUser | null;
+  loading: boolean;
   dispatch: React.Dispatch<TAction>;
 }
 
@@ -27,16 +30,22 @@ const AuthContext = createContext<ContextType | null>(null);
 
 interface IState {
   user: TUser | null;
+  loading: boolean;
 }
 
-type TAction = { type: 'LOGIN'; payload: TUser } | { type: 'LOGOUT' };
+type TAction =
+  | { type: 'LOGIN'; payload: TUser }
+  | { type: 'LOGOUT' }
+  | { type: 'LOADING_FALSE' };
 
 function AuthReducer(state: IState, action: TAction) {
   switch (action.type) {
     case 'LOGIN':
-      return { user: action.payload };
+      return { ...state, user: action.payload };
     case 'LOGOUT':
-      return { user: null };
+      return { ...state, user: null };
+    case 'LOADING_FALSE':
+      return { ...state, loading: false };
 
     default:
       return state;
@@ -44,21 +53,28 @@ function AuthReducer(state: IState, action: TAction) {
 }
 
 function AuthContextProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(AuthReducer, { user: null });
+  const [state, dispatch] = useReducer(AuthReducer, {
+    user: null,
+    loading: true,
+  });
+
+  useEffect(() => {
+    async function checkLogged() {
+      const res = await checkAuth();
+      if (res.status === 'success') {
+        dispatch({ type: 'LOGIN', payload: res.data });
+      }
+      dispatch({ type: 'LOADING_FALSE' });
+    }
+
+    checkLogged();
+  }, []);
 
   const ProviderValue = useMemo(() => ({ ...state, dispatch }), [state]);
 
-  useEffect(() => {
-    async function checkLogIn() {
-      const res = await fetch('/api/v1/auth/me');
-      const resData = await res.json();
-      if (resData.status === 'success') {
-        dispatch({ type: 'LOGIN', payload: resData.data });
-      }
-    }
-
-    checkLogIn();
-  }, []);
+  if (state.loading) {
+    return <Loading />;
+  }
 
   return (
     <AuthContext.Provider value={ProviderValue}>
