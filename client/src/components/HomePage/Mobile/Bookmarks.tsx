@@ -1,10 +1,16 @@
+import { useNavigate } from 'react-router-dom';
 import useAuthContext from '../../../hooks/useAuthContext';
-import logOutUser from '../../../api/logOutUser';
+import { logOutUser } from '../../../api/auth';
 import pfp from '../../../assets/pfp.svg';
 
 // put space between search and right side
 function Bookmarks({ close }: { close: () => void }) {
   const auth = useAuthContext();
+  const navigate = useNavigate();
+
+  function navigateProfile() {
+    navigate(`/${auth.user?._id}`);
+  }
 
   async function handleLogOut() {
     const res = await logOutUser();
@@ -31,7 +37,13 @@ function Bookmarks({ close }: { close: () => void }) {
           Search Facebook
         </button>
       </header>
-      <div className="flex gap-2 py-2 mx-2 border-b-2 border-gray-300 cursor-pointer">
+      <div
+        className="flex gap-2 py-2 mx-2 border-b-2 border-gray-300 cursor-pointer"
+        onClick={navigateProfile}
+        onKeyDown={navigateProfile}
+        role="button"
+        tabIndex={0}
+      >
         <div>
           <img src={pfp} alt="profile" className="w-pfp" />
         </div>
