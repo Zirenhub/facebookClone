@@ -10,7 +10,7 @@ function AuthPage() {
   const [signUpIsOpen, setSignUpIsOpen] = useState<boolean>(false);
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
-  const [errors, setErrors] = useState<string[]>([]);
+  const [errors, setErrors] = useState<{ msg: string }[]>([]);
 
   const navigate = useNavigate();
   const auth = useAuthContext();
@@ -23,9 +23,7 @@ function AuthPage() {
       if (res.status === 'success') {
         auth.dispatch({ type: 'LOGIN', payload: res.data });
       } else {
-        res.errors.forEach((error: any) => {
-          setErrors((current) => [...current, error.msg]);
-        });
+        setErrors(res.errors);
       }
     }
   }
@@ -91,8 +89,8 @@ function AuthPage() {
           </form>
           {errors.map((error) => {
             return (
-              <div key={error}>
-                <p>{error}</p>
+              <div key={error.msg}>
+                <p>{error.msg}</p>
               </div>
             );
           })}
