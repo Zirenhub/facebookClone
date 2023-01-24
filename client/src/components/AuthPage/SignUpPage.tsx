@@ -3,6 +3,8 @@ import moment from 'moment';
 import { UserSignUp } from '../../types/UserSignUp';
 import useSignUpFormValidator from '../../hooks/useSignUpFormValidator';
 import signUpUser from '../../api/signUpUser';
+import useAuthContext from '../../hooks/useAuthContext';
+import logInUser from '../../api/logInUser';
 
 type BirthdayT = {
   day: number;
@@ -24,8 +26,10 @@ function SignUpPage({ close }: { close: () => void }) {
     month: 0,
     year: 2023,
   });
+  const [error, setError] = useState<{ msg: string }[]>([]);
 
   const currentYear = new Date().getFullYear();
+  const auth = useAuthContext();
 
   function handleBirthday(e: React.SyntheticEvent) {
     const target = e.target as HTMLInputElement;
@@ -86,9 +90,12 @@ function SignUpPage({ close }: { close: () => void }) {
     e.preventDefault();
     const isValid = validate();
     if (isValid) {
-      const res = await signUpUser(userInfo);
-      if (res.status === 'success') {
-        // user successfully signed up
+      const signup = await signUpUser(userInfo);
+      if (signup.status === 'success') {
+        const login = await logInUser(userInfo.email, userInfo.password);
+        auth.dispatch({ type: 'LOGIN', payload: login.data });
+      } else {
+        setError(signup.errors);
       }
     }
   }
@@ -264,6 +271,14 @@ function SignUpPage({ close }: { close: () => void }) {
             />
           </form>
         </div>
+        {error &&
+          error.map((err) => {
+            return (
+              <p key={err.msg} className="text-center">
+                {err.msg}
+              </p>
+            );
+          })}
       </div>
     </div>
   );
