@@ -23,6 +23,7 @@ module.exports = {
   rules: {
     'react/react-in-jsx-scope': 0,
     'jsx-a11y/label-has-associated-control': 0,
+    'no-underscore-dangle': 0,
   },
   ignorePatterns: [
     'tailwind.config.cjs',
