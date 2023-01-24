@@ -2,9 +2,8 @@ import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 import { UserSignUp } from '../../types/UserSignUp';
 import useSignUpFormValidator from '../../hooks/useSignUpFormValidator';
-import signUpUser from '../../api/signUpUser';
+import { signUpUser, logInUser } from '../../api/auth';
 import useAuthContext from '../../hooks/useAuthContext';
-import logInUser from '../../api/logInUser';
 
 type BirthdayT = {
   day: number;

@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import logInUser from '../../api/logInUser';
+import { logInUser } from '../../api/auth';
 import useAuthContext from '../../hooks/useAuthContext';
 import Loading from '../Loading';
 

@@ -5,7 +5,7 @@ import {
   useMemo,
   useReducer,
 } from 'react';
-import checkAuth from '../api/checkAuth';
+import { checkAuth } from '../api/auth';
 import Loading from '../components/Loading';
 
 type TUser = {
