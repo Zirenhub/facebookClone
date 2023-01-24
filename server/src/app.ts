@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 
 import authRoute from './routes/authRoute';
 import postRoute from './routes/postRoute';
+import profileRoute from './routes/profileRoute';
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ const port = process.env.PORT || 5000;
 
 app.use('/api/v1/auth', authRoute);
 app.use('/api/v1/post', postRoute);
+app.use('/api/v1/profile', profileRoute);
 
 mongoose.connect(process.env.DB_URI!).then(() => {
   app.listen(port, () =>
