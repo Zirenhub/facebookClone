@@ -37,7 +37,6 @@ module.exports = {
         back: "url('/src/assets/back.svg')",
       },
       width: {
-        back: '21px',
         pfp: '48px',
       },
     },
