@@ -3,6 +3,7 @@ export type TProfile = {
   _id: string;
   firstName: string;
   lastName: string;
+  fullName: string;
   birthday: string;
   gender: string;
   customGender?: string;
