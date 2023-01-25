@@ -2,7 +2,7 @@ export default async function getProfile(id: string) {
   const res = await fetch(`/api/v1/profile/${id}`);
   const resData = await res.json();
   if (resData.status === 'success') {
-    return resData;
+    return resData.data;
   }
-  throw new Error('Something went wrong getting profile');
+  throw new Error('Page is not valid');
 }
