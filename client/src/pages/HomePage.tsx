@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, Suspense } from 'react';
 import Loading from '../components/Loading';
 
 const MobileHeader = lazy(() => import('../components/HomePage/Mobile/Header'));
@@ -13,20 +13,7 @@ const DesktopHeader = lazy(
 );
 
 function HomePage() {
-  const [width, setWidth] = useState<number>(window.innerWidth);
-  const isMobile = width <= 500;
-
-  useEffect(() => {
-    function handleWindowChange() {
-      setWidth(window.innerWidth);
-    }
-
-    window.addEventListener('resize', handleWindowChange);
-
-    return () => {
-      window.removeEventListener('resize', handleWindowChange);
-    };
-  }, []);
+  const isMobile = window.innerWidth <= 500;
 
   if (isMobile) {
     return (
