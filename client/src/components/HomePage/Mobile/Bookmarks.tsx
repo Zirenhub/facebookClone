@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import useAuthContext from '../../../hooks/useAuthContext';
 import { logOutUser } from '../../../api/auth';
 import pfp from '../../../assets/pfp.svg';
+import BackButton from '../../utils/BackButton';
 
 // put space between search and right side
 function Bookmarks({ close }: { close: () => void }) {
@@ -24,12 +25,7 @@ function Bookmarks({ close }: { close: () => void }) {
   return (
     <div className="bg-white z-10 h-full w-full absolute overflow-auto">
       <header className="flex min-h-[50px] p-2 border-b-2 border-gray-300">
-        <button
-          type="button"
-          onClick={close}
-          className="bg-back mr-3 bg-contain bg-center bg-no-repeat w-back"
-          aria-label="Back"
-        />
+        <BackButton close={close} />
         <button
           type="button"
           className="px-4 bg-gray-200 rounded-full grow text-dimBlack"

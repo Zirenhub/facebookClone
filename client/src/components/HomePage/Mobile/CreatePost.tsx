@@ -1,5 +1,6 @@
 import pfp from '../../../assets/pfp.svg';
 import useAuthContext from '../../../hooks/useAuthContext';
+import BackButton from '../../utils/BackButton';
 
 function CreatePost({ close }: { close: () => void }) {
   const auth = useAuthContext();
@@ -10,12 +11,7 @@ function CreatePost({ close }: { close: () => void }) {
     <div className="z-10 absolute bg-white top-0 left-0 h-full w-full">
       <header className="flex justify-between p-3 border-b-2">
         <div className="flex gap-2">
-          <button
-            type="button"
-            aria-label="Back"
-            className="bg-back bg-contain bg-center bg-no-repeat w-back"
-            onClick={close}
-          />
+          <BackButton close={close} />
           <p className="font-bold">Create post</p>
         </div>
         <div>
