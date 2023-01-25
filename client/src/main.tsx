@@ -5,11 +5,11 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { AuthContextProvider } from './context/authContext';
 import './index.css';
-import AuthPage from './components/AuthPage/AuthPage';
-import HomePage from './components/HomePage/HomePage';
+import AuthPage from './pages/AuthPage';
+import HomePage from './pages/HomePage';
 import ProfilePage from './pages/ProfilePage';
 import ProtectedRoute from './components/ProtectedRoute';
-import ErrorPage from './components/ErrorPage/ErrorPage';
+import ErrorPage from './pages/ErrorPage';
 
 const router = createBrowserRouter([
   {

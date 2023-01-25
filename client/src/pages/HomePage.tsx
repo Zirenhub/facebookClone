@@ -1,10 +1,16 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
-import Loading from '../Loading';
+import Loading from '../components/Loading';
 
-const MobileHeader = lazy(() => import('./Mobile/Header'));
-const MobileWritePost = lazy(() => import('./Mobile/WritePost'));
-const MobileAddStory = lazy(() => import('./Mobile/AddStory'));
-const DesktopHeader = lazy(() => import('./Desktop/Header'));
+const MobileHeader = lazy(() => import('../components/HomePage/Mobile/Header'));
+const MobileWritePost = lazy(
+  () => import('../components/HomePage/Mobile/WritePost')
+);
+const MobileAddStory = lazy(
+  () => import('../components/HomePage/Mobile/AddStory')
+);
+const DesktopHeader = lazy(
+  () => import('../components/HomePage/Desktop/Header')
+);
 
 function HomePage() {
   const [width, setWidth] = useState<number>(window.innerWidth);

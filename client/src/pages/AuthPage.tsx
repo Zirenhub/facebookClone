@@ -1,10 +1,10 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { logInUser } from '../../api/auth';
-import useAuthContext from '../../hooks/useAuthContext';
-import Loading from '../Loading';
+import { logInUser } from '../api/auth';
+import useAuthContext from '../hooks/useAuthContext';
+import Loading from '../components/Loading';
 
-const SignUpModal = lazy(() => import('./SignUpPage'));
+const SignUpModal = lazy(() => import('../components/AuthPage/SignUpPage'));
 
 function AuthPage() {
   const [signUpIsOpen, setSignUpIsOpen] = useState<boolean>(false);

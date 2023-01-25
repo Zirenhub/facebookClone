@@ -4,6 +4,7 @@ import { UserSignUp } from '../../types/UserSignUp';
 import useSignUpFormValidator from '../../hooks/useSignUpFormValidator';
 import { signUpUser, logInUser } from '../../api/auth';
 import useAuthContext from '../../hooks/useAuthContext';
+import CloseButton from '../utils/CloseButton';
 
 type BirthdayT = {
   day: number;
@@ -105,12 +106,7 @@ function SignUpPage({ close }: { close: () => void }) {
         <div className="px-3 py-1">
           <div className="flex items-center justify-between">
             <p className="text-2xl font-bold">Sign Up</p>
-            <button
-              type="button"
-              aria-label="Close"
-              className="bg-close bg-contain bg-center bg-no-repeat min-h-[16px] min-w-[16px]"
-              onClick={close}
-            />
+            <CloseButton close={close} />
           </div>
           <p className="text-gray-500">It&apos;s quick and easy.</p>
         </div>
