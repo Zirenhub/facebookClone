@@ -6,21 +6,54 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { AuthContextProvider } from './context/authContext';
 import './index.css';
 import AuthPage from './pages/AuthPage';
-import HomePage from './pages/HomePage';
 import ProfilePage from './pages/ProfilePage';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorPage from './pages/ErrorPage';
+import MobileHeader from './components/HOC/MobileHeader';
+import MobileHomePage from './pages/Mobile/HomePage';
+import DesktopHomePage from './pages/Desktop/HomePage';
 
-const router = createBrowserRouter([
+const isMobile = window.innerWidth <= 500;
+
+const mobileRouter = createBrowserRouter([
+  {
+    element: (
+      <ProtectedRoute>
+        <MobileHeader />
+      </ProtectedRoute>
+    ),
+    children: [
+      {
+        path: '/home',
+        element: (
+          <ProtectedRoute>
+            <MobileHomePage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/:id',
+        element: (
+          <ProtectedRoute>
+            <ProfilePage isMobile />
+          </ProtectedRoute>
+        ),
+        errorElement: <ErrorPage />,
+      },
+    ],
+  },
   {
     path: '/',
     element: <AuthPage />,
   },
+]);
+
+const desktopRouter = createBrowserRouter([
   {
     path: '/home',
     element: (
       <ProtectedRoute>
-        <HomePage />
+        <DesktopHomePage />
       </ProtectedRoute>
     ),
   },
@@ -28,10 +61,14 @@ const router = createBrowserRouter([
     path: '/:id',
     element: (
       <ProtectedRoute>
-        <ProfilePage />
+        <ProfilePage isMobile={false} />
       </ProtectedRoute>
     ),
     errorElement: <ErrorPage />,
+  },
+  {
+    path: '/',
+    element: <AuthPage />,
   },
 ]);
 
@@ -41,7 +78,11 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <AuthContextProvider>
-        <RouterProvider router={router} />
+        {isMobile ? (
+          <RouterProvider router={mobileRouter} />
+        ) : (
+          <RouterProvider router={desktopRouter} />
+        )}
         <ReactQueryDevtools />
       </AuthContextProvider>
     </QueryClientProvider>
