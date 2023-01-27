@@ -1,17 +1,29 @@
 import { useState } from 'react';
+import { followProfile } from '../../api/profile';
 import { TProfile } from '../../types/Profile';
+import Popup from '../Popup';
 import ProfileHeader from './ProfileHeader';
 
 function StangerProfile({ data }: { data: TProfile }) {
   const [currentPage, setCurrentPage] = useState<string>('Posts');
+  const [followError, setFollowError] = useState<string | null>(null);
 
   const pages = ['Posts', 'About', 'Photos', 'Videos', 'Mentions'];
 
-  function handleFollow() {}
+  async function handleFollow() {
+    try {
+      await followProfile(data._id);
+    } catch (err: any) {
+      setFollowError(err.message);
+    }
+  }
 
   return (
     <div>
       <ProfileHeader fullName={data.fullName} />
+      {followError && (
+        <Popup msg={followError} close={() => setFollowError(null)} />
+      )}
       <div className="flex flex-col p-2 border-b-4 border-gray-300">
         <p>followers following</p>
         <div className="flex gap-2">
