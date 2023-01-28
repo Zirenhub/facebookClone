@@ -7,6 +7,7 @@ import ProtectedRoute from '../components/ProtectedRoute';
 import MobileHeader from '../components/HOC/MobileHeader';
 
 import MobileHomePage from '../pages/Mobile/HomePage';
+import MobileMenu from '../components/Menu/MobileMenu';
 
 const router = createBrowserRouter([
   {
@@ -32,6 +33,14 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
         errorElement: <ErrorPage />,
+      },
+      {
+        path: '/menu',
+        element: (
+          <ProtectedRoute>
+            <MobileMenu />
+          </ProtectedRoute>
+        ),
       },
     ],
   },
