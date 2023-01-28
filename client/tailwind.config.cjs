@@ -31,11 +31,6 @@ module.exports = {
       fontFamily: {
         ubuntu: ['Ubuntu'],
       },
-      backgroundImage: {
-        'facebook-logo': "url('/src/assets/facebook-logo.svg')",
-        close: "url('/src/assets/x.svg')",
-        back: "url('/src/assets/back.svg')",
-      },
       width: {
         pfp: '48px',
       },
