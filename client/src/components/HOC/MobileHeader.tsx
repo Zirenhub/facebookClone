@@ -1,54 +1,30 @@
 import { useEffect, useState } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import facebookLogo from '../../assets/facebook-logo.svg';
 import search from '../../assets/search.svg';
 import plus from '../../assets/plus.svg';
-import Menu from '../svg/Menu';
-import Home from '../svg/Home';
-import Friends from '../svg/Friends';
-import Watch from '../svg/Watch';
 import Messenger from '../svg/Messenger';
-import Bell from '../svg/Bell';
-import Pfp from '../svg/Pfp';
 import useAuthContext from '../../hooks/useAuthContext';
+import useRoute from '../../hooks/useRoute';
 
 function MobileHeader() {
-  const [currentPage, setCurrentPage] = useState<string>('home');
+  const [currentPage, setCurrentPage] = useState<string | null>(null);
 
   const auth = useAuthContext();
-  const navigate = useNavigate();
+  const pages = useRoute();
   const location = useLocation();
 
-  const pages = [
-    { name: 'home', svg: Home },
-    { name: 'friends', svg: Friends },
-    { name: 'watch', svg: Watch },
-    { name: 'profile', svg: Pfp },
-    { name: 'notifications', svg: Bell },
-    { name: 'menu', svg: Menu },
-  ];
-
-  function handleNavigate(page: string) {
-    switch (page) {
-      case 'profile':
-        navigate(`/${auth.user?._id}`);
-        break;
-      case 'home':
-        navigate('/home');
-        break;
-      default:
-    }
-  }
-
   useEffect(() => {
-    switch (location.pathname) {
-      case '/home':
-        setCurrentPage('home');
-        break;
-      default:
-        setCurrentPage('profile');
+    const path = location.pathname.substring(1, location.pathname.length);
+
+    if (path === 'home') {
+      setCurrentPage('home');
+    } else if (path === auth.user?._id) {
+      setCurrentPage('profile');
+    } else {
+      setCurrentPage(null);
     }
-  }, [location]);
+  }, [location, auth]);
 
   return (
     <>
@@ -80,7 +56,7 @@ function MobileHeader() {
                 type="button"
                 className="grow"
                 key={page.name}
-                onClick={() => handleNavigate(page.name)}
+                onClick={page.link}
               >
                 <page.svg
                   fill={currentPage === page.name ? '#3b82f6' : '#65676b'}
