@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { logInUser } from '../api/auth';
 import useAuthContext from '../hooks/useAuthContext';
 import Loading from '../components/Loading';
+import FacebookLogo from '../assets/facebook-logo.svg';
 
 const SignUpModal = lazy(() => import('../components/AuthPage/SignUpPage'));
 
@@ -46,7 +47,9 @@ function AuthPage() {
     <div className="bg-background flex flex-col h-full sm:flex-row sm:pb-48">
       <div className="flex flex-col grow p-5 justify-center items-center sm:items-end">
         <div className="flex flex-col items-center max-w-xl">
-          <div className="bg-facebook-logo min-h-[8rem] min-w-full bg-cover bg-center bg-no-repeat" />
+          <div className="h-16 w-full">
+            <FacebookLogo height="100%" width="100%" />
+          </div>
           <p className="text-xl text-center">
             Connect with friends and the world around you on Facebook.
           </p>

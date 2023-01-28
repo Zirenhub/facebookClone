@@ -1,13 +1,13 @@
 import { useNavigate } from 'react-router-dom';
-import Bell from '../components/svg/Bell';
-import Pfp from '../components/svg/Pfp';
-import Menu from '../components/svg/Menu';
-import Home from '../components/svg/Home';
-import Friends from '../components/svg/Friends';
-import Watch from '../components/svg/Watch';
 import useAuthContext from './useAuthContext';
-import Marketplace from '../components/svg/Marketplace';
-import Groups from '../components/svg/Groups';
+import Friends from '../assets/friends.svg';
+import Pfp from '../assets/pfp-one.svg';
+import Bell from '../assets/bell.svg';
+import Marketplace from '../assets/marketplace.svg';
+import Home from '../assets/home.svg';
+import Watch from '../assets/watch.svg';
+import Groups from '../assets/groups.svg';
+import Menu from '../assets/menu-bars.svg';
 
 function useRoute() {
   const isMobile = window.innerWidth <= 500;

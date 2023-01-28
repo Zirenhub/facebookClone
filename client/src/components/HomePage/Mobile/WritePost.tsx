@@ -1,6 +1,6 @@
 import { lazy, Suspense, useState } from 'react';
-import pfp from '../../../assets/pfp.svg';
-import pictures from '../../../assets/pictures.svg';
+import Pfp from '../../../assets/pfp-two.svg';
+import Pictures from '../../../assets/pictures.svg';
 import Loading from '../../Loading';
 
 const CreatePostModal = lazy(() => import('./CreatePost'));
@@ -19,8 +19,8 @@ function WritePost() {
   return (
     <div className="flex flex-col">
       <div className="flex items-center p-2">
-        <div>
-          <img src={pfp} alt="profile" className="w-pfp" />
+        <div className="w-12 h-12 rounded-full bg-gray-200">
+          <Pfp height="100%" width="100%" />
         </div>
         <div className="grow px-3">
           <button
@@ -31,11 +31,8 @@ function WritePost() {
             What&apos;s on your mind?
           </button>
         </div>
-        <div className="flex flex-col items-center cursor-pointer">
-          <div>
-            <img src={pictures} alt="photos" className="h-[32px]" />
-          </div>
-          <p className="text-sm">Photo</p>
+        <div className="w-12 h-12">
+          <Pictures width="100%" height="100%" fill="gray" />
         </div>
       </div>
     </div>

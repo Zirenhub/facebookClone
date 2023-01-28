@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import dotenv from 'dotenv';
+import svgr from 'vite-plugin-svgr';
 
 dotenv.config();
 
@@ -11,5 +12,13 @@ export default defineConfig({
       '/api/v1': `http://localhost:${process.env.PORT}`,
     },
   },
-  plugins: [react()],
+  plugins: [
+    react(),
+    svgr({
+      exportAsDefault: true,
+      svgrOptions: {
+        icon: true,
+      },
+    }),
+  ],
 });

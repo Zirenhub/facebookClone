@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import useAuthContext from '../../hooks/useAuthContext';
 import useRoute from '../../hooks/useRoute';
-import fLogo from '../../assets/f-logo.svg';
-import menu from '../../assets/menu.svg';
-import pfp from '../../assets/pfp.svg';
-import Messenger from '../svg/Messenger';
-import Bell from '../svg/Bell';
+import FLogo from '../../assets/f-logo.svg';
+import Messenger from '../../assets/messenger.svg';
+import Menu from '../../assets/menu.svg';
+import Pfp from '../../assets/pfp-two.svg';
+import Bell from '../../assets/bell.svg';
 
 function Header() {
   const [currentPage, setCurrentPage] = useState<string | null>(null);
@@ -37,7 +37,7 @@ function Header() {
     <header className="grid grid-cols-3 bg-white px-3 py-1 shadow-md">
       <div className="flex gap-5 items-center">
         <div className="shrink-0">
-          <img src={fLogo} alt="facebook logo" className="min-h-[40px]" />
+          <FLogo />
         </div>
         <div>
           <input
@@ -66,16 +66,16 @@ function Header() {
       </div>
       <div className="flex justify-end items-center gap-2">
         <div className="bg-gray-200 w-10 h-10 rounded-full flex justify-center items-center cursor-pointer hover:bg-gray-300">
-          <img src={menu} alt="menu" className="block m-auto w-6 h-6" />
+          <Menu />
         </div>
         <div className="bg-gray-200 w-10 h-10 rounded-full flex justify-center items-center cursor-pointer hover:bg-gray-300">
-          <Messenger fill="black" />
+          <Messenger />
         </div>
         <div className="bg-gray-200 w-10 h-10 rounded-full flex justify-center items-center cursor-pointer hover:bg-gray-300">
-          <Bell fill="black" />
+          <Bell />
         </div>
         <div className="w-10 h-10 rounded-full cursor-pointer">
-          <img src={pfp} alt="profile" className="block" />
+          <Pfp />
         </div>
       </div>
     </header>

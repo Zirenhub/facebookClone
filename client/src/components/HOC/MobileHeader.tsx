@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import facebookLogo from '../../assets/facebook-logo.svg';
-import search from '../../assets/search.svg';
-import plus from '../../assets/plus.svg';
-import Messenger from '../svg/Messenger';
 import useAuthContext from '../../hooks/useAuthContext';
 import useRoute from '../../hooks/useRoute';
+import facebookLogo from '../../assets/facebook-logo.png';
+import Plus from '../../assets/plus.svg';
+import Search from '../../assets/search.svg';
+import Messenger from '../../assets/messenger.svg';
 
 function MobileHeader() {
   const [currentPage, setCurrentPage] = useState<string | null>(null);
@@ -21,6 +21,8 @@ function MobileHeader() {
       setCurrentPage('home');
     } else if (path === auth.user?._id) {
       setCurrentPage('profile');
+    } else if (path === 'menu') {
+      setCurrentPage('menu');
     } else {
       setCurrentPage(null);
     }
@@ -28,38 +30,40 @@ function MobileHeader() {
 
   return (
     <>
-      <header className="max-h-24 pb-3 border-b-2 border-slate-400">
+      <header className="max-h-24 px-3 py-2 border-b-2 border-slate-400">
         <div className="flex">
-          <div className="grow flex justify-start">
+          <div className="h-8">
             <img
-              className="object-cover h-[42px] w-[146px]"
-              alt="facebook logo"
               src={facebookLogo}
+              alt="facebook logo"
+              className="w-[120px] h-full object-contain"
             />
           </div>
-          <div className="flex gap-2 px-2 pt-1 items-center">
-            <div className="bg-gray-200 w-9 h-9 p-1 rounded-full">
-              <img src={plus} alt="post" className="block m-auto" />
+          <div className="flex gap-2 items-center grow justify-end">
+            <div className="bg-gray-200 rounded-full h-8 w-8 flex justify-center items-center">
+              <Plus height="100%" width="70%" />
             </div>
-            <div className="bg-gray-200 w-9 h-9 p-1 rounded-full">
-              <img src={search} alt="search" className="block m-auto" />
+            <div className="bg-gray-200 rounded-full h-8 w-8 flex justify-center items-center">
+              <Search height="100%" width="70%" />
             </div>
-            <div className="bg-gray-200 w-9 h-9 p-1 rounded-full">
-              <Messenger fill="#00000" />
+            <div className="bg-gray-200 rounded-full h-8 w-8 flex justify-center items-center">
+              <Messenger height="100%" width="70%" />
             </div>
           </div>
         </div>
-        <div className="flex justify-between pt-2 items-center">
+        <div className="flex pt-2 items-center justify-between">
           {pages.map((page) => {
             return (
               <button
                 type="button"
-                className="grow"
+                className="h-8 w-8"
                 key={page.name}
                 onClick={page.link}
               >
                 <page.svg
                   fill={currentPage === page.name ? '#3b82f6' : '#65676b'}
+                  width="100%"
+                  height="100%"
                 />
               </button>
             );
