@@ -1,9 +1,19 @@
+import { useNavigate } from 'react-router-dom';
 import { TRequest } from '../../types/Requests';
 import Pfp from '../../assets/pfp-two.svg';
-import { useNavigate } from 'react-router-dom';
+import { acceptRequest } from '../../api/profile';
 
 function FriendsRequests({ data }: { data: TRequest[] }) {
   const navigate = useNavigate();
+
+  async function handleAcceptRequest(reqID: string) {
+    try {
+      await acceptRequest(reqID);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+  function handleRejectRequest(reqID: string) {}
 
   return (
     <>
@@ -27,12 +37,14 @@ function FriendsRequests({ data }: { data: TRequest[] }) {
               <button
                 type="button"
                 className="bg-green-300 rounded-lg px-2 font-bold"
+                onClick={() => handleAcceptRequest(request._id)}
               >
                 ACCEPT
               </button>
               <button
                 type="button"
                 className="bg-red-300 rounded-lg px-2 font-bold"
+                onClick={() => handleAcceptRequest(request._id)}
               >
                 DECLINE
               </button>

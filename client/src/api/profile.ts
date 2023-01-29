@@ -12,7 +12,7 @@ export async function getProfile(id: string) {
 }
 
 export async function sendRequest(id: string) {
-  const res = await fetch(`/api/v1/profile/${id}/sendRequest`);
+  const res = await fetch(`/api/v1/profile/${id}/request`, { method: 'POST' });
   const resData = await res.json();
   if (resData.status === 'success') {
     return resData.data;
@@ -22,6 +22,18 @@ export async function sendRequest(id: string) {
 
 export async function getRequests() {
   const res = await fetch(`/api/v1/profile/requests`);
+  const resData = await res.json();
+  if (resData.status === 'success') {
+    return resData.data;
+  }
+
+  throw new Error(getError(resData));
+}
+
+export async function acceptRequest(reqID: string) {
+  const res = await fetch(`/api/v1/profile/${reqID}/accept`, {
+    method: 'POST',
+  });
   const resData = await res.json();
   if (resData.status === 'success') {
     return resData.data;
