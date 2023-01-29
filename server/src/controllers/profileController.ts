@@ -75,8 +75,8 @@ export const sendRequest = async (req: IUserRequest, res: Response) => {
 
     // save request
     const friend = await FriendModel.create({
-      profile: user,
-      friend: requestID,
+      profile: requestID,
+      friend: user,
     });
     return res.json({
       status: 'success',
@@ -96,12 +96,48 @@ export const getRequests = async (req: IUserRequest, res: Response) => {
   try {
     const requests = await FriendModel.find({
       profile: req.user._id,
+      friend: { $ne: req.user._id },
       status: 'Pending',
     }).populate('friend');
 
     return res.json({
       status: 'success',
       data: requests,
+      message: null,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: 'error',
+      errors: err,
+      message: null,
+    });
+  }
+};
+
+export const acceptRequest = async (req: IUserRequest, res: Response) => {
+  try {
+    const requestID = new mongoose.Types.ObjectId(req.params.id);
+
+    if (!mongoose.Types.ObjectId.isValid(requestID)) {
+      return res
+        .status(404)
+        .json({ status: 'error', errors: null, message: 'Invalid ID' });
+    }
+    const request = await FriendModel.findByIdAndUpdate(
+      requestID,
+      { status: 'Accepted' },
+      { new: true }
+    );
+    // const request = await FriendModel.findOneAndUpdate(
+    //   { profile: req.user.id, friend: requestID },
+    //   { status: 'Accepted' },
+    //   { new: true }
+    // );
+    // console.log(request);
+
+    return res.json({
+      status: 'success',
+      data: request,
       message: null,
     });
   } catch (err) {
