@@ -1,5 +1,3 @@
-import getFullName from '../components/utils/getFullName';
-
 function getError(data: any) {
   return data.message ? data.message : data.errors.message;
 }
@@ -8,16 +6,13 @@ export async function getProfile(id: string) {
   const res = await fetch(`/api/v1/profile/${id}`);
   const resData = await res.json();
   if (resData.status === 'success') {
-    return {
-      ...resData.data,
-      fullName: getFullName(resData.data.firstName, resData.data.lastName),
-    };
+    return resData.data;
   }
   throw new Error(getError(resData));
 }
 
-export async function followProfile(id: string) {
-  const res = await fetch(`/api/v1/profile/${id}/follow`);
+export async function sendRequest(id: string) {
+  const res = await fetch(`/api/v1/profile/${id}/sendRequest`);
   const resData = await res.json();
   if (resData.status === 'success') {
     return resData.data;
@@ -25,11 +20,12 @@ export async function followProfile(id: string) {
   throw new Error(getError(resData));
 }
 
-export async function followersProfile(id: string) {
-  const res = await fetch(`/api/v1/profile/${id}/followers`);
+export async function getRequests() {
+  const res = await fetch(`/api/v1/profile/requests`);
   const resData = await res.json();
   if (resData.status === 'success') {
     return resData.data;
   }
+
   throw new Error(getError(resData));
 }
