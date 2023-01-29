@@ -23,6 +23,8 @@ function MobileHeader() {
       setCurrentPage('profile');
     } else if (path === 'menu') {
       setCurrentPage('menu');
+    } else if (path === 'friends') {
+      setCurrentPage('friends');
     } else {
       setCurrentPage(null);
     }
