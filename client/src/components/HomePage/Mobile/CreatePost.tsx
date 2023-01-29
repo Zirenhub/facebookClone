@@ -1,6 +1,6 @@
-import pfp from '../../../assets/pfp.svg';
 import useAuthContext from '../../../hooks/useAuthContext';
-import BackButton from '../../utils/BackButton';
+import Pfp from '../../../assets/pfp-two.svg';
+import Back from '../../../assets/back.svg';
 
 function CreatePost({ close }: { close: () => void }) {
   const auth = useAuthContext();
@@ -10,8 +10,10 @@ function CreatePost({ close }: { close: () => void }) {
   return (
     <div className="z-10 absolute bg-white top-0 left-0 h-full w-full">
       <header className="flex justify-between p-3 border-b-2">
-        <div className="flex gap-2">
-          <BackButton close={close} />
+        <div className="flex gap-2 items-center">
+          <button type="button" onClick={close}>
+            <Back />
+          </button>
           <p className="font-bold">Create post</p>
         </div>
         <div>
@@ -22,13 +24,11 @@ function CreatePost({ close }: { close: () => void }) {
       </header>
       <div className="flex flex-col">
         <div className="flex gap-2 p-3">
-          <div>
-            <img src={pfp} alt="profile" className="w-pfp" />
+          <div className="h-12 w-12">
+            <Pfp height="100%" width="100%" />
           </div>
           <div className="flex flex-col">
-            <p>
-              {auth.user?.firstName} {auth.user?.lastName}
-            </p>
+            <p>{auth.user?.fullName}</p>
             <p>FRIENDS OR PUBLIC HERE</p>
           </div>
         </div>
