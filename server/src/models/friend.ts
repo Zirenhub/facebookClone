@@ -24,9 +24,6 @@ const FriendSchema = new Schema<IFriend>(
   { timestamps: true }
 );
 
-// unique index to ensure that the follower can only follow once
-FriendSchema.index({ friend: 1 }, { unique: true });
-
 const FriendModel = mongoose.model<IFriend>('Friend', FriendSchema);
 
 export default FriendModel;
