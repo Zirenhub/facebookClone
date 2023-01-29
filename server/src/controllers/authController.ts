@@ -30,11 +30,7 @@ export const login = [
     }
     const email: string = req.body.email;
     const password: string = req.body.password;
-    const user = await CredentialsModel.findOne({ email })
-      .populate<{
-        profile: IProfile;
-      }>('profile')
-      .lean();
+    const user = await CredentialsModel.findOne({ email });
 
     if (!user) {
       return res.status(403).json({
@@ -46,13 +42,25 @@ export const login = [
 
     const checkPassword = bcrypt.compareSync(password, user.password);
     if (checkPassword) {
-      const token = jwt.sign(user.profile, process.env.JWT_SECRET!, {
+      const profile = await ProfileModel.findById(user.profile);
+      if (!profile) {
+        return res.status(403).json({
+          status: 'error',
+          errors: [{ msg: "Profile doesn't exist." }],
+          message: null,
+        });
+      }
+      const token = jwt.sign(profile.toObject(), process.env.JWT_SECRET!, {
         expiresIn: '1h',
       });
       res.cookie('token', token, {
         httpOnly: true,
       });
-      return res.json({ status: 'success', data: user.profile, message: null });
+      return res.json({
+        status: 'success',
+        data: profile.toObject(),
+        message: null,
+      });
     } else {
       res.status(403).json({
         status: 'error',
