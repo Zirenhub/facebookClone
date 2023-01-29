@@ -2,7 +2,7 @@ import { Response } from 'express';
 import mongoose from 'mongoose';
 import { IUserRequest } from '../middleware/jwtAuth';
 import ProfileModel from '../models/profile';
-import FollowModel from '../models/follow';
+import FriendModel from '../models/friend';
 
 export const getProfile = async (req: IUserRequest, res: Response) => {
   const id = req.params.id;
@@ -29,28 +29,29 @@ export const getProfile = async (req: IUserRequest, res: Response) => {
   }
 };
 
-export const followProfile = async (req: IUserRequest, res: Response) => {
+export const sendRequest = async (req: IUserRequest, res: Response) => {
   try {
-    const id = new mongoose.Types.ObjectId(req.params.id);
+    const user = req.user._id;
+    const requestID = new mongoose.Types.ObjectId(req.params.id);
 
     // check if the id is valid
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!mongoose.Types.ObjectId.isValid(requestID)) {
       return res
         .status(404)
         .json({ status: 'error', errors: null, message: 'Invalid ID' });
     }
 
     // check if the requested id is the same as the user iq
-    if (req.user._id === id) {
+    if (user === requestID) {
       return res.status(400).json({
         status: 'error',
         errors: null,
-        message: 'You cannot follow yourself',
+        message: 'You cannot send a friend request to yourself',
       });
     }
 
     // check if the profile exits
-    const profile = await ProfileModel.findById(id);
+    const profile = await ProfileModel.findById(requestID);
     if (!profile) {
       return res.status(404).json({
         status: 'error',
@@ -59,28 +60,27 @@ export const followProfile = async (req: IUserRequest, res: Response) => {
       });
     }
 
-    const follower = req.user._id;
-    const followed = profile._id;
-
-    // check if the requested id is not already being followed
-    const follow = await FollowModel.findOne({ follower, followed });
-    if (follow) {
+    // check if a request already exists
+    const request = await FriendModel.findOne({
+      profile: user,
+      friend: requestID,
+    });
+    if (request) {
       return res.status(400).json({
         status: 'error',
         errors: null,
-        message: 'You are already following this profile',
+        message: 'You are already send a friend request to this profile',
       });
     }
 
-    // save follow
-    const newFollow = new FollowModel({
-      follower,
-      followed,
+    // save request
+    const friend = await FriendModel.create({
+      profile: user,
+      friend: requestID,
     });
-    await newFollow.save();
     return res.json({
       status: 'success',
-      data: newFollow.toObject(),
+      data: friend,
       message: null,
     });
   } catch (err) {
@@ -92,22 +92,16 @@ export const followProfile = async (req: IUserRequest, res: Response) => {
   }
 };
 
-export const followersProfile = async (req: IUserRequest, res: Response) => {
+export const getRequests = async (req: IUserRequest, res: Response) => {
   try {
-    const id = new mongoose.Types.ObjectId(req.params.id);
-
-    // check if the id is valid
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res
-        .status(404)
-        .json({ status: 'error', errors: null, message: 'Invalid ID' });
-    }
-
-    const followers = await FollowModel.countDocuments({ followed: id });
+    const requests = await FriendModel.find({
+      profile: req.user._id,
+      status: 'Pending',
+    }).populate('friend');
 
     return res.json({
       status: 'success',
-      data: followers,
+      data: requests,
       message: null,
     });
   } catch (err) {

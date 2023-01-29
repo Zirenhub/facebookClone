@@ -2,14 +2,14 @@ import express from 'express';
 import { jwtAuth } from '../middleware/jwtAuth';
 import {
   getProfile,
-  followProfile,
-  followersProfile,
+  sendRequest,
+  getRequests,
 } from '../controllers/profileController';
 
 const router = express.Router();
 
+router.post('/:id/sendRequest', jwtAuth, sendRequest);
+router.get('/requests', jwtAuth, getRequests);
 router.get('/:id', jwtAuth, getProfile);
-router.get('/:id/follow', jwtAuth, followProfile);
-router.get('/:id/followers', jwtAuth, followersProfile);
 
 export default router;

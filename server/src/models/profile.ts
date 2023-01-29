@@ -25,6 +25,16 @@ const ProfileSchema = new Schema<IProfile>(
   { timestamps: true }
 );
 
+ProfileSchema.virtual('fullName').get(function () {
+  return `
+${this.firstName[0].toUpperCase()}${this.firstName.substring(1, this.firstName.length)}
+${this.lastName[0].toUpperCase()}${this.lastName.substring(1, this.lastName.length)}
+`;
+});
+
+ProfileSchema.set('toObject', { virtuals: true });
+ProfileSchema.set('toJSON', { virtuals: true });
+
 const ProfileModel = mongoose.model<IProfile>('Profile', ProfileSchema);
 
 export default ProfileModel;
