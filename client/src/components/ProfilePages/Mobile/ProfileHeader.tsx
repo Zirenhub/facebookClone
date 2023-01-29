@@ -1,4 +1,4 @@
-import Pfp from '../../assets/pfp-two.svg';
+import Pfp from '../../../assets/pfp-two.svg';
 
 function ProfileHeader({ fullName }: { fullName: string }) {
   return (
