@@ -13,6 +13,7 @@ type TUser = {
   _id: string;
   firstName: string;
   lastName: string;
+  fullName: string;
   gender: string;
   birthday: string;
   exp: number;
