@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import { TProfile } from '../types/Profile';
-import OwnProfile from '../components/ProfilePages/OwnProfile';
-import StrangerProfile from '../components/ProfilePages/StrangerProfile';
+import OwnProfile from '../components/ProfilePages/Mobile/OwnProfile';
+import StrangerProfile from '../components/ProfilePages/Mobile/StrangerProfile';
 import Loading from '../components/Loading';
 import useAuthContext from '../hooks/useAuthContext';
 import { getProfile } from '../api/profile';
