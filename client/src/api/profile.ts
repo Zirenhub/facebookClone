@@ -41,3 +41,15 @@ export async function acceptRequest(reqID: string) {
 
   throw new Error(getError(resData));
 }
+
+export async function rejectRequest(reqID: string) {
+  const res = await fetch(`/api/v1/profile/${reqID}/reject`, {
+    method: 'POST',
+  });
+  const resData = await res.json();
+  if (resData.status === 'success') {
+    return resData.data;
+  }
+
+  throw new Error(getError(resData));
+}
