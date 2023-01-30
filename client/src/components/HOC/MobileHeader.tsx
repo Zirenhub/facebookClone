@@ -6,9 +6,11 @@ import facebookLogo from '../../assets/facebook-logo.png';
 import Plus from '../../assets/plus.svg';
 import Search from '../../assets/search.svg';
 import Messenger from '../../assets/messenger.svg';
+import SearchPage from '../../pages/Mobile/SearchPage';
 
 function MobileHeader() {
   const [currentPage, setCurrentPage] = useState<string | null>(null);
+  const [searchPage, setSearchPage] = useState<boolean>(false);
 
   const auth = useAuthContext();
   const pages = useRoute();
@@ -30,6 +32,10 @@ function MobileHeader() {
     }
   }, [location, auth]);
 
+  if (searchPage) {
+    return <SearchPage close={() => setSearchPage(false)} />;
+  }
+
   return (
     <>
       <header className="max-h-24 px-3 py-2 border-b-2 border-slate-400">
@@ -45,9 +51,13 @@ function MobileHeader() {
             <div className="bg-gray-200 rounded-full h-8 w-8 flex justify-center items-center">
               <Plus height="100%" width="70%" />
             </div>
-            <div className="bg-gray-200 rounded-full h-8 w-8 flex justify-center items-center">
+            <button
+              type="button"
+              onClick={() => setSearchPage(true)}
+              className="bg-gray-200 rounded-full h-8 w-8 flex justify-center items-center"
+            >
               <Search height="100%" width="70%" />
-            </div>
+            </button>
             <div className="bg-gray-200 rounded-full h-8 w-8 flex justify-center items-center">
               <Messenger height="100%" width="70%" />
             </div>
