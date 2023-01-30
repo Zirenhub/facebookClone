@@ -128,12 +128,35 @@ export const acceptRequest = async (req: IUserRequest, res: Response) => {
       { status: 'Accepted' },
       { new: true }
     );
-    // const request = await FriendModel.findOneAndUpdate(
-    //   { profile: req.user.id, friend: requestID },
-    //   { status: 'Accepted' },
-    //   { new: true }
-    // );
-    // console.log(request);
+
+    return res.json({
+      status: 'success',
+      data: request,
+      message: null,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: 'error',
+      errors: err,
+      message: null,
+    });
+  }
+};
+
+export const rejectRequest = async (req: IUserRequest, res: Response) => {
+  try {
+    const requestID = new mongoose.Types.ObjectId(req.params.id);
+
+    if (!mongoose.Types.ObjectId.isValid(requestID)) {
+      return res
+        .status(404)
+        .json({ status: 'error', errors: null, message: 'Invalid ID' });
+    }
+    const request = await FriendModel.findByIdAndUpdate(
+      requestID,
+      { status: 'Declined' },
+      { new: true }
+    );
 
     return res.json({
       status: 'success',
