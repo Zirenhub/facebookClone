@@ -24,6 +24,8 @@ const FriendSchema = new Schema<IFriend>(
   { timestamps: true }
 );
 
+FriendSchema.index({ friend: 1, profile: 1 }, { unique: true });
+
 const FriendModel = mongoose.model<IFriend>('Friend', FriendSchema);
 
 export default FriendModel;
