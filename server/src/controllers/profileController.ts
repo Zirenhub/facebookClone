@@ -15,9 +15,24 @@ export const getProfile = async (req: IUserRequest, res: Response) => {
         message: "Profile doesn't exist",
       });
     }
+
+    let friendStatus = null;
+
+    if (id !== req.user._id) {
+      // profile is trying to befriend me, or im trying to befriend profile?
+      const request = await FriendModel.findOne({
+        profile: [id, req.user._id],
+        friend: [id, req.user._id],
+      });
+
+      if (request?.status === 'Pending' || request?.status === 'Accepted') {
+        friendStatus = request.toObject();
+      }
+    }
+
     return res.json({
       status: 'success',
-      data: profile.toObject(),
+      data: { ...profile.toObject(), friendStatus },
       message: null,
     });
   } catch (err) {
@@ -32,17 +47,17 @@ export const getProfile = async (req: IUserRequest, res: Response) => {
 export const sendRequest = async (req: IUserRequest, res: Response) => {
   try {
     const user = req.user._id;
-    const requestID = new mongoose.Types.ObjectId(req.params.id);
+    const requestedProfile = req.params.id;
 
     // check if the id is valid
-    if (!mongoose.Types.ObjectId.isValid(requestID)) {
+    if (!mongoose.Types.ObjectId.isValid(requestedProfile)) {
       return res
         .status(404)
         .json({ status: 'error', errors: null, message: 'Invalid ID' });
     }
 
     // check if the requested id is the same as the user iq
-    if (user === requestID) {
+    if (user === requestedProfile) {
       return res.status(400).json({
         status: 'error',
         errors: null,
@@ -51,7 +66,7 @@ export const sendRequest = async (req: IUserRequest, res: Response) => {
     }
 
     // check if the profile exits
-    const profile = await ProfileModel.findById(requestID);
+    const profile = await ProfileModel.findById(requestedProfile);
     if (!profile) {
       return res.status(404).json({
         status: 'error',
@@ -60,22 +75,31 @@ export const sendRequest = async (req: IUserRequest, res: Response) => {
       });
     }
 
-    // check if a request already exists
+    // check if a request send to the user already exists,
+    // if a request already exists, no point in sending a request back, user should instead accept or reject the available request.
+    // the user can't send a second request to follow if one is already send to a profile anyway due to unique indexes.
     const request = await FriendModel.findOne({
-      profile: user,
-      friend: requestID,
+      profile: req.user._id,
+      friend: requestedProfile,
     });
-    if (request) {
+
+    if (request?.status === 'Pending') {
       return res.status(400).json({
         status: 'error',
         errors: null,
-        message: 'You are already send a friend request to this profile',
+        message: 'A request already exists',
+      });
+    } else if (request?.status === 'Accepted') {
+      return res.status(400).json({
+        status: 'error',
+        errors: null,
+        message: 'You are already friends',
       });
     }
 
     // save request
     const friend = await FriendModel.create({
-      profile: requestID,
+      profile: requestedProfile,
       friend: user,
     });
     return res.json({
@@ -96,7 +120,6 @@ export const getRequests = async (req: IUserRequest, res: Response) => {
   try {
     const requests = await FriendModel.find({
       profile: req.user._id,
-      friend: { $ne: req.user._id },
       status: 'Pending',
     }).populate('friend');
 
@@ -116,18 +139,42 @@ export const getRequests = async (req: IUserRequest, res: Response) => {
 
 export const acceptRequest = async (req: IUserRequest, res: Response) => {
   try {
-    const requestID = new mongoose.Types.ObjectId(req.params.id);
+    const requestID = req.params.id;
 
     if (!mongoose.Types.ObjectId.isValid(requestID)) {
       return res
         .status(404)
         .json({ status: 'error', errors: null, message: 'Invalid ID' });
     }
-    const request = await FriendModel.findByIdAndUpdate(
-      requestID,
-      { status: 'Accepted' },
-      { new: true }
-    );
+
+    const request = await FriendModel.findById(requestID);
+
+    if (!request) {
+      return res
+        .status(404)
+        .json({ status: 'error', errors: null, message: 'Invalid request ID' });
+    }
+
+    if (request.status === 'Accepted') {
+      return res.status(400).json({
+        status: 'error',
+        errors: null,
+        message: 'You are already friends',
+      });
+    }
+
+    // if the user is not owner of the request, or is not the receiver of the request throw error.
+    if (
+      req.user._id !== request.profile.toString() &&
+      req.user.id !== request.friend.toString()
+    ) {
+      return res
+        .status(403)
+        .json({ status: 'error', errors: null, message: 'Unauthorized' });
+    }
+
+    request.status = 'Accepted';
+    await request.save();
 
     return res.json({
       status: 'success',
@@ -145,18 +192,39 @@ export const acceptRequest = async (req: IUserRequest, res: Response) => {
 
 export const rejectRequest = async (req: IUserRequest, res: Response) => {
   try {
-    const requestID = new mongoose.Types.ObjectId(req.params.id);
+    const requestID = req.params.id;
 
     if (!mongoose.Types.ObjectId.isValid(requestID)) {
       return res
         .status(404)
         .json({ status: 'error', errors: null, message: 'Invalid ID' });
     }
-    const request = await FriendModel.findByIdAndUpdate(
-      requestID,
-      { status: 'Declined' },
-      { new: true }
-    );
+
+    const request = await FriendModel.findById(requestID);
+
+    if (!request) {
+      return res
+        .status(404)
+        .json({ status: 'error', errors: null, message: 'Invalid request ID' });
+    }
+
+    // check if request status is not pending and if its not throw error?
+    // doesn't seem necessary as you can unfriend a friend any time
+    // and rejecting is basically just chaning status from pending to declined
+    // while unfrending is changing status from accepted to declined
+
+    // if the user is not owner of the request, or is not the receiver of the request throw error.
+    if (
+      req.user._id !== request.profile.toString() &&
+      req.user.id !== request.friend.toString()
+    ) {
+      return res
+        .status(403)
+        .json({ status: 'error', errors: null, message: 'Unauthorized' });
+    }
+
+    request.status = 'Declined';
+    await request.save();
 
     return res.json({
       status: 'success',
