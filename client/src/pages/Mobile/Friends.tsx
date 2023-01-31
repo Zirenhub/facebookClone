@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getRequests } from '../../api/profile';
 import Loading from '../../components/Loading';
-import { TRequest } from '../../types/Requests';
+import { TRequest } from '../../types/Request';
 import Search from '../../assets/search.svg';
 import FriendsRequests from '../../components/Friends/FriendsRequests';
 
@@ -11,8 +11,11 @@ function Friends() {
 
   const pages = ['Requests', 'Your Friends'];
 
-  const { isLoading, isError, data, error } = useQuery<TRequest[], Error>({
-    queryKey: ['friends'],
+  const { isLoading, isError, data, error, refetch } = useQuery<
+    TRequest[],
+    Error
+  >({
+    queryKey: ['requests'],
     queryFn: () => getRequests(),
   });
 
@@ -52,8 +55,10 @@ function Friends() {
           );
         })}
       </div>
-      <div className="mt-3">
-        {currentPage === 'Requests' && <FriendsRequests data={data} />}
+      <div className="mt-3 flex flex-col gap-3">
+        {currentPage === 'Requests' && (
+          <FriendsRequests data={data} refetch={refetch} />
+        )}
       </div>
     </div>
   );
