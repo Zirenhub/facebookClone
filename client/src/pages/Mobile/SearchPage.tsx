@@ -41,24 +41,29 @@ function SearchPage({ close }: { close: () => void }) {
           />
         </div>
       </header>
-      {searchResults &&
-        searchResults.map((result) => {
-          return (
-            <button
-              key={result._id}
-              type="button"
-              onClick={() => navigate(`/${result._id}`, { replace: true })}
-              className="bg-gray-200 p-3 rounded-lg flex items-center gap-4 w-full"
-            >
-              <div className="h-12 w-12">
-                <Pfp height="100%" width="100%" />
-              </div>
-              <p className="font-bold">
-                {result.firstName} {result.lastName}
-              </p>
-            </button>
-          );
-        })}
+      <div className="flex flex-col gap-4">
+        {searchResults &&
+          searchResults.map((result) => {
+            return (
+              <button
+                key={result._id}
+                type="button"
+                onClick={() => {
+                  close();
+                  navigate(`/${result._id}`);
+                }}
+                className="bg-gray-200 p-3 rounded-lg flex items-center gap-4 w-full"
+              >
+                <div className="h-12 w-12">
+                  <Pfp height="100%" width="100%" />
+                </div>
+                <p className="font-bold">
+                  {result.firstName} {result.lastName}
+                </p>
+              </button>
+            );
+          })}
+      </div>
     </div>
   );
 }
