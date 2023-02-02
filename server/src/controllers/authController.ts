@@ -5,7 +5,6 @@ import jwt from 'jsonwebtoken';
 import CredentialsModel from '../models/credentials';
 import ProfileModel from '../models/profile';
 import { IUserRequest } from '../middleware/jwtAuth';
-import { IProfile } from '../interfaces/IProfile';
 
 const currentYear = new Date().getFullYear();
 

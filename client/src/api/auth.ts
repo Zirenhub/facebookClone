@@ -1,11 +1,5 @@
 import { UserSignUp } from '../types/UserSignUp';
 
-export async function checkAuth() {
-  const res = await fetch('/api/v1/auth/me');
-  const resData = await res.json();
-  return resData;
-}
-
 export async function logInUser(email: string, password: string) {
   const res = await fetch('/api/v1/auth/login', {
     method: 'POST',
