@@ -2,8 +2,15 @@
 import '@testing-library/cypress/add-commands';
 
 Cypress.Commands.add('login', (email, password) => {
-  cy.get(':nth-child(1) > .border-2').type(email);
-  // cy.findByLabelText('Password').type(password);
+  cy.session(email, () => {
+    cy.visit(Cypress.env('local'));
+    cy.get(':nth-child(1) > .border-2').type(email);
+    cy.get(':nth-child(2) > .border-2').type(`${password}{enter}`, {
+      log: false,
+    });
+    cy.url().should('include', '/home');
+    cy.contains("What's on your mind?");
+  });
 });
 
 // ***********************************************
