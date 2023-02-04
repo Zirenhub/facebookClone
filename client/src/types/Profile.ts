@@ -1,3 +1,13 @@
+export type TProfileFriend = {
+  __v: string;
+  _id: string;
+  createdAt: string;
+  updatedAt: string;
+  friend: string;
+  profile: string;
+  status: string;
+};
+
 export type TProfile = {
   __v: string;
   _id: string;
@@ -6,15 +16,7 @@ export type TProfile = {
   fullName: string;
   birthday: string;
   gender: string;
-  friendStatus: {
-    __v: string;
-    _id: string;
-    createdAt: string;
-    updatedAt: string;
-    friend: string;
-    profile: string;
-    status: string;
-  } | null;
+  friendStatus: TProfileFriend | null;
   customGender?: string;
   createdAt: string;
   updatedAt: string;
