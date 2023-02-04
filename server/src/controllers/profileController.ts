@@ -223,12 +223,11 @@ export const rejectRequest = async (req: IUserRequest, res: Response) => {
         .json({ status: 'error', errors: null, message: 'Unauthorized' });
     }
 
-    request.status = 'Declined';
-    await request.save();
+    await request.deleteOne();
 
     return res.json({
       status: 'success',
-      data: request,
+      data: null,
       message: null,
     });
   } catch (err) {

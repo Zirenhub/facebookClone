@@ -17,14 +17,14 @@ const FriendSchema = new Schema<IFriend>(
     },
     status: {
       type: String,
-      enum: ['Pending', 'Accepted', 'Declined'],
+      enum: ['Pending', 'Accepted'],
       default: 'Pending',
     },
   },
   { timestamps: true }
 );
 
-FriendSchema.index({ friend: 1, profile: 1 }, { unique: true });
+FriendSchema.index({ friend: 1, profile: 1, status: 1 }, { unique: true });
 
 const FriendModel = mongoose.model<IFriend>('Friend', FriendSchema);
 
