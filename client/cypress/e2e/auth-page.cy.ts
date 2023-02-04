@@ -17,7 +17,7 @@ describe('Tests auth page', () => {
   });
 
   it('logs in', () => {
-    const { email, password } = Cypress.env('user');
+    const { email, password } = Cypress.env('userOne');
     cy.login(email, password);
   });
 });
