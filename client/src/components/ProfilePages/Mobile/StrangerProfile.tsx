@@ -5,32 +5,32 @@ import {
   sendRequest,
 } from '../../../api/profile';
 import useAuthContext from '../../../hooks/useAuthContext';
-import { TProfile } from '../../../types/Profile';
+import { TProfile, TProfileFriend } from '../../../types/Profile';
 import Popup from '../../Popup';
 import ProfileHeader from './ProfileHeader';
 
 function StangerProfile({ data }: { data: TProfile }) {
   const [currentPage, setCurrentPage] = useState<string>('Posts');
   const [requestError, setRequestError] = useState<string | null>(null);
-  const [friendStatus, setFriendStatus] = useState<string | null>(null);
+  const [friendStatus, setFriendStatus] = useState<TProfileFriend | null>(null);
 
   const pages = ['Posts', 'About', 'Photos', 'Videos', 'Mentions'];
   const auth = useAuthContext();
 
   async function handleRequest() {
     try {
-      await sendRequest(data._id);
-      setFriendStatus('requested');
+      const res = await sendRequest(data._id);
+      setFriendStatus(res);
     } catch (err: any) {
       setRequestError(err.message);
     }
   }
 
   async function handleAcceptRequest() {
-    if (data.friendStatus) {
+    if (friendStatus) {
       try {
-        await acceptRequest(data.friendStatus._id);
-        setFriendStatus('friends');
+        const res = await acceptRequest(friendStatus._id);
+        setFriendStatus(res);
       } catch (err: any) {
         setRequestError(err.message);
       }
@@ -38,9 +38,9 @@ function StangerProfile({ data }: { data: TProfile }) {
   }
 
   async function handleCancelRequest() {
-    if (data.friendStatus) {
+    if (friendStatus) {
       try {
-        await rejectRequest(data.friendStatus._id);
+        await rejectRequest(friendStatus._id);
         setFriendStatus(null);
       } catch (err: any) {
         setRequestError(err.message);
@@ -49,19 +49,57 @@ function StangerProfile({ data }: { data: TProfile }) {
   }
 
   useEffect(() => {
-    if (data.friendStatus) {
-      // if the status is pending check who is requesting.
-      if (data.friendStatus.status === 'Pending') {
-        if (data.friendStatus.friend !== auth.user?._id) {
-          setFriendStatus('request');
-        } else {
-          setFriendStatus('requested');
-        }
-      } else if (data.friendStatus.status === 'Accepted') {
-        setFriendStatus('friends');
+    setFriendStatus(data.friendStatus);
+  }, [data]);
+
+  function getRequestButton() {
+    if (friendStatus) {
+      if (friendStatus.status === 'Accepted') {
+        return (
+          <button
+            type="button"
+            className="bg-red-500 text-white font-bold py-1 rounded-md grow"
+            onClick={handleCancelRequest}
+          >
+            Unfriend
+          </button>
+        );
       }
+      if (
+        friendStatus.status === 'Pending' &&
+        friendStatus.friend === auth.user?._id
+      ) {
+        return (
+          <button
+            type="button"
+            className="bg-red-500 text-white font-bold py-1 rounded-md grow"
+            onClick={handleCancelRequest}
+          >
+            Cancel Request
+          </button>
+        );
+      }
+
+      return (
+        <button
+          type="button"
+          className="bg-green-500 text-white font-bold py-1 rounded-md grow"
+          onClick={handleAcceptRequest}
+        >
+          Accept Friend Request
+        </button>
+      );
     }
-  }, [data, auth]);
+    return (
+      <button
+        type="button"
+        className="bg-blue-500 text-white font-bold py-1 rounded-md grow"
+        onClick={handleRequest}
+      >
+        Add Friend
+      </button>
+    );
+  }
 
   return (
     <div>
@@ -70,41 +108,7 @@ function StangerProfile({ data }: { data: TProfile }) {
         <Popup msg={requestError} close={() => setRequestError(null)} />
       )}
       <div className="flex gap-2 p-2">
-        {friendStatus === 'request' && (
-          <button
-            type="button"
-            className="bg-green-500 text-white font-bold py-1 rounded-md grow"
-            onClick={handleAcceptRequest}
-          >
-            Accept Friend Request
-          </button>
-        )}
-        {friendStatus === 'requested' && (
-          <button
-            type="button"
-            className="bg-red-500 text-white font-bold py-1 rounded-md grow"
-            onClick={handleCancelRequest}
-          >
-            Cancel request
-          </button>
-        )}
-        {friendStatus === 'friends' && (
-          <button
-            type="button"
-            className="bg-red-500 text-white font-bold py-1 rounded-md grow"
-          >
-            Unfriend
-          </button>
-        )}
-        {!friendStatus && (
-          <button
-            type="button"
-            className="bg-blue-500 text-white font-bold py-1 rounded-md grow"
-            onClick={handleRequest}
-          >
-            Add Friend
-          </button>
-        )}
+        {getRequestButton()}
         <button
           type="button"
           className="bg-gray-200 text-black font-bold py-1 rounded-md grow"
