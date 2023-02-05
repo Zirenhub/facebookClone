@@ -47,6 +47,9 @@ describe('Tests friends functionality', () => {
         cy.contains(/Test User2/i).click();
         cy.contains('Test User2');
         cy.contains('Unfriend');
+        cy.visit(`${Cypress.env('local')}friends`);
+        cy.contains('Your Friends').click();
+        cy.contains('Test User2');
 
         cy.login(testEmail, testPassword);
         cy.visit(`${Cypress.env('local')}home`);
