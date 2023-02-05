@@ -21,3 +21,5 @@ describe('Tests auth page', () => {
     cy.login(email, password);
   });
 });
+
+export {};

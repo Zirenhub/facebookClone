@@ -82,3 +82,5 @@ describe('Tests friends functionality', () => {
     cy.contains('Add Friend');
   });
 });
+
+export {};

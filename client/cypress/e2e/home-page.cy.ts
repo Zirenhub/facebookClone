@@ -11,3 +11,5 @@ describe('Tests home page', () => {
     cy.contains("What's on your mind?");
   });
 });
+
+export {};

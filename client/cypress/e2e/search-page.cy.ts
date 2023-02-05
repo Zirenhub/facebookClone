@@ -20,3 +20,5 @@ describe('Tests search page', () => {
     cy.contains('Add Friend');
   });
 });
+
+export {};

@@ -11,3 +11,5 @@ describe('Tests profile page', () => {
     cy.contains('Test User2');
   });
 });
+
+export {};
