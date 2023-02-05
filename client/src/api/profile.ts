@@ -53,3 +53,13 @@ export async function rejectRequest(reqID: string) {
 
   throw new Error(getError(resData));
 }
+
+export async function getFriends() {
+  const res = await fetch('/api/v1/profile/friends');
+  const resData = await res.json();
+  if (resData.status === 'success') {
+    return resData.data;
+  }
+
+  throw new Error(getError(resData));
+}

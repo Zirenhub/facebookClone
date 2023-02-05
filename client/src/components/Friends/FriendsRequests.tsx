@@ -1,34 +1,54 @@
-import { QueryObserverResult } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import Loading from '../Loading';
 import { TRequest } from '../../types/Request';
 import Pfp from '../../assets/pfp-two.svg';
-import { acceptRequest, rejectRequest } from '../../api/profile';
+import { acceptRequest, rejectRequest, getRequests } from '../../api/profile';
 
-function FriendsRequests({
-  data,
-  refetch,
-}: {
-  data: TRequest[];
-  refetch: () => Promise<QueryObserverResult>;
-}) {
+function FriendsRequests() {
   const navigate = useNavigate();
 
-  async function handleRequest(reqID: string, accept: boolean) {
-    try {
-      if (accept) {
-        await acceptRequest(reqID);
-      } else {
-        await rejectRequest(reqID);
-      }
+  const { isLoading, isError, data, error, refetch } = useQuery<
+    TRequest[],
+    Error
+  >({
+    queryKey: ['requests'],
+    queryFn: () => getRequests(),
+  });
 
-      await refetch();
-    } catch (err) {
-      console.log(err);
-    }
+  const acceptRequestMutation = useMutation({
+    mutationFn: (reqID: string) => {
+      return acceptRequest(reqID);
+    },
+  });
+
+  const rejectRequestMutation = useMutation({
+    mutationFn: (reqID: string) => {
+      return rejectRequest(reqID);
+    },
+  });
+
+  if (acceptRequestMutation.isSuccess || rejectRequestMutation.isSuccess) {
+    refetch();
+  }
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  if (isError) {
+    return (
+      <div>
+        <p>{error.message}</p>
+      </div>
+    );
   }
 
   return (
     <>
+      {(acceptRequestMutation.isError || rejectRequestMutation.isError) && (
+        <p>An error occurred</p>
+      )}
       {data.map((request) => {
         return (
           <div
@@ -49,14 +69,14 @@ function FriendsRequests({
               <button
                 type="button"
                 className="bg-green-300 rounded-lg px-2 font-bold"
-                onClick={() => handleRequest(request._id, true)}
+                onClick={() => acceptRequestMutation.mutate(request._id)}
               >
                 ACCEPT
               </button>
               <button
                 type="button"
                 className="bg-red-300 rounded-lg px-2 font-bold"
-                onClick={() => handleRequest(request._id, false)}
+                onClick={() => rejectRequestMutation.mutate(request._id)}
               >
                 DECLINE
               </button>

@@ -1,35 +1,10 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { getRequests } from '../../api/profile';
-import Loading from '../../components/Loading';
-import { TRequest } from '../../types/Request';
-import Search from '../../assets/search.svg';
+import FriendsAccepted from '../../components/Friends/FriendsAccepted';
 import FriendsRequests from '../../components/Friends/FriendsRequests';
+import Search from '../../assets/search.svg';
 
 function Friends() {
   const [currentPage, setCurrentPage] = useState<string>('Requests');
-
-  const pages = ['Requests', 'Your Friends'];
-
-  const { isLoading, isError, data, error, refetch } = useQuery<
-    TRequest[],
-    Error
-  >({
-    queryKey: ['requests'],
-    queryFn: () => getRequests(),
-  });
-
-  if (isLoading) {
-    return <Loading />;
-  }
-
-  if (isError) {
-    return (
-      <div>
-        <p>{error.message}</p>
-      </div>
-    );
-  }
 
   return (
     <div className="p-2">
@@ -40,7 +15,7 @@ function Friends() {
         </div>
       </div>
       <div className="flex gap-2">
-        {pages.map((page) => {
+        {['Requests', 'Your Friends'].map((page) => {
           return (
             <button
               key={page}
@@ -56,9 +31,7 @@ function Friends() {
         })}
       </div>
       <div className="mt-3 flex flex-col gap-3">
-        {currentPage === 'Requests' && (
-          <FriendsRequests data={data} refetch={refetch} />
-        )}
+        {currentPage === 'Requests' ? <FriendsRequests /> : <FriendsAccepted />}
       </div>
     </div>
   );
