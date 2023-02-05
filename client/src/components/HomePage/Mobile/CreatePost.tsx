@@ -1,11 +1,46 @@
+import React, { useState } from 'react';
 import useAuthContext from '../../../hooks/useAuthContext';
 import Pfp from '../../../assets/pfp-two.svg';
 import Back from '../../../assets/back.svg';
+import postBgOne from '../../../assets/post-bg-one.jpg';
+import postBgTwo from '../../../assets/post-bg-two.jpg';
+import postBgThree from '../../../assets/post-bg-three.jpg';
+import postBgFour from '../../../assets/post-bg-four.jpg';
 
 function CreatePost({ close }: { close: () => void }) {
-  const auth = useAuthContext();
+  const [postContent, setPostContent] = useState<{
+    content: string;
+    audience: string;
+    background: string | null;
+  }>({ content: '', audience: 'friends', background: null });
 
-  function handleSubmit() {}
+  const auth = useAuthContext();
+  const postBackgrounds = [
+    { desc: 'vinyl player background', src: postBgOne, name: 'postBgOne' },
+    { desc: 'animal eyes background', src: postBgTwo, name: 'postBgTwo' },
+    { desc: 'rain drops background', src: postBgThree, name: 'postBgThree' },
+    { desc: 'laughing emojis background', src: postBgFour, name: 'postBgFour' },
+  ];
+
+  function handlePostContent(e: React.SyntheticEvent) {
+    const target = e.target as HTMLTextAreaElement;
+    setPostContent({ ...postContent, content: target.value });
+  }
+
+  function handlePostAudience(e: React.SyntheticEvent) {
+    const target = e.target as HTMLSelectElement;
+    setPostContent({ ...postContent, audience: target.value });
+  }
+
+  function handlePostBackground(bg: string) {
+    setPostContent({ ...postContent, background: bg });
+  }
+
+  function handleSubmit() {
+    if (postContent.content) {
+      // todo
+    }
+  }
 
   return (
     <div className="z-10 absolute bg-white top-0 left-0 h-full w-full">
@@ -17,7 +52,14 @@ function CreatePost({ close }: { close: () => void }) {
           <p className="font-bold">Create post</p>
         </div>
         <div>
-          <button type="button" className="text-blue-600 font-bold">
+          <button
+            type="button"
+            className={`${
+              postContent.content
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-200 text-gray-500'
+            } font-bold rounded-sm px-2 py-1`}
+          >
             POST
           </button>
         </div>
@@ -29,25 +71,40 @@ function CreatePost({ close }: { close: () => void }) {
           </div>
           <div className="flex flex-col">
             <p>{auth.user?.fullName}</p>
-            <p>FRIENDS OR PUBLIC HERE</p>
+            <select
+              value={postContent.audience}
+              onChange={handlePostAudience}
+              className="bg-white font-bold"
+            >
+              <option value="public">Public</option>
+              <option value="friends">Friends</option>
+            </select>
           </div>
         </div>
         <div className="px-2">
           <textarea
-            className="border-2 w-full min-h-[50px] h-24 max-h-28"
+            className="w-full min-h-[50px] h-24 max-h-28"
             placeholder="What's on your mind?"
+            onChange={handlePostContent}
           />
         </div>
       </div>
-      <p>Background pick here</p>
-      <div className="px-3">
-        <button
-          type="button"
-          className="py-2 bg-blue-500 text-white font-bold w-full"
-          onClick={handleSubmit}
-        >
-          POST
-        </button>
+      <div className="flex w-full h-12 justify-between">
+        {postBackgrounds.map((postBg) => {
+          return (
+            <button
+              type="button"
+              key={postBg.desc}
+              onClick={() => handlePostBackground(postBg.name)}
+            >
+              <img
+                alt={postBg.desc}
+                src={postBg.src}
+                className="rounded-md h-full block m-auto"
+              />
+            </button>
+          );
+        })}
       </div>
     </div>
   );
