@@ -25,7 +25,7 @@ export const getProfile = async (req: IUserRequest, res: Response) => {
         friend: [id, req.user._id],
       });
 
-      if (request?.status === 'Pending' || request?.status === 'Accepted') {
+      if (request) {
         friendStatus = request.toObject();
       }
     }
@@ -228,6 +228,44 @@ export const rejectRequest = async (req: IUserRequest, res: Response) => {
     return res.json({
       status: 'success',
       data: null,
+      message: null,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: 'error',
+      errors: err,
+      message: null,
+    });
+  }
+};
+
+export const getFriends = async (req: IUserRequest, res: Response) => {
+  try {
+    const relationships = await FriendModel.find({
+      $and: [
+        {
+          $or: [{ profile: req.user._id }, { friend: req.user._id }],
+        },
+        { status: 'Accepted' },
+      ],
+    });
+
+    const friends = relationships.map((relationship) => {
+      // if im the one that accepted the request,
+      // give me the request profile id,
+      // otherwise give me the id of the profile that accepted the request.
+      return relationship.profile.toString() === req.user._id.toString()
+        ? relationship.friend
+        : relationship.profile;
+    });
+
+    const populatedFriends = await ProfileModel.find({
+      _id: { $in: friends },
+    });
+
+    return res.json({
+      status: 'success',
+      data: populatedFriends,
       message: null,
     });
   } catch (err) {
