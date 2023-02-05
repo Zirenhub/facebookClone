@@ -16,11 +16,22 @@ function CreatePost({ close }: { close: () => void }) {
 
   const auth = useAuthContext();
   const postBackgrounds = [
-    { desc: 'vinyl player background', src: postBgOne, name: 'postBgOne' },
-    { desc: 'animal eyes background', src: postBgTwo, name: 'postBgTwo' },
-    { desc: 'rain drops background', src: postBgThree, name: 'postBgThree' },
-    { desc: 'laughing emojis background', src: postBgFour, name: 'postBgFour' },
+    { desc: 'vinyl player background', src: postBgOne, name: 'post-bg-one' },
+    { desc: 'animal eyes background', src: postBgTwo, name: 'post-bg-two' },
+    { desc: 'rain drops background', src: postBgThree, name: 'post-bg-three' },
+    {
+      desc: 'laughing emojis background',
+      src: postBgFour,
+      name: 'post-bg-four',
+    },
   ];
+
+  function getBackground() {
+    if (postContent.background) {
+      return `bg-[url('src/assets/${postContent.background}.jpg')]`;
+    }
+    return '';
+  }
 
   function handlePostContent(e: React.SyntheticEvent) {
     const target = e.target as HTMLTextAreaElement;
@@ -32,12 +43,12 @@ function CreatePost({ close }: { close: () => void }) {
     setPostContent({ ...postContent, audience: target.value });
   }
 
-  function handlePostBackground(bg: string) {
+  function handlePostBackground(bg: string | null) {
     setPostContent({ ...postContent, background: bg });
   }
 
   function handleSubmit() {
-    if (postContent.content) {
+    if (postContent.content && postContent.audience) {
       // todo
     }
   }
@@ -81,15 +92,22 @@ function CreatePost({ close }: { close: () => void }) {
             </select>
           </div>
         </div>
-        <div className="px-2">
+        <div className={`p-2 ${getBackground()}`}>
           <textarea
-            className="w-full min-h-[50px] h-24 max-h-28"
+            className="w-full min-h-[50px] h-24 max-h-28 bg-transparent"
             placeholder="What's on your mind?"
             onChange={handlePostContent}
           />
         </div>
       </div>
       <div className="flex w-full h-12 justify-between">
+        <button
+          type="button"
+          className="px-1"
+          onClick={() => handlePostBackground(null)}
+        >
+          <div className="bg-gray-200 rounded-md h-full w-[75px] block m-auto" />
+        </button>
         {postBackgrounds.map((postBg) => {
           return (
             <button
