@@ -1,6 +1,6 @@
 import { Types } from 'mongoose';
 
-export interface ILike {
+export interface IReaction {
   author: Types.ObjectId;
-  post: Types.ObjectId;
+  type: string;
 }
