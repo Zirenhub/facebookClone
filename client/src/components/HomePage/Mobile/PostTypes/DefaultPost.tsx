@@ -1,21 +1,16 @@
-import { useState } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
-import { TDefaultPost } from '../../../../types/Post';
 import postBgOne from '../../../../../public/assets/post-bg-one.jpg';
 import postBgTwo from '../../../../../public/assets/post-bg-two.jpg';
 import postBgThree from '../../../../../public/assets/post-bg-three.jpg';
 import postBgFour from '../../../../../public/assets/post-bg-four.jpg';
+import { TPost } from '../../../../types/Post';
 
 type Props = {
-  setCanSend: React.Dispatch<React.SetStateAction<boolean>>;
+  post: TPost;
+  setPost: React.Dispatch<React.SetStateAction<TPost>>;
 };
 
-function DefaultPost({ setCanSend }: Props) {
-  const [postContent, setPostContent] = useState<TDefaultPost>({
-    content: '',
-    background: null,
-  });
-
+function DefaultPost({ post, setPost }: Props) {
   const postBackgrounds = [
     { desc: 'vinyl player background', name: 'post-bg-one', src: postBgOne },
     { desc: 'animal eyes background', name: 'post-bg-two', src: postBgTwo },
@@ -28,9 +23,9 @@ function DefaultPost({ setCanSend }: Props) {
   ];
 
   function getPostBackground() {
-    // `bg-[url('/assets/${postContent.background}.jpg')]` doesn't work for some reason
+    // `bg-[url('/assets/${post.background}.jpg')]` doesn't work for some reason
     const bgClass = 'flex justify-center items-center';
-    switch (postContent.background) {
+    switch (post.background) {
       case 'post-bg-one':
         return `bg-[url('/assets/post-bg-one.jpg')] ${bgClass} text-white`;
       case 'post-bg-two':
@@ -45,33 +40,22 @@ function DefaultPost({ setCanSend }: Props) {
   }
 
   function handlePostBackground(bg: string | null) {
-    if (postContent.content.length <= 250) {
-      setPostContent({ ...postContent, background: bg });
+    if (post.content.length <= 250) {
+      setPost({ ...post, background: bg });
     }
   }
 
   function handlePostContent(e: React.SyntheticEvent) {
     const target = e.target as HTMLTextAreaElement;
     const content = target.value.trim();
-    if (content) {
-      setCanSend(true);
-    } else {
-      setCanSend(false);
-    }
     if (content.length > 250) {
-      setPostContent({
-        ...postContent,
+      setPost({
+        ...post,
         content,
         background: null,
       });
     } else {
-      setPostContent({ ...postContent, content });
-    }
-  }
-
-  function handleSubmit() {
-    if (postContent.content) {
-      // todo
+      setPost({ ...post, content });
     }
   }
 
@@ -82,10 +66,11 @@ function DefaultPost({ setCanSend }: Props) {
       >
         <TextareaAutosize
           className={`bg-transparent font-bold outline-none resize-none ${
-            postContent.background ? 'text-center' : 'w-full'
+            post.background ? 'text-center' : 'w-full'
           }`}
           placeholder="What's on your mind?"
           maxLength={450}
+          value={post.content}
           onChange={(e) => handlePostContent(e)}
         />
       </div>

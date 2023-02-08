@@ -1,23 +1,22 @@
-import React, { useState } from 'react';
 import TextareaAutosize from 'react-textarea-autosize';
-import { TImagePost } from '../../../../types/Post';
+import { TPost } from '../../../../types/Post';
 
-function ImagePost() {
-  const [postContent, setPostContent] = useState<TImagePost>({
-    content: '',
-    image: null,
-  });
+type Props = {
+  post: TPost;
+  setPost: React.Dispatch<React.SetStateAction<TPost>>;
+};
 
+function ImagePost({ post, setPost }: Props) {
   function handlePostContent(e: React.SyntheticEvent) {
     const target = e.target as HTMLTextAreaElement;
     const content = target.value.trim();
-    setPostContent({ ...postContent, content });
+    setPost({ ...post, content });
   }
 
   function handleImageChange(e: React.SyntheticEvent) {
     const target = e.target as HTMLInputElement;
     if (target.files) {
-      setPostContent({ ...postContent, image: target.files[0] });
+      setPost({ ...post, image: target.files[0] });
     }
   }
 
@@ -27,23 +26,25 @@ function ImagePost() {
         className="font-bold outline-none resize-none placeholder:text-gray-600 w-full"
         placeholder="Say something about this image."
         maxLength={450}
+        value={post.content}
         onChange={(e) => handlePostContent(e)}
       />
       <div className="w-full flex justify-center items-center bg-gray-200">
-        {postContent.image ? (
+        {post.image ? (
           <img
             alt="your file"
-            src={URL.createObjectURL(postContent.image)}
+            src={URL.createObjectURL(post.image)}
             className="max-h-64"
           />
         ) : (
           <p>Please select an image.</p>
         )}
       </div>
-      <form className="pt-2">
+      <form className="pt-2" encType="multipart/form-data">
         <input
           type="file"
           onChange={handleImageChange}
+          name="post-image"
           accept="image/png, image/jpeg"
         />
       </form>

@@ -1,9 +1,6 @@
-export type TDefaultPost = {
+export type TPost = {
   content: string;
-  background: string | null;
-};
-
-export type TImagePost = {
-  content: string;
-  image: File | null;
+  background?: string | null;
+  image?: File | null;
+  audience: string;
 };
