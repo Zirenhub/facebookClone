@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { IPost } from '../interfaces/IPost';
+import { ReactionSchema } from '../models/reaction';
 
 const Schema = mongoose.Schema;
 
@@ -10,18 +11,29 @@ const PostSchema = new Schema<IPost>(
       ref: 'Profile',
       required: true,
     },
+    audience: {
+      type: String,
+      required: true,
+    },
     content: {
       type: String,
       required: true,
     },
-    likes: {
-      type: Schema.Types.ObjectId,
-      ref: 'Like',
+    background: {
+      type: String,
+      required: false,
+    },
+    image: {
+      data: Buffer,
+      contentType: String,
+
+      required: false,
     },
     comments: {
       type: Schema.Types.ObjectId,
       ref: 'Comment',
     },
+    reactions: [ReactionSchema],
   },
   { timestamps: true }
 );
