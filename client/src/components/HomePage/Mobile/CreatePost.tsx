@@ -3,8 +3,8 @@ import useAuthContext from '../../../hooks/useAuthContext';
 import Pfp from '../../../assets/pfp-two.svg';
 import Back from '../../../assets/back.svg';
 import Close from '../../../assets/x.svg';
-import DefaultPost from './PostTypes/DefaultPost';
-import ImagePost from './PostTypes/ImagePost';
+import CreateDefaultPost from './CreatePostTypes/CreateDefaultPost';
+import CreateImagePost from './CreatePostTypes/CreateImagePost';
 import { TPost } from '../../../types/Post';
 import { postDefault, postImage } from '../../../api/post';
 
@@ -21,18 +21,16 @@ function CreatePost({ close }: { close: () => void }) {
   const auth = useAuthContext();
 
   async function handleSubmit() {
-    console.log('test');
-
     const { content, image, background, audience } = post;
     try {
-      let res;
       if (postType === 'image' && image) {
-        res = await postImage(content, image, audience);
+        await postImage(content, image, audience);
       } else {
-        res = await postDefault(content, background, audience);
+        await postDefault(content, background, audience);
       }
-      console.log(res);
+      close();
     } catch (err) {
+      // handle errors!
       console.log(err);
     }
   }
@@ -109,7 +107,7 @@ function CreatePost({ close }: { close: () => void }) {
       <div className="flex flex-col p-2">
         {postType === 'default' && (
           <>
-            <DefaultPost post={post} setPost={setPost} />
+            <CreateDefaultPost post={post} setPost={setPost} />
             <div className="pt-2">
               <button
                 type="button"
@@ -124,7 +122,9 @@ function CreatePost({ close }: { close: () => void }) {
             </div>
           </>
         )}
-        {postType === 'image' && <ImagePost post={post} setPost={setPost} />}
+        {postType === 'image' && (
+          <CreateImagePost post={post} setPost={setPost} />
+        )}
       </div>
     </div>
   );
