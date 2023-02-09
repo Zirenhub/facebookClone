@@ -1,3 +1,4 @@
+import { Navigate } from 'react-router-dom';
 import useAuthContext from '../hooks/useAuthContext';
 
 function ProtectedRoute({ children }: { children: JSX.Element }) {
@@ -8,6 +9,7 @@ function ProtectedRoute({ children }: { children: JSX.Element }) {
   }
 
   auth.dispatch({ type: 'LOGOUT' });
+  return <Navigate to="/" replace />;
 }
 
 export default ProtectedRoute;
