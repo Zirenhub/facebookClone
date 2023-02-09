@@ -1,19 +1,35 @@
-import { lazy, Suspense } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Suspense } from 'react';
 import Loading from '../../components/Loading';
-
-const MobileWritePost = lazy(
-  () => import('../../components/HomePage/Mobile/WritePost')
-);
-const MobileAddStory = lazy(
-  () => import('../../components/HomePage/Mobile/AddStory')
-);
+import MobileWritePost from '../../components/HomePage/Mobile/WritePost';
+import MobileAddStory from '../../components/HomePage/Mobile/AddStory';
+import { getPosts } from '../../api/post';
+import { TDBPost } from '../../types/Post';
+import ImagePost from '../../components/HomePage/Mobile/PostTypes/ImagePost';
+import DefaultPost from '../../components/HomePage/Mobile/PostTypes/DefaultPost';
 
 function HomePage() {
+  const { isLoading, isError, data, error } = useQuery<TDBPost[], Error>({
+    queryKey: ['posts'],
+    queryFn: () => getPosts(),
+  });
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
   return (
     <div className="flex flex-col">
       <Suspense fallback={<Loading />}>
         <MobileWritePost />
         <MobileAddStory />
+        {data?.map((post) => {
+          if (post.image) {
+            return <ImagePost data={post} />;
+          }
+          return <DefaultPost data={data} />;
+        })}
+        {isError && <p>{error.message}</p>}
       </Suspense>
     </div>
   );
