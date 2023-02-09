@@ -60,18 +60,10 @@ function AuthContextProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     async function checkLogged() {
-      try {
-        const res = await fetch('/api/v1/auth/me');
-        const resData = await res.json();
-        if (resData.status === 'success') {
-          dispatch({ type: 'LOGIN', payload: resData.data });
-        } else {
-          throw new Error('Unauthorized');
-        }
-      } catch (err: any) {
-        if (err.message === 'Unauthorized') {
-          dispatch({ type: 'LOGOUT' });
-        }
+      const res = await fetch('/api/v1/auth/me');
+      const resData = await res.json();
+      if (resData.status === 'success') {
+        dispatch({ type: 'LOGIN', payload: resData.data });
       }
       dispatch({ type: 'LOADING_FALSE' });
     }

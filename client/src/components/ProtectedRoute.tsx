@@ -1,15 +1,13 @@
-import { Navigate } from 'react-router-dom';
 import useAuthContext from '../hooks/useAuthContext';
 
 function ProtectedRoute({ children }: { children: JSX.Element }) {
   const auth = useAuthContext();
-  console.log(auth.user);
 
   if (auth.user) {
     return children;
   }
 
-  return <Navigate to="/" replace />;
+  auth.dispatch({ type: 'LOGOUT' });
 }
 
 export default ProtectedRoute;
