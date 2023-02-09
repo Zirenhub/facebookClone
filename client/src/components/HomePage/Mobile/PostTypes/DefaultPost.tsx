@@ -47,7 +47,7 @@ function DefaultPost({ post, setPost }: Props) {
 
   function handlePostContent(e: React.SyntheticEvent) {
     const target = e.target as HTMLTextAreaElement;
-    const content = target.value.trim();
+    const content = target.value;
     if (content.length > 250) {
       setPost({
         ...post,

@@ -9,7 +9,7 @@ type Props = {
 function ImagePost({ post, setPost }: Props) {
   function handlePostContent(e: React.SyntheticEvent) {
     const target = e.target as HTMLTextAreaElement;
-    const content = target.value.trim();
+    const content = target.value;
     setPost({ ...post, content });
   }
 
