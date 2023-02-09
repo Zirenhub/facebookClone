@@ -15,6 +15,9 @@ export const createPost = [
     .withMessage("Post length can't be larger than 450 characters"),
   body('type').custom((value, { req }) => {
     if (value === 'image') {
+      if (!req.file) {
+        throw Error('File must be included.');
+      }
       const { mimetype, size } = req.file;
 
       // Array of allowed files
@@ -43,15 +46,22 @@ export const createPost = [
       }
       return true;
     } else if (value === 'default') {
-      const { background } = req.body;
-      if (background) {
-        const { content } = req.body;
-        if (content.length > 250) {
-          throw Error('Post content is too big for a background.');
-        }
+      const { background, content } = req.body;
+      if (
+        background !== 'post-bg-one' &&
+        background !== 'post-bg-two' &&
+        background !== 'post-bg-three' &&
+        background !== 'post-bg-four' &&
+        background !== null
+      ) {
+        throw Error('Post background is not valid.');
+      }
+      if (background && content.length > 250) {
+        throw Error('Post content is too big for a background.');
       }
       return true;
     }
+    throw Error('Post is invalid.');
   }),
   body('audience')
     .trim()
@@ -71,22 +81,37 @@ export const createPost = [
         .json({ status: 'error', errors: errors.array(), message: null });
     }
     const author: Types.ObjectId = req.user._id;
-    const { content, audience, background, image, type } = req.body;
-
-    if (type === 'default') {
-      // save default post.
-    } else if (type === 'image') {
-      const image = req.file;
-      console.log(content, image);
-    }
+    const { content, audience, background, type } = req.body;
 
     try {
-      // todo
-    } catch (err) {
-      res.status(400).json({
+      let newPost;
+      if (type === 'image' && req.file) {
+        const { buffer, mimetype } = req.file;
+        newPost = new PostModel({
+          author,
+          audience,
+          content,
+          image: {
+            data: buffer,
+            contentType: mimetype,
+          },
+        });
+      } else {
+        newPost = new PostModel({
+          author,
+          audience,
+          content,
+          background,
+        });
+      }
+
+      await newPost.save();
+      return res.json({ status: 'success', data: newPost, message: null });
+    } catch (err: any) {
+      res.status(500).json({
         status: 'error',
-        errors: err,
-        message: null,
+        errors: null,
+        message: err.message,
       });
     }
   },
