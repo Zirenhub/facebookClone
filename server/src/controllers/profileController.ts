@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import { IUserRequest } from '../middleware/jwtAuth';
 import ProfileModel from '../models/profile';
 import FriendModel from '../models/friend';
+import getFriendsIds from '../utils/getFriendsIds';
 
 export const getProfile = async (req: IUserRequest, res: Response) => {
   const id = req.params.id;
@@ -241,28 +242,10 @@ export const rejectRequest = async (req: IUserRequest, res: Response) => {
 
 export const getFriends = async (req: IUserRequest, res: Response) => {
   try {
-    const relationships = await FriendModel.find({
-      $and: [
-        {
-          $or: [{ profile: req.user._id }, { friend: req.user._id }],
-        },
-        { status: 'Accepted' },
-      ],
-    });
-
-    const friends = relationships.map((relationship) => {
-      // if im the one that accepted the request,
-      // give me the request profile id,
-      // otherwise give me the id of the profile that accepted the request.
-      return relationship.profile.toString() === req.user._id.toString()
-        ? relationship.friend
-        : relationship.profile;
-    });
-
+    const friends = await getFriendsIds(req.user._id);
     const populatedFriends = await ProfileModel.find({
       _id: { $in: friends },
     });
-
     return res.json({
       status: 'success',
       data: populatedFriends,
