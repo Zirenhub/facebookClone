@@ -1,30 +1,30 @@
-import { ImagePost, DefaultPost } from '../types/Post';
+import { TDBPost } from '../types/Post';
 
-type Errors = {
+type ValidationError = {
   location: string;
   msg: string;
   param: string;
   value: string;
 };
 
-type ImagePostRes = {
+type PostRes = {
   status: 'success' | 'error';
-  data?: ImagePost;
-  errors?: Errors[] | null;
+  data?: TDBPost;
+  errors?: ValidationError[] | null;
   message: string | null;
 };
 
-type DefaultPostRes = {
+type TimelinePosts = {
   status: 'success' | 'error';
-  data?: DefaultPost;
-  errors?: Errors[] | null;
+  data?: TDBPost[];
+  errors?: null;
   message: string | null;
 };
 
 function getFinal(
   status: 'success' | 'error',
   data: any,
-  errors: Errors[] | null | undefined,
+  errors: ValidationError[] | null | undefined,
   message: string | null
 ) {
   if (status === 'success' && data) {
@@ -44,7 +44,7 @@ export async function postImage(
   content: string,
   image: File,
   audience: string
-): Promise<ImagePost> {
+): Promise<TDBPost> {
   const formData = new FormData();
   formData.append('content', content);
   formData.append('audience', audience);
@@ -54,7 +54,7 @@ export async function postImage(
     method: 'POST',
     body: formData,
   });
-  const { status, data, errors, message }: ImagePostRes = await res.json();
+  const { status, data, errors, message }: PostRes = await res.json();
   return getFinal(status, data, errors, message);
 }
 
@@ -62,12 +62,18 @@ export async function postDefault(
   content: string,
   background: string | null,
   audience: string
-): Promise<DefaultPost> {
+): Promise<TDBPost> {
   const res = await fetch('/api/v1/post', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ content, background, audience, type: 'default' }),
   });
-  const { status, data, errors, message }: DefaultPostRes = await res.json();
+  const { status, data, errors, message }: PostRes = await res.json();
+  return getFinal(status, data, errors, message);
+}
+
+export async function getPosts(): Promise<TDBPost[]> {
+  const res = await fetch('/api/v1/timeline');
+  const { status, data, errors, message }: TimelinePosts = await res.json();
   return getFinal(status, data, errors, message);
 }
