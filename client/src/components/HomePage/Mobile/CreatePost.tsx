@@ -6,12 +6,14 @@ import Close from '../../../assets/x.svg';
 import DefaultPost from './PostTypes/DefaultPost';
 import ImagePost from './PostTypes/ImagePost';
 import { TPost } from '../../../types/Post';
-import { postImage } from '../../../api/post';
+import { postDefault, postImage } from '../../../api/post';
 
 function CreatePost({ close }: { close: () => void }) {
   const [postType, setPostType] = useState<'default' | 'image'>('default');
   const [post, setPost] = useState<TPost>({
     content: '',
+    background: null,
+    image: null,
     audience: 'friends',
   });
   const [canSendPost, setCanSendPost] = useState<boolean>(false);
@@ -19,18 +21,19 @@ function CreatePost({ close }: { close: () => void }) {
   const auth = useAuthContext();
 
   async function handleSubmit() {
+    console.log('test');
+
     const { content, image, background, audience } = post;
-
-    if (!content || (postType !== 'default' && postType !== 'image')) {
-      return;
-    }
-
-    if (postType === 'image') {
-      if (image) {
-        await postImage(content, image, audience);
+    try {
+      let res;
+      if (postType === 'image' && image) {
+        res = await postImage(content, image, audience);
+      } else {
+        res = await postDefault(content, background, audience);
       }
-    } else {
-      console.log('send default post');
+      console.log(res);
+    } catch (err) {
+      console.log(err);
     }
   }
 
@@ -40,15 +43,18 @@ function CreatePost({ close }: { close: () => void }) {
   }
 
   useEffect(() => {
+    const { image } = post;
+    const content = post.content.trim();
+
     if (postType === 'image') {
-      if (post.content && post.image) {
+      if (content && image) {
         setCanSendPost(true);
         return;
       }
       setCanSendPost(false);
       return;
     }
-    if (post.content) {
+    if (content) {
       setCanSendPost(true);
     } else {
       setCanSendPost(false);
