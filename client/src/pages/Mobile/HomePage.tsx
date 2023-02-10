@@ -24,10 +24,17 @@ function HomePage() {
         <MobileWritePost />
         <MobileAddStory />
         {data?.map((post) => {
-          if (post.image) {
-            return <ImagePost data={post} />;
-          }
-          return <DefaultPost data={data} />;
+          console.log(post);
+
+          return (
+            <div key={post._id}>
+              {post.image ? (
+                <ImagePost data={post} />
+              ) : (
+                <DefaultPost data={post} />
+              )}
+            </div>
+          );
         })}
         {isError && <p>{error.message}</p>}
       </Suspense>
