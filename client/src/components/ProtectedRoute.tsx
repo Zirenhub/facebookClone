@@ -8,7 +8,6 @@ function ProtectedRoute({ children }: { children: JSX.Element }) {
     return children;
   }
 
-  auth.dispatch({ type: 'LOGOUT' });
   return <Navigate to="/" replace />;
 }
 

@@ -38,6 +38,11 @@ type TAction =
   | { type: 'LOGOUT' }
   | { type: 'LOADING_FALSE' };
 
+type Res = {
+  status: 'success' | 'error';
+  data: TUser;
+};
+
 function AuthReducer(state: IState, action: TAction) {
   switch (action.type) {
     case 'LOGIN':
@@ -59,16 +64,33 @@ function AuthContextProvider({ children }: { children: ReactNode }) {
   });
 
   useEffect(() => {
-    async function checkLogged() {
-      const res = await fetch('/api/v1/auth/me');
-      const resData = await res.json();
-      if (resData.status === 'success') {
-        dispatch({ type: 'LOGIN', payload: resData.data });
+    async function init() {
+      async function checkLogged() {
+        const res = await fetch('/api/v1/auth/me');
+        const { data, status }: Res = await res.json();
+        if (status === 'success') {
+          dispatch({ type: 'LOGIN', payload: data });
+          return data.exp;
+        }
+        return null;
       }
-      dispatch({ type: 'LOADING_FALSE' });
+      try {
+        const exp = await checkLogged();
+        if (exp) {
+          const expDate = new Date(exp * 1000);
+          const difference = expDate.getTime() - new Date().getTime();
+
+          setTimeout(() => {
+            dispatch({ type: 'LOGOUT' });
+          }, difference);
+        }
+        dispatch({ type: 'LOADING_FALSE' });
+      } catch (err) {
+        console.log(err);
+      }
     }
 
-    checkLogged();
+    init();
   }, []);
 
   const ProviderValue = useMemo(() => ({ ...state, dispatch }), [state]);
