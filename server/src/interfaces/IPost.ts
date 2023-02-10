@@ -6,10 +6,7 @@ export interface IPost {
   audience: string;
   content: string;
   background: string;
-  image: {
-    data: Buffer;
-    contentType: String;
-  };
+  image: string;
   comments: Types.ObjectId;
   reactions: Types.DocumentArray<IReaction>;
 }
