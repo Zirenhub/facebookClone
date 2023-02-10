@@ -24,9 +24,7 @@ const PostSchema = new Schema<IPost>(
       required: false,
     },
     image: {
-      data: Buffer,
-      contentType: String,
-
+      type: String,
       required: false,
     },
     comments: {

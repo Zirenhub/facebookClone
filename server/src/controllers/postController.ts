@@ -5,6 +5,22 @@ import { IUserRequest } from '../middleware/jwtAuth';
 import PostModel from '../models/post';
 import path from 'path';
 
+import dotenv from 'dotenv';
+dotenv.config();
+
+const cloudinary = require('cloudinary').v2;
+
+const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } =
+  process.env;
+
+if (CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDINARY_API_SECRET) {
+  cloudinary.config({
+    cloud_name: CLOUDINARY_CLOUD_NAME,
+    api_key: CLOUDINARY_API_KEY,
+    api_secret: CLOUDINARY_API_SECRET,
+  });
+}
+
 export const createPost = [
   body('content')
     .trim()
@@ -85,16 +101,15 @@ export const createPost = [
 
     try {
       let newPost;
-      if (type === 'image' && req.file) {
-        const { buffer, mimetype } = req.file;
+      if (type === 'image' && req['file']) {
+        const imagePath = req['file'].path;
+        const image = await cloudinary.uploader.upload(imagePath);
+
         newPost = new PostModel({
           author,
           audience,
           content,
-          image: {
-            data: buffer,
-            contentType: mimetype,
-          },
+          image: image.url,
         });
       } else {
         newPost = new PostModel({
