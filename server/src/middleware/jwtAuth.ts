@@ -11,12 +11,12 @@ const jwtAuth = (req: IUserRequest, res: Response, next: NextFunction) => {
     const user = jwt.verify(token, process.env.JWT_SECRET!);
     req.user = user;
     next();
-  } catch (err) {
+  } catch (err: any) {
     res.clearCookie('token');
     res.status(401).json({
       status: 'error',
-      errors: [{ msg: 'Unauthorized' }],
-      message: null,
+      errors: null,
+      message: err.message,
     });
   }
 };
