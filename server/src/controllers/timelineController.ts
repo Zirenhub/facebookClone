@@ -9,21 +9,10 @@ export const getTimeline = async (req: IUserRequest, res: Response) => {
     const populatedPosts = await PostModel.find({
       author: { $in: friends },
     });
-    const formatedPosts = populatedPosts.map((post) => {
-      if (post.image) {
-        return {
-          ...post,
-          image: post.image.data.toBase64(),
-        };
-      } else {
-        return {
-          ...post,
-        };
-      }
-    });
+
     return res.json({
       status: 'success',
-      data: formatedPosts,
+      data: populatedPosts,
       message: null,
     });
   } catch (err: any) {
