@@ -21,6 +21,7 @@ function CreatePost({ close }: { close: () => void }) {
   const auth = useAuthContext();
 
   async function handleSubmit() {
+    if (!canSendPost) return;
     const { content, image, background, audience } = post;
     try {
       if (postType === 'image' && image) {
@@ -50,11 +51,11 @@ function CreatePost({ close }: { close: () => void }) {
         return;
       }
       setCanSendPost(false);
-      return;
-    }
-    if (content) {
-      setCanSendPost(true);
     } else {
+      if (content) {
+        setCanSendPost(true);
+        return;
+      }
       setCanSendPost(false);
     }
   }, [post, postType]);
