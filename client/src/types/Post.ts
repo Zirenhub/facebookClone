@@ -8,13 +8,21 @@ export type TPost = {
 export type TDBPost = {
   __v: string;
   _id: string;
-  author: string;
+  author: {
+    birthday: string;
+    createdAt: string;
+    updatedAt: string;
+    __v: string;
+    _id: string;
+    firstName: string;
+    lastName: string;
+    fullName: string;
+    gender: string;
+    customGender?: string;
+  };
   audience: string;
   content: string;
-  image?: {
-    data: BufferType;
-    contentType: string;
-  };
+  image?: string;
   background?: string | null;
   reactions: [];
   createdAt: string;
