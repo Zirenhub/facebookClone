@@ -98,7 +98,7 @@ function CreatePost({ close }: { close: () => void }) {
           <select
             value={post.audience}
             onChange={handlePostAudience}
-            className="bg-white font-bold"
+            className="bg-white font-bold border-2 rounded-md px-2 py-1"
           >
             <option value="public">Public</option>
             <option value="friends">Friends</option>
