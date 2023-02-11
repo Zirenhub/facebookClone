@@ -8,7 +8,7 @@ export const getTimeline = async (req: IUserRequest, res: Response) => {
     const friends = await getFriendsIds(req.user._id);
     const populatedPosts = await PostModel.find({
       author: { $in: friends },
-    });
+    }).populate('author');
 
     return res.json({
       status: 'success',
