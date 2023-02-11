@@ -19,25 +19,26 @@ function HomePage() {
   }
 
   return (
-    <div className="flex flex-col">
-      <Suspense fallback={<Loading />}>
-        <MobileWritePost />
-        <MobileAddStory />
-        {data?.map((post) => {
-          console.log(post);
-
-          return (
-            <div key={post._id}>
-              {post.image ? (
-                <ImagePost data={post} />
-              ) : (
-                <DefaultPost data={post} />
-              )}
+    <div className="p-2">
+      <MobileWritePost />
+      <MobileAddStory />
+      {data?.map((post) => {
+        return (
+          <div key={post._id} className="mt-2 border-b-4 border-slate-400">
+            {post.image ? (
+              <ImagePost data={post} />
+            ) : (
+              <DefaultPost data={post} />
+            )}
+            <div className="flex justify-between text-gray-600 font-bold px-4 mt-1 py-1 border-t-2">
+              <button type="button">Like</button>
+              <button type="button">Comment</button>
+              <button type="button">Share</button>
             </div>
-          );
-        })}
-        {isError && <p>{error.message}</p>}
-      </Suspense>
+          </div>
+        );
+      })}
+      {isError && <p>{error.message}</p>}
     </div>
   );
 }
