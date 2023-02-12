@@ -24,7 +24,11 @@ export type TDBPost = {
   content: string;
   image?: string;
   background?: string | null;
-  reactions: [];
+  reactions: {
+    author: string;
+    type: 'like' | 'heart' | 'laugh';
+    _id: string;
+  }[];
   createdAt: string;
   updatedAt: string;
 };
