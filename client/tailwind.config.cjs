@@ -29,7 +29,7 @@ module.exports = {
         '8xl': '6.132rem',
       },
       fontFamily: {
-        ubuntu: ['Ubuntu'],
+        poppins: ['Poppins'],
       },
       width: {
         pfp: '48px',
