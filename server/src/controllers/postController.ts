@@ -6,14 +6,22 @@ import PostModel from '../models/post';
 import path from 'path';
 
 import dotenv from 'dotenv';
+import { ReactionModel } from '../models/reaction';
 dotenv.config();
 
 const cloudinary = require('cloudinary').v2;
 
-const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } =
-  process.env;
+const {
+  CLOUDINARY_CLOUD_NAME,
+  CLOUDINARY_API_KEY,
+  CLOUDINARY_API_SECRET,
+} = process.env;
 
-if (CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDINARY_API_SECRET) {
+if (
+  CLOUDINARY_CLOUD_NAME &&
+  CLOUDINARY_API_KEY &&
+  CLOUDINARY_API_SECRET
+) {
   cloudinary.config({
     cloud_name: CLOUDINARY_CLOUD_NAME,
     api_key: CLOUDINARY_API_KEY,
@@ -46,7 +54,9 @@ export const createPost = [
       // Allowed file size in mb
       const allowed_file_size = 2;
       // Get the extension of the uploaded file
-      const extension = path.extname(req.file.originalname).toLocaleLowerCase();
+      const extension = path
+        .extname(req.file.originalname)
+        .toLocaleLowerCase();
       // Check if the uploaded file is allowed
       if (
         !array_of_allowed_files.includes(
@@ -92,9 +102,11 @@ export const createPost = [
   async (req: IUserRequest, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res
-        .status(400)
-        .json({ status: 'error', errors: errors.array(), message: null });
+      return res.status(400).json({
+        status: 'error',
+        errors: errors.array(),
+        message: null,
+      });
     }
     const author: Types.ObjectId = req.user._id;
     const { content, audience, background, type } = req.body;
@@ -121,7 +133,11 @@ export const createPost = [
       }
 
       await newPost.save();
-      return res.json({ status: 'success', data: newPost, message: null });
+      return res.json({
+        status: 'success',
+        data: newPost,
+        message: null,
+      });
     } catch (err: any) {
       res.status(500).json({
         status: 'error',
@@ -140,10 +156,91 @@ export const getPost = async (req: IUserRequest, res: Response) => {
     // get likes
     // respond with post including comments and likes
   } else {
-    res.status(400).json({
+    return res.status(400).json({
       status: 'error',
-      errors: [{ msg: 'Invalid Post' }],
+      errors: null,
+      message: 'Post was not found.',
+    });
+  }
+};
+
+export const likePost = async (req: IUserRequest, res: Response) => {
+  try {
+    const id = req.params.id;
+    const post = await PostModel.findById(id);
+    if (!post) {
+      return res.status(400).json({
+        status: 'error',
+        errors: null,
+        message: 'Post was not found.',
+      });
+    }
+    const alreadyLiked = post.reactions.some((reaction) => {
+      return reaction.author.toString() === req.user._id;
+    });
+    if (alreadyLiked) {
+      return res.status(400).json({
+        status: 'error',
+        errors: null,
+        message: 'Post is already liked.',
+      });
+    }
+    const reaction = new ReactionModel({
+      author: req.user._id,
+      type: 'like',
+    });
+    post.reactions.push(reaction);
+    await post.save();
+    return res.json({
+      status: 'success',
+      data: post,
       message: null,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      status: 'error',
+      errors: null,
+      message: err.message,
+    });
+  }
+};
+
+export const unlikePost = async (
+  req: IUserRequest,
+  res: Response
+) => {
+  try {
+    const id = req.params.id;
+    const post = await PostModel.findById(id);
+    if (!post) {
+      return res.status(400).json({
+        status: 'error',
+        errors: null,
+        message: 'Post was not found.',
+      });
+    }
+    const reaction = post.reactions.find(
+      (reaction) => reaction.author.toString() === req.user._id
+    );
+    if (!reaction) {
+      return res.status(400).json({
+        status: 'error',
+        errors: null,
+        message: 'Like was not found.',
+      });
+    }
+    post.reactions.remove(reaction._id);
+    await post.save();
+    return res.json({
+      status: 'success',
+      data: null,
+      message: null,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      status: 'error',
+      errors: null,
+      message: err.message,
     });
   }
 };
