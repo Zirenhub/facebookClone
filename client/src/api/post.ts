@@ -77,3 +77,16 @@ export async function getPosts(): Promise<TDBPost[]> {
   const { status, data, errors, message }: TimelinePosts = await res.json();
   return getFinal(status, data, errors, message);
 }
+
+export async function likePost(postID: string) {
+  const res = await fetch(`/api/v1/post/${postID}/like`, { method: 'POST' });
+  console.log(await res.json());
+
+  // const { status, data, errors, message } = await res.json();
+  // return getFinal(status, data, errors, message);
+}
+
+export async function unlikePost(postID: string) {
+  const res = await fetch(`/api/v1/post/${postID}/unlike`, { method: 'POST' });
+  console.log(await res.json());
+}
