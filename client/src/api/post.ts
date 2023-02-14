@@ -27,7 +27,7 @@ function getFinal(
   errors: ValidationError[] | null | undefined,
   message: string | null
 ) {
-  if (status === 'success' && data) {
+  if (status === 'success') {
     return data;
   }
   if (status === 'error' && message) {
@@ -78,15 +78,23 @@ export async function getPosts(): Promise<TDBPost[]> {
   return getFinal(status, data, errors, message);
 }
 
-export async function likePost(postID: string) {
-  const res = await fetch(`/api/v1/post/${postID}/like`, { method: 'POST' });
-  console.log(await res.json());
-
-  // const { status, data, errors, message } = await res.json();
-  // return getFinal(status, data, errors, message);
+export async function postReact(
+  postID: string,
+  reaction: 'laugh' | 'heart' | 'like'
+) {
+  const res = await fetch(`/api/v1/post/${postID}/like`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ reaction }),
+  });
+  const { status, data, errors, message } = await res.json();
+  return getFinal(status, data, errors, message);
 }
 
-export async function unlikePost(postID: string) {
-  const res = await fetch(`/api/v1/post/${postID}/unlike`, { method: 'POST' });
-  console.log(await res.json());
+export async function removePostReact(postID: string) {
+  const res = await fetch(`/api/v1/post/${postID}/unlike`, {
+    method: 'POST',
+  });
+  const { status, data, errors, message } = await res.json();
+  return getFinal(status, data, errors, message);
 }
