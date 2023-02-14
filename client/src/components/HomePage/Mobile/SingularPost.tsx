@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useLongPress, LongPressDetectEvents } from 'use-long-press';
 import { TDBPost } from '../../../types/Post';
 import ImagePost from './PostTypes/ImagePost';
@@ -6,7 +6,7 @@ import DefaultPost from './PostTypes/DefaultPost';
 import Like from '../../../assets/like.svg';
 import Comment from '../../../assets/comment.svg';
 import Share from '../../../assets/share.svg';
-import { likePost, unlikePost } from '../../../api/post';
+import { postReact, removePostReact } from '../../../api/post';
 import Reactions from '../../Reactions';
 
 /* eslint react/jsx-props-no-spreading: 0 */
@@ -18,29 +18,11 @@ function SingularPost({
   post: TDBPost;
   userID: string | undefined;
 }) {
-  const [isLiked, setIsLiked] = useState<boolean>(false);
   const [reactionsMenu, setReactionsMenu] = useState<boolean>(false);
-  const [selectedReaction, setSelectedReaction] = useState<
-    'laugh' | 'heart' | 'like' | null
-  >(null);
+  const [reaction, setReaction] = useState<'laugh' | 'heart' | 'like' | null>(
+    null
+  );
 
-  let canLike = true;
-
-  async function postLikeUnlike(postID: string) {
-    canLike = false;
-    try {
-      if (!isLiked) {
-        await likePost(postID);
-        setIsLiked(true);
-      } else {
-        await unlikePost(postID);
-        setIsLiked(false);
-      }
-      canLike = true;
-    } catch (err) {
-      console.log(err);
-    }
-  }
   function handleCommentPost() {}
   function handleSharePost() {}
 
@@ -51,27 +33,33 @@ function SingularPost({
     {
       onStart: () => console.log('Press started'),
       onFinish: () => console.log('Press finished'),
-      onCancel: () => {
+      onCancel: async () => {
         if (setReactionsMenu) setReactionsMenu(false);
-        if (canLike) {
-          postLikeUnlike(post._id);
+        try {
+          if (reaction) {
+            await removePostReact(post._id);
+            setReaction(null);
+          } else {
+            await postReact(post._id, 'like');
+            setReaction('like');
+          }
+        } catch (err) {
+          console.log(err);
         }
       },
-      // onMove: () => console.log("Detected mouse or touch movement"),
-      threshold: 1000,
-      captureEvent: true,
+      threshold: 700,
       cancelOnMovement: false,
       detect: LongPressDetectEvents.TOUCH,
     }
   );
 
-  useEffect(() => {
-    const like = post.reactions.some((reaction) => {
-      return reaction.author === userID;
-    });
+  // useEffect(() => {
+  //   const like = post.reactions.some((reaction) => {
+  //     return reaction.author === userID;
+  //   });
 
-    setIsLiked(like);
-  }, [post, userID]);
+  //   setHasReacted(like);
+  // }, [post, userID]);
 
   return (
     <>
@@ -80,14 +68,14 @@ function SingularPost({
         {reactionsMenu && (
           <Reactions
             close={() => setReactionsMenu(false)}
-            setReaction={setSelectedReaction}
+            setReaction={setReaction}
           />
         )}
         <button type="button" {...bind()} className="flex items-center gap-1">
           <Like
             height="20px"
             width="20px"
-            fill={`${isLiked ? '#3b82f6' : 'none'}`}
+            fill={`${reaction ? '#3b82f6' : 'none'}`}
           />
           Like
         </button>
