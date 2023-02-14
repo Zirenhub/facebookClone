@@ -6,7 +6,6 @@ import PostModel from '../models/post';
 import path from 'path';
 
 import dotenv from 'dotenv';
-import { ReactionModel } from '../models/reaction';
 dotenv.config();
 
 const cloudinary = require('cloudinary').v2;
@@ -73,13 +72,14 @@ export const createPost = [
       return true;
     } else if (value === 'default') {
       const { background, content } = req.body;
-      if (
-        background !== 'post-bg-one' &&
-        background !== 'post-bg-two' &&
-        background !== 'post-bg-three' &&
-        background !== 'post-bg-four' &&
-        background !== null
-      ) {
+      const backgrounds = [
+        'post-bg-one',
+        'post-bg-two',
+        'post-bg-three',
+        'post-bg-four',
+        null,
+      ];
+      if (!backgrounds.includes(background)) {
         throw Error('Post background is not valid.');
       }
       if (background && content.length > 250) {
@@ -94,7 +94,8 @@ export const createPost = [
     .escape()
     .notEmpty()
     .custom((value) => {
-      if (value !== 'friends' && value !== 'public') {
+      const audiences = ['friends', 'public'];
+      if (!audiences.includes(value)) {
         throw Error('Post audience has to be friends or public.');
       }
       return true;
@@ -164,46 +165,63 @@ export const getPost = async (req: IUserRequest, res: Response) => {
   }
 };
 
-export const likePost = async (req: IUserRequest, res: Response) => {
-  try {
-    const id = req.params.id;
-    const post = await PostModel.findById(id);
-    if (!post) {
-      return res.status(400).json({
+export const likePost = [
+  body('reaction').custom((value) => {
+    const reactions = ['laugh', 'heart', 'like'];
+    if (!reactions.includes(value)) {
+      throw Error('Reaction value is not valid.');
+    }
+    return true;
+  }),
+
+  async (req: IUserRequest, res: Response) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          status: 'error',
+          errors: errors.array(),
+          message: null,
+        });
+      }
+
+      const id = req.params.id;
+      const reaction = req.body.reaction;
+      const post = await PostModel.findById(id);
+      if (!post) {
+        return res.status(400).json({
+          status: 'error',
+          errors: null,
+          message: 'Post was not found.',
+        });
+      }
+      const alreadyLiked = post.reactions.some((reaction) => {
+        return reaction.author.toString() === req.user._id;
+      });
+      if (alreadyLiked) {
+        return res.status(400).json({
+          status: 'error',
+          errors: null,
+          message: 'Post is already liked.',
+        });
+      }
+
+      post.reactions.push({ author: req.user._id, type: reaction });
+      await post.save();
+      return res.json({
+        status: 'success',
+        data: post,
+        message: null,
+      });
+    } catch (err: any) {
+      res.status(500).json({
         status: 'error',
         errors: null,
-        message: 'Post was not found.',
+        message: err.message,
       });
     }
-    const alreadyLiked = post.reactions.some((reaction) => {
-      return reaction.author.toString() === req.user._id;
-    });
-    if (alreadyLiked) {
-      return res.status(400).json({
-        status: 'error',
-        errors: null,
-        message: 'Post is already liked.',
-      });
-    }
-    const reaction = new ReactionModel({
-      author: req.user._id,
-      type: 'like',
-    });
-    post.reactions.push(reaction);
-    await post.save();
-    return res.json({
-      status: 'success',
-      data: post,
-      message: null,
-    });
-  } catch (err: any) {
-    res.status(500).json({
-      status: 'error',
-      errors: null,
-      message: err.message,
-    });
-  }
-};
+  },
+];
 
 export const unlikePost = async (
   req: IUserRequest,

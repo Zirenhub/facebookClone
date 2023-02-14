@@ -4,6 +4,8 @@ import { TDBPost } from '../../../types/Post';
 import ImagePost from './PostTypes/ImagePost';
 import DefaultPost from './PostTypes/DefaultPost';
 import Like from '../../../assets/like.svg';
+import LaughingReaction from '../../../assets/laughing-reaction.gif';
+import HeartReaction from '../../../assets/heart-reaction.gif';
 import Comment from '../../../assets/comment.svg';
 import Share from '../../../assets/share.svg';
 import { postReact, removePostReact } from '../../../api/post';
@@ -31,8 +33,6 @@ function SingularPost({
       setReactionsMenu(!reactionsMenu);
     },
     {
-      onStart: () => console.log('Press started'),
-      onFinish: () => console.log('Press finished'),
       onCancel: async () => {
         if (setReactionsMenu) setReactionsMenu(false);
         try {
@@ -53,6 +53,37 @@ function SingularPost({
     }
   );
 
+  function getReaction(reactionParam: 'laugh' | 'heart' | 'like') {
+    if (reactionParam === 'like') {
+      return (
+        <Like
+          height="20px"
+          width="20px"
+          fill={`${reaction ? '#3b82f6' : 'none'}`}
+        />
+      );
+    }
+    if (reactionParam === 'heart') {
+      return (
+        <img
+          src={HeartReaction}
+          alt="heart reaction"
+          className="h-12 w-12 bg-contain"
+        />
+      );
+    }
+    if (reactionParam === 'laugh') {
+      return (
+        <img
+          src={LaughingReaction}
+          alt="laughing reaction"
+          className="bg-contain h-12 w-12 "
+        />
+      );
+    }
+    return null;
+  }
+
   // useEffect(() => {
   //   const like = post.reactions.some((reaction) => {
   //     return reaction.author === userID;
@@ -69,14 +100,11 @@ function SingularPost({
           <Reactions
             close={() => setReactionsMenu(false)}
             setReaction={setReaction}
+            postID={post._id}
           />
         )}
         <button type="button" {...bind()} className="flex items-center gap-1">
-          <Like
-            height="20px"
-            width="20px"
-            fill={`${reaction ? '#3b82f6' : 'none'}`}
-          />
+          {getReaction(reaction)}
           Like
         </button>
         <button
