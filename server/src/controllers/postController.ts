@@ -195,22 +195,19 @@ export const likePost = [
           message: 'Post was not found.',
         });
       }
-      const alreadyLiked = post.reactions.some((reaction) => {
+      const hasReacted = post.reactions.find((reaction) => {
         return reaction.author.toString() === req.user._id;
       });
-      if (alreadyLiked) {
-        return res.status(400).json({
-          status: 'error',
-          errors: null,
-          message: 'Post is already liked.',
-        });
+      if (hasReacted) {
+        hasReacted.type = reaction;
+      } else {
+        post.reactions.push({ author: req.user._id, type: reaction });
       }
 
-      post.reactions.push({ author: req.user._id, type: reaction });
       await post.save();
       return res.json({
         status: 'success',
-        data: post,
+        data: null,
         message: null,
       });
     } catch (err: any) {
