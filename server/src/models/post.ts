@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 import { IPost } from '../interfaces/IPost';
-import { ReactionSchema } from '../models/reaction';
 
 const Schema = mongoose.Schema;
 
@@ -31,10 +30,25 @@ const PostSchema = new Schema<IPost>(
       type: Schema.Types.ObjectId,
       ref: 'Comment',
     },
-    reactions: [ReactionSchema],
+    reactions: [
+      {
+        author: {
+          type: Schema.Types.ObjectId,
+          ref: 'Profile',
+          required: true,
+        },
+        type: {
+          type: String,
+          enum: ['like', 'heart', 'laugh'],
+          required: true,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );
+
+PostSchema.index({ author: 1 });
 
 const PostModel = mongoose.model<IPost>('Post', PostSchema);
 
