@@ -5,11 +5,8 @@ import MobileAddStory from '../../components/HomePage/Mobile/AddStory';
 import { getPosts } from '../../api/post';
 import { TDBPost } from '../../types/Post';
 import SingularPost from '../../components/HomePage/Mobile/SingularPost';
-import useAuthContext from '../../hooks/useAuthContext';
 
 function HomePage() {
-  const auth = useAuthContext();
-
   const { isLoading, isError, data, error } = useQuery<TDBPost[], Error>({
     queryKey: ['posts'],
     queryFn: () => getPosts(),
@@ -26,13 +23,22 @@ function HomePage() {
       <MobileAddStory />
       {data && (
         <div>
-          {data.map((post) => {
-            return (
-              <div key={post._id} className="mt-2 border-b-4 border-slate-400">
-                <SingularPost post={post} userID={auth.user?._id} />
-              </div>
-            );
-          })}
+          {data
+            .sort(
+              (a, b) =>
+                new Date(b.createdAt).valueOf() -
+                new Date(a.createdAt).valueOf()
+            )
+            .map((post) => {
+              return (
+                <div
+                  key={post._id}
+                  className="mt-2 border-b-4 border-slate-400"
+                >
+                  <SingularPost post={post} />
+                </div>
+              );
+            })}
         </div>
       )}
       {isError && <p>{error.message}</p>}
