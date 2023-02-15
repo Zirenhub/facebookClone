@@ -3,16 +3,19 @@ import { IUserRequest } from '../middleware/jwtAuth';
 import PostModel from '../models/post';
 import getFriendsIds from '../utils/getFriendsIds';
 
-export const getTimeline = async (req: IUserRequest, res: Response) => {
+export const getTimeline = async (
+  req: IUserRequest,
+  res: Response
+) => {
   try {
     const friends = await getFriendsIds(req.user._id);
-    const populatedPosts = await PostModel.find({
-      author: { $in: friends },
+    const posts = await PostModel.find({
+      $or: [{ author: { $in: friends } }, { author: req.user._id }],
     }).populate('author');
 
     return res.json({
       status: 'success',
-      data: populatedPosts,
+      data: posts,
       message: null,
     });
   } catch (err: any) {
