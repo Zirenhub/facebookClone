@@ -1,9 +1,22 @@
 export type TPost = {
   content: string;
-  background: string | null;
+  background:
+    | 'post-bg-one'
+    | 'post-bg-two'
+    | 'post-bg-three'
+    | 'post-bg-four'
+    | null;
   image: File | null;
-  audience: string;
+  audience: 'friends' | 'public';
 };
+
+export type ReactionTypes = 'like' | 'laugh' | 'heart';
+
+export type Reactions = {
+  author: string;
+  type: ReactionTypes;
+  _id: string;
+}[];
 
 export type TDBPost = {
   __v: string;
@@ -24,11 +37,7 @@ export type TDBPost = {
   content: string;
   image?: string;
   background?: string | null;
-  reactions: {
-    author: string;
-    type: 'like' | 'heart' | 'laugh';
-    _id: string;
-  }[];
+  reactions: Reactions;
   createdAt: string;
   updatedAt: string;
 };
