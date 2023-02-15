@@ -1,129 +1,113 @@
-import { useState } from 'react';
-import { useLongPress, LongPressDetectEvents } from 'use-long-press';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import moment from 'moment';
 import { TDBPost } from '../../../types/Post';
-import ImagePost from './PostTypes/ImagePost';
-import DefaultPost from './PostTypes/DefaultPost';
 import Like from '../../../assets/like.svg';
-import LaughingReaction from '../../../assets/laughing-reaction.gif';
-import HeartReaction from '../../../assets/heart-reaction.gif';
-import Comment from '../../../assets/comment.svg';
-import Share from '../../../assets/share.svg';
-import { postReact, removePostReact } from '../../../api/post';
-import Reactions from '../../Reactions';
+import Pfp from '../../../assets/pfp-two.svg';
+import postBackgrounds from '../../PostBackgrounds';
+import PostFooter from './Post/PostFooter';
 
-/* eslint react/jsx-props-no-spreading: 0 */
+type PostReactions = {
+  reactionsAmount: {
+    like: number;
+    laugh: number;
+    heart: number;
+  };
+  commentsAmount: number;
+};
 
-function SingularPost({
-  post,
-  userID,
-}: {
-  post: TDBPost;
-  userID: string | undefined;
-}) {
-  const [reactionsMenu, setReactionsMenu] = useState<boolean>(false);
-  const [reaction, setReaction] = useState<'laugh' | 'heart' | 'like' | null>(
-    null
-  );
+function SingularPost({ post }: { post: TDBPost }) {
+  const [postReactions, setPostReactions] = useState<PostReactions>({
+    reactionsAmount: { like: 0, laugh: 0, heart: 0 },
+    commentsAmount: 0,
+  });
+  const [postDate, setPostDate] = useState<string | null>(null);
 
-  function handleCommentPost() {}
-  function handleSharePost() {}
+  const navigate = useNavigate();
 
-  const bind = useLongPress(
-    () => {
-      setReactionsMenu(!reactionsMenu);
-    },
-    {
-      onCancel: async () => {
-        if (setReactionsMenu) setReactionsMenu(false);
-        try {
-          if (reaction) {
-            await removePostReact(post._id);
-            setReaction(null);
-          } else {
-            await postReact(post._id, 'like');
-            setReaction('like');
-          }
-        } catch (err) {
-          console.log(err);
-        }
-      },
-      threshold: 700,
-      cancelOnMovement: false,
-      detect: LongPressDetectEvents.TOUCH,
-    }
-  );
-
-  function getReaction(reactionParam: 'laugh' | 'heart' | 'like') {
-    if (reactionParam === 'like') {
+  function getPostStyle() {
+    if (post.image) {
       return (
-        <Like
-          height="20px"
-          width="20px"
-          fill={`${reaction ? '#3b82f6' : 'none'}`}
-        />
+        <div>
+          <p>{post.content}</p>
+          <img alt="post" src={post.image} />
+        </div>
       );
     }
-    if (reactionParam === 'heart') {
+    if (post.background) {
+      const background = postBackgrounds.find(
+        (b) => b.name === post.background
+      );
       return (
-        <img
-          src={HeartReaction}
-          alt="heart reaction"
-          className="h-12 w-12 bg-contain"
-        />
+        <div className="relative mt-3">
+          <img alt={background?.desc} src={background?.src} />
+          <div className="absolute top-2/4 left-2/4 -translate-y-2/4 -translate-x-2/4 w-full text-center">
+            <p className="text-white">{post.content}</p>
+          </div>
+        </div>
       );
     }
-    if (reactionParam === 'laugh') {
-      return (
-        <img
-          src={LaughingReaction}
-          alt="laughing reaction"
-          className="bg-contain h-12 w-12 "
-        />
-      );
-    }
-    return null;
+    return <p className="text-xl">{post.content}</p>;
   }
 
-  // useEffect(() => {
-  //   const like = post.reactions.some((reaction) => {
-  //     return reaction.author === userID;
-  //   });
+  function navigateProfile() {
+    navigate(`/${post.author._id}`);
+  }
 
-  //   setHasReacted(like);
-  // }, [post, userID]);
+  useEffect(() => {
+    const reactions = {
+      laugh: 0,
+      heart: 0,
+      like: 0,
+    };
+
+    post.reactions.forEach((r) => {
+      if (r.type === 'laugh') {
+        reactions.laugh += 1;
+      } else if (r.type === 'heart') {
+        reactions.heart += 1;
+      } else {
+        reactions.like += 1;
+      }
+    });
+
+    const { laugh, heart, like } = reactions;
+
+    setPostReactions({
+      reactionsAmount: { laugh, heart, like },
+      commentsAmount: 0,
+    });
+
+    setPostDate(moment(new Date(post.createdAt)).format('MMM Do, YYYY'));
+  }, [post]);
 
   return (
     <>
-      {post.image ? <ImagePost data={post} /> : <DefaultPost data={post} />}
-      <div className="flex justify-between items-center text-gray-600 px-4 mt-1 py-1 border-t-2 relative">
-        {reactionsMenu && (
-          <Reactions
-            close={() => setReactionsMenu(false)}
-            setReaction={setReaction}
-            postID={post._id}
-          />
-        )}
-        <button type="button" {...bind()} className="flex items-center gap-1">
-          {getReaction(reaction)}
-          Like
+      <div className="flex gap-2">
+        <button type="button" onClick={navigateProfile} className="w-12 h-12">
+          <Pfp height="100%" width="100%" />
         </button>
-        <button
-          type="button"
-          onClick={handleCommentPost}
-          className="flex items-center gap-1"
+        <div
+          className="flex flex-col"
+          onClick={navigateProfile}
+          onKeyDown={navigateProfile}
+          role="button"
+          tabIndex={0}
         >
-          <Comment height="25px" width="25px" />
-          Comment
-        </button>
-        <button
-          type="button"
-          onClick={handleSharePost}
-          className="flex items-center gap-1"
-        >
-          <Share height="20px" width="20px" />
-          Share
-        </button>
+          <p className="font-bold">{post.author.fullName}</p>
+          <p>{postDate}</p>
+        </div>
       </div>
+      {getPostStyle()}
+      <div className="flex items-center">
+        <Like fill="rgb(6 165 250)" />
+        <p>
+          {postReactions.reactionsAmount.like +
+            postReactions.reactionsAmount.heart +
+            postReactions.reactionsAmount.laugh}
+        </p>
+      </div>
+      <PostFooter postID={post._id} postReactions={post.reactions} />
     </>
   );
 }
