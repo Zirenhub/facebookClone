@@ -31,6 +31,12 @@ module.exports = {
       fontFamily: {
         poppins: ['Poppins'],
       },
+      backgroundImage: {
+        'post-bg-one': "url('../public/assets/post-bg-one.jpg')",
+        'post-bg-two': "url('../public/assets/post-bg-two.jpg')",
+        'post-bg-three': "url('../public/assets/post-bg-three.jpg')",
+        'post-bg-four': "url('../public/assets/post-bg-four.jpg')",
+      },
       width: {
         pfp: '48px',
       },
