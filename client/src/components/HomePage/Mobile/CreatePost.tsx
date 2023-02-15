@@ -38,7 +38,9 @@ function CreatePost({ close }: { close: () => void }) {
 
   function handlePostAudience(e: React.SyntheticEvent) {
     const target = e.target as HTMLSelectElement;
-    setPost({ ...post, audience: target.value });
+    if (target.value === 'friends' || target.value === 'public') {
+      setPost({ ...post, audience: target.value });
+    }
   }
 
   useEffect(() => {
@@ -89,43 +91,45 @@ function CreatePost({ close }: { close: () => void }) {
           </button>
         </div>
       </header>
-      <div className="flex gap-2 p-2">
-        <div className="h-12 w-12">
-          <Pfp height="100%" width="100%" />
+      <div className="p-2">
+        <div className="flex gap-2 mb-3">
+          <div className="h-12 w-12">
+            <Pfp height="100%" width="100%" />
+          </div>
+          <div className="flex flex-col">
+            <p>{auth.user?.fullName}</p>
+            <select
+              value={post.audience}
+              onChange={handlePostAudience}
+              className="bg-white font-bold border-2 rounded-md px-2 py-1"
+            >
+              <option value="public">Public</option>
+              <option value="friends">Friends</option>
+            </select>
+          </div>
         </div>
         <div className="flex flex-col">
-          <p>{auth.user?.fullName}</p>
-          <select
-            value={post.audience}
-            onChange={handlePostAudience}
-            className="bg-white font-bold border-2 rounded-md px-2 py-1"
-          >
-            <option value="public">Public</option>
-            <option value="friends">Friends</option>
-          </select>
+          {postType === 'default' && (
+            <>
+              <CreateDefaultPost post={post} setPost={setPost} />
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPostType('image');
+                    setCanSendPost(false);
+                  }}
+                  className="bg-gray-200 rounded-md px-2 py-1"
+                >
+                  Add image
+                </button>
+              </div>
+            </>
+          )}
+          {postType === 'image' && (
+            <CreateImagePost post={post} setPost={setPost} />
+          )}
         </div>
-      </div>
-      <div className="flex flex-col p-2">
-        {postType === 'default' && (
-          <>
-            <CreateDefaultPost post={post} setPost={setPost} />
-            <div className="pt-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setPostType('image');
-                  setCanSendPost(false);
-                }}
-                className="bg-gray-200 rounded-md px-2 py-1"
-              >
-                Add image
-              </button>
-            </div>
-          </>
-        )}
-        {postType === 'image' && (
-          <CreateImagePost post={post} setPost={setPost} />
-        )}
       </div>
     </div>
   );
