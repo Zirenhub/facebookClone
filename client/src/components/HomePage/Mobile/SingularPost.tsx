@@ -55,29 +55,6 @@ function SingularPost({ post }: { post: TDBPost }) {
   }
 
   useEffect(() => {
-    const reactions = {
-      laugh: 0,
-      heart: 0,
-      like: 0,
-    };
-
-    post.reactions.forEach((r) => {
-      if (r.type === 'laugh') {
-        reactions.laugh += 1;
-      } else if (r.type === 'heart') {
-        reactions.heart += 1;
-      } else {
-        reactions.like += 1;
-      }
-    });
-
-    const { laugh, heart, like } = reactions;
-
-    setPostReactions({
-      reactionsAmount: { laugh, heart, like },
-      commentsAmount: 0,
-    });
-
     setPostDate(moment(new Date(post.createdAt)).format('MMM Do, YYYY'));
   }, [post]);
 
@@ -99,14 +76,6 @@ function SingularPost({ post }: { post: TDBPost }) {
         </div>
       </div>
       {getPostStyle()}
-      <div className="flex items-center">
-        <Like fill="rgb(6 165 250)" />
-        <p>
-          {postReactions.reactionsAmount.like +
-            postReactions.reactionsAmount.heart +
-            postReactions.reactionsAmount.laugh}
-        </p>
-      </div>
       <PostFooter postID={post._id} postReactions={post.reactions} />
     </>
   );

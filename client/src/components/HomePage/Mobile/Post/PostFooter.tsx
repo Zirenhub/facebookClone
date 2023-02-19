@@ -19,13 +19,33 @@ type Props = {
 function PostFooter({ postID, postReactions }: Props) {
   const [reactionsMenu, setReactionsMenu] = useState<boolean>(false);
   const [reaction, setReaction] = useState<ReactionTypes | null>(null);
+  const [reactionsDetail, setReactionsDetail] = useState({
+    reactionsInfo: { like: 0, heart: 0, laugh: 0 },
+    commentsNum: 0,
+  });
 
   const auth = useAuthContext();
+
+  function increaseDecreaseReactions(r: ReactionTypes, operation: '+' | '-') {
+    setReactionsDetail({
+      ...reactionsDetail,
+      reactionsInfo: {
+        ...reactionsDetail.reactionsInfo,
+        [r]:
+          operation === '+'
+            ? (reactionsDetail.reactionsInfo[r] += 1)
+            : (reactionsDetail.reactionsInfo[r] -= 1),
+      },
+    });
+  }
 
   async function handleReaction(r: ReactionTypes) {
     try {
       await postReact(postID, r);
       setReaction(r);
+      if (!reaction) {
+        increaseDecreaseReactions(r, '+');
+      }
     } catch (err) {
       console.log(err);
     }
@@ -42,9 +62,11 @@ function PostFooter({ postID, postReactions }: Props) {
           if (reaction) {
             await removePostReact(postID);
             setReaction(null);
+            increaseDecreaseReactions(reaction, '-');
           } else {
             await postReact(postID, 'like');
             setReaction('like');
+            increaseDecreaseReactions('like', '+');
           }
         } catch (err) {
           console.log(err);
@@ -117,45 +139,68 @@ function PostFooter({ postID, postReactions }: Props) {
     if (myReaction) {
       setReaction(myReaction.type);
     }
+
+    const laughs = postReactions.filter((r) => r.type === 'laugh');
+    const likes = postReactions.filter((r) => r.type === 'like');
+    const hearts = postReactions.filter((r) => r.type === 'heart');
+
+    setReactionsDetail({
+      reactionsInfo: {
+        laugh: laughs.length,
+        heart: hearts.length,
+        like: likes.length,
+      },
+      commentsNum: 0,
+    });
   }, [postReactions, auth]);
 
   return (
-    <div className="flex relative h-12 items-center justify-between text-gray-600 px-4 mt-1 py-1 border-t-2">
-      {reactionsMenu && (
-        <div className="bg-white rounded-md flex absolute -top-12 left-10">
-          <button type="button" onTouchStart={() => handleReaction('laugh')}>
-            <img
-              src={LaughingReaction}
-              alt="laughing reaction"
-              className="bg-contain h-12 w-12 "
-            />
-          </button>
-          <button type="button" onTouchStart={() => handleReaction('heart')}>
-            <img
-              src={HeartReaction}
-              alt="heart reaction"
-              className="h-12 w-12 bg-contain"
-            />
-          </button>
-          <button type="button" onTouchStart={() => handleReaction('like')}>
-            <img
-              src={LikeReaction}
-              alt="like reaction"
-              className="h-12 w-12 bg-contain"
-            />
-          </button>
-        </div>
-      )}
-      {getReactionButton()}
-      <button type="button" className="flex items-center">
-        <Comment height="30px" width="30px" />
-        Comment
-      </button>
-      <button type="button" className="flex items-center">
-        <Share height="30px" width="30px" />
-        Share
-      </button>
-    </div>
+    <>
+      <div className="flex items-center">
+        <Like fill="rgb(6 165 250)" />
+        <p>
+          {reactionsDetail.reactionsInfo.like +
+            reactionsDetail.reactionsInfo.heart +
+            reactionsDetail.reactionsInfo.laugh}
+        </p>
+      </div>
+      <div className="flex relative h-12 items-center justify-between text-gray-600 px-4 mt-1 py-1 border-t-2">
+        {reactionsMenu && (
+          <div className="bg-white rounded-md flex absolute -top-12 left-10">
+            <button type="button" onTouchStart={() => handleReaction('laugh')}>
+              <img
+                src={LaughingReaction}
+                alt="laughing reaction"
+                className="bg-contain h-12 w-12 "
+              />
+            </button>
+            <button type="button" onTouchStart={() => handleReaction('heart')}>
+              <img
+                src={HeartReaction}
+                alt="heart reaction"
+                className="h-12 w-12 bg-contain"
+              />
+            </button>
+            <button type="button" onTouchStart={() => handleReaction('like')}>
+              <img
+                src={LikeReaction}
+                alt="like reaction"
+                className="h-12 w-12 bg-contain"
+              />
+            </button>
+          </div>
+        )}
+        {getReactionButton()}
+        <button type="button" className="flex items-center">
+          <Comment height="30px" width="30px" />
+          Comment
+        </button>
+        <button type="button" className="flex items-center">
+          <Share height="30px" width="30px" />
+          Share
+        </button>
+      </div>
+    </>
   );
 }
 
