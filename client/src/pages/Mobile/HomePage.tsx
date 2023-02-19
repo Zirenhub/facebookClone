@@ -37,26 +37,18 @@ function HomePage() {
     <div className="p-2">
       <MobileWritePost setPosts={setPosts} posts={posts} />
       <MobileAddStory />
-      {posts && (
-        <div>
-          {posts
-            .sort(
-              (a, b) =>
-                new Date(b.createdAt).valueOf() -
-                new Date(a.createdAt).valueOf()
-            )
-            .map((post) => {
-              return (
-                <div
-                  key={post._id}
-                  className="mt-2 border-b-4 border-slate-400"
-                >
-                  <SingularPost post={post} deletePost={mutationDeletePost} />
-                </div>
-              );
-            })}
-        </div>
-      )}
+      {posts
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt).valueOf() - new Date(a.createdAt).valueOf()
+        )
+        .map((post) => {
+          return (
+            <div key={post._id} className="mt-2 border-b-4 border-slate-400">
+              <SingularPost post={post} deletePost={mutationDeletePost} />
+            </div>
+          );
+        })}
       {isError && <p>{error.message}</p>}
     </div>
   );
