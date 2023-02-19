@@ -5,10 +5,16 @@ import Back from '../../../assets/back.svg';
 import Close from '../../../assets/x.svg';
 import CreateDefaultPost from './CreatePostTypes/CreateDefaultPost';
 import CreateImagePost from './CreatePostTypes/CreateImagePost';
-import { TPost } from '../../../types/Post';
+import { TDBPost, TPost } from '../../../types/Post';
 import { postDefault, postImage } from '../../../api/post';
 
-function CreatePost({ close }: { close: () => void }) {
+type Props = {
+  close: () => void;
+  setPosts: React.Dispatch<React.SetStateAction<TDBPost[]>>;
+  posts: TDBPost[];
+};
+
+function CreatePost({ close, setPosts, posts }: Props) {
   const [postType, setPostType] = useState<'default' | 'image'>('default');
   const [post, setPost] = useState<TPost>({
     content: '',
@@ -24,14 +30,15 @@ function CreatePost({ close }: { close: () => void }) {
     if (!canSendPost) return;
     const { content, image, background, audience } = post;
     try {
+      let res;
       if (postType === 'image' && image) {
-        await postImage(content, image, audience);
+        res = await postImage(content, image, audience);
       } else {
-        await postDefault(content, background, audience);
+        res = await postDefault(content, background, audience);
       }
+      setPosts([...posts, res]);
       close();
     } catch (err) {
-      // handle errors!
       console.log(err);
     }
   }
