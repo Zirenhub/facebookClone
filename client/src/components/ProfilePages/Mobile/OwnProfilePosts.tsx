@@ -1,18 +1,43 @@
-import { lazy, Suspense, useState } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
+import { deletePost } from '../../../api/post';
+import { getProfilePosts } from '../../../api/profile';
 import Pfp from '../../../assets/pfp-two.svg';
 import Pictures from '../../../assets/pictures.svg';
-import Loading from '../../Loading';
+import { TDBPost } from '../../../types/Post';
+import CreatePostModal from '../../HomePage/Mobile/CreatePost';
+import SingularPost from '../../HomePage/Mobile/SingularPost';
 
-const CreatePostModal = lazy(() => import('../../HomePage/Mobile/CreatePost'));
-
-function OwnProfilePosts() {
+function OwnProfilePosts({ id }: { id: string }) {
+  const [posts, setPosts] = useState<TDBPost[]>([]);
   const [openCreatePost, setOpenCreatePost] = useState<boolean>(false);
+
+  const { isLoading, isError, data, error } = useQuery<TDBPost[], Error>({
+    queryKey: ['posts', id],
+    queryFn: () => getProfilePosts(id),
+    refetchOnWindowFocus: false,
+  });
+
+  const mutationDeletePost = useMutation({
+    mutationFn: (postID: string) => {
+      return deletePost(postID);
+    },
+    onSuccess(successData, variables, context) {
+      setPosts(posts.filter((post) => post._id !== variables));
+    },
+  });
+
+  useEffect(() => {
+    if (data) setPosts(data);
+  }, [data]);
 
   if (openCreatePost) {
     return (
-      <Suspense fallback={<Loading />}>
-        <CreatePostModal close={() => setOpenCreatePost(false)} />
-      </Suspense>
+      <CreatePostModal
+        close={() => setOpenCreatePost(false)}
+        posts={posts}
+        setPosts={setPosts}
+      />
     );
   }
 
@@ -57,6 +82,26 @@ function OwnProfilePosts() {
           </div>
         </div>
       </div>
+      {posts && (
+        <div>
+          {posts
+            .sort(
+              (a, b) =>
+                new Date(b.createdAt).valueOf() -
+                new Date(a.createdAt).valueOf()
+            )
+            .map((post) => {
+              return (
+                <div
+                  key={post._id}
+                  className="mt-2 border-b-4 border-slate-400"
+                >
+                  <SingularPost post={post} deletePost={mutationDeletePost} />
+                </div>
+              );
+            })}
+        </div>
+      )}
     </div>
   );
 }
