@@ -10,7 +10,7 @@ import useAuthContext from '../../../hooks/useAuthContext';
 
 type Props = {
   post: TDBPost;
-  deletePost: UseMutationResult<any, unknown, string, unknown>;
+  deletePost?: UseMutationResult<any, unknown, string, unknown>;
 };
 
 function SingularPost({ post, deletePost }: Props) {
@@ -85,7 +85,9 @@ function SingularPost({ post, deletePost }: Props) {
           <div className="bg-gray-200 rounded-md px-3 py-2 absolute right-2 top-12 z-10 flex flex-col">
             <button
               type="button"
-              onClick={() => deletePost.mutate(post._id)}
+              onClick={() => {
+                if (deletePost) deletePost.mutate(post._id);
+              }}
               className="border-b-2"
             >
               Delete
@@ -99,5 +101,9 @@ function SingularPost({ post, deletePost }: Props) {
     </>
   );
 }
+
+SingularPost.defaultProps = {
+  deletePost: null,
+};
 
 export default SingularPost;
