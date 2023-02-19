@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import moment from 'moment';
 import { UseMutationResult } from '@tanstack/react-query';
@@ -7,6 +7,7 @@ import Pfp from '../../../assets/pfp-two.svg';
 import postBackgrounds from '../../PostBackgrounds';
 import PostFooter from './Post/PostFooter';
 import useAuthContext from '../../../hooks/useAuthContext';
+import FullPost from '../../FullPost';
 
 type Props = {
   post: TDBPost;
@@ -16,6 +17,7 @@ type Props = {
 function SingularPost({ post, deletePost }: Props) {
   const [postDate, setPostDate] = useState<string | null>(null);
   const [settingsMenu, setSettingsMenu] = useState<boolean>(false);
+  const [openPost, setOpenPost] = useState<boolean>(false);
 
   const auth = useAuthContext();
 
@@ -46,28 +48,43 @@ function SingularPost({ post, deletePost }: Props) {
     return <p className="text-xl">{post.content}</p>;
   }
 
-  function navigateProfile() {
+  function navigateProfile(e: React.SyntheticEvent) {
+    e.stopPropagation();
     navigate(`/${post.author._id}`);
+  }
+
+  function handleOpenPost() {
+    setOpenPost(true);
   }
 
   useEffect(() => {
     setPostDate(moment(new Date(post.createdAt)).format('MMM Do, YYYY'));
   }, [post]);
 
+  if (openPost) {
+    return <FullPost data={post} close={() => setOpenPost(false)} />;
+  }
+
   return (
     <>
-      <div className="flex justify-between relative">
-        <div className="flex gap-3">
-          <button type="button" onClick={navigateProfile} className="w-12 h-12">
+      <div
+        onClick={handleOpenPost}
+        onKeyDown={handleOpenPost}
+        role="button"
+        tabIndex={0}
+        className="flex justify-between relative"
+      >
+        <div
+          onClick={navigateProfile}
+          onKeyDown={navigateProfile}
+          role="button"
+          tabIndex={0}
+          className="flex gap-3"
+        >
+          <div className="w-12 h-12">
             <Pfp height="100%" width="100%" />
-          </button>
-          <div
-            className="flex flex-col"
-            onClick={navigateProfile}
-            onKeyDown={navigateProfile}
-            role="button"
-            tabIndex={0}
-          >
+          </div>
+          <div className="flex flex-col">
             <p className="font-bold">{post.author.fullName}</p>
             <p>{postDate}</p>
           </div>
@@ -75,14 +92,17 @@ function SingularPost({ post, deletePost }: Props) {
         {auth.user?._id === post.author._id && (
           <button
             type="button"
-            onClick={() => setSettingsMenu(!settingsMenu)}
+            onClick={(e: React.SyntheticEvent) => {
+              e.stopPropagation();
+              setSettingsMenu(!settingsMenu);
+            }}
             className="text-3xl h-fit"
           >
             ...
           </button>
         )}
         {settingsMenu && (
-          <div className="bg-gray-200 rounded-md px-3 py-2 absolute right-2 top-12 z-10 flex flex-col">
+          <div className="bg-gray-200 font-bold rounded-md px-3 py-2 absolute right-2 top-12 z-10 flex flex-col">
             <button
               type="button"
               onClick={() => {
