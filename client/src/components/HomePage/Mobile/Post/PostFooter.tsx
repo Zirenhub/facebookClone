@@ -132,6 +132,11 @@ function PostFooter({ postID, postReactions }: Props) {
   useEffect(() => {
     const mainEl = document.querySelector('main');
     mainEl?.addEventListener('click', () => setReactionsMenu(false));
+
+    // on mobile after a long tap on reaction button, prevent context menu popup.
+    window.oncontextmenu = (e) => {
+      e.preventDefault();
+    };
   }, []);
 
   useEffect(() => {
