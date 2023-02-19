@@ -37,7 +37,7 @@ function ProfilePage({ isMobile }: { isMobile: boolean }) {
   }
 
   // return isMobile ? <StrangerProfile data={data} /> : '';
-  return <StrangerProfile data={data} />;
+  return <StrangerProfile profileData={data} />;
 }
 
 export default ProfilePage;

@@ -1,56 +1,59 @@
+import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import {
   acceptRequest,
+  getProfilePosts,
   rejectRequest,
   sendRequest,
 } from '../../../api/profile';
 import useAuthContext from '../../../hooks/useAuthContext';
+import { TDBPost } from '../../../types/Post';
 import { TProfile, TProfileFriend } from '../../../types/Profile';
+import SingularPost from '../../HomePage/Mobile/SingularPost';
 import Popup from '../../Popup';
 import ProfileHeader from './ProfileHeader';
 
-function StangerProfile({ data }: { data: TProfile }) {
-  const [currentPage, setCurrentPage] = useState<string>('Posts');
+type TPages = 'Posts' | 'About' | 'Photos' | 'Videos' | 'Mentions';
+
+function StangerProfile({ profileData }: { profileData: TProfile }) {
+  const [currentPage, setCurrentPage] = useState<TPages>('Posts');
   const [requestError, setRequestError] = useState<string | null>(null);
   const [friendStatus, setFriendStatus] = useState<TProfileFriend | null>(null);
 
-  const pages = ['Posts', 'About', 'Photos', 'Videos', 'Mentions'];
+  const pages: readonly ['Posts', 'About', 'Photos', 'Videos', 'Mentions'] = [
+    'Posts',
+    'About',
+    'Photos',
+    'Videos',
+    'Mentions',
+  ];
   const auth = useAuthContext();
 
-  async function handleRequest() {
+  const { isLoading, isError, data, error } = useQuery<TDBPost[], Error>({
+    queryKey: ['posts', profileData._id],
+    queryFn: () => getProfilePosts(profileData._id),
+    refetchOnWindowFocus: false,
+  });
+
+  async function handleRequest(status: 'send' | 'accept' | 'cancel') {
     try {
-      const res = await sendRequest(data._id);
+      let res = null;
+      if (status === 'send') {
+        res = await sendRequest(profileData._id);
+      } else if (status === 'accept' && friendStatus) {
+        res = await acceptRequest(friendStatus._id);
+      } else if (status === 'cancel' && friendStatus) {
+        res = await rejectRequest(friendStatus._id);
+      }
       setFriendStatus(res);
     } catch (err: any) {
       setRequestError(err.message);
     }
   }
 
-  async function handleAcceptRequest() {
-    if (friendStatus) {
-      try {
-        const res = await acceptRequest(friendStatus._id);
-        setFriendStatus(res);
-      } catch (err: any) {
-        setRequestError(err.message);
-      }
-    }
-  }
-
-  async function handleCancelRequest() {
-    if (friendStatus) {
-      try {
-        await rejectRequest(friendStatus._id);
-        setFriendStatus(null);
-      } catch (err: any) {
-        setRequestError(err.message);
-      }
-    }
-  }
-
   useEffect(() => {
-    setFriendStatus(data.friendStatus);
-  }, [data]);
+    setFriendStatus(profileData.friendStatus);
+  }, [profileData]);
 
   function getRequestButton() {
     if (friendStatus) {
@@ -59,7 +62,7 @@ function StangerProfile({ data }: { data: TProfile }) {
           <button
             type="button"
             className="bg-red-500 text-white font-bold py-1 rounded-md grow"
-            onClick={handleCancelRequest}
+            onClick={() => handleRequest('cancel')}
           >
             Unfriend
           </button>
@@ -73,7 +76,7 @@ function StangerProfile({ data }: { data: TProfile }) {
           <button
             type="button"
             className="bg-red-500 text-white font-bold py-1 rounded-md grow"
-            onClick={handleCancelRequest}
+            onClick={() => handleRequest('cancel')}
           >
             Cancel Request
           </button>
@@ -84,7 +87,7 @@ function StangerProfile({ data }: { data: TProfile }) {
         <button
           type="button"
           className="bg-green-500 text-white font-bold py-1 rounded-md grow"
-          onClick={handleAcceptRequest}
+          onClick={() => handleRequest('accept')}
         >
           Accept Friend Request
         </button>
@@ -94,7 +97,7 @@ function StangerProfile({ data }: { data: TProfile }) {
       <button
         type="button"
         className="bg-blue-500 text-white font-bold py-1 rounded-md grow"
-        onClick={handleRequest}
+        onClick={() => handleRequest('send')}
       >
         Add Friend
       </button>
@@ -103,7 +106,7 @@ function StangerProfile({ data }: { data: TProfile }) {
 
   return (
     <div>
-      <ProfileHeader fullName={data.fullName} />
+      <ProfileHeader fullName={profileData.fullName} />
       {requestError && (
         <Popup msg={requestError} close={() => setRequestError(null)} />
       )}
@@ -133,6 +136,26 @@ function StangerProfile({ data }: { data: TProfile }) {
           );
         })}
       </div>
+      {currentPage === 'Posts' && data && (
+        <div className="p-2">
+          {data
+            .sort(
+              (a, b) =>
+                new Date(b.createdAt).valueOf() -
+                new Date(a.createdAt).valueOf()
+            )
+            .map((post) => {
+              return (
+                <div
+                  key={post._id}
+                  className="mt-2 border-b-4 border-slate-400"
+                >
+                  <SingularPost post={post} />
+                </div>
+              );
+            })}
+        </div>
+      )}
     </div>
   );
 }
