@@ -53,7 +53,7 @@ function OwnProfile({ data }: { data: TProfile }) {
           </button>
         </div>
       </div>
-      {currentPage === 'Posts' && <OwnProfilePosts />}
+      {currentPage === 'Posts' && <OwnProfilePosts id={data._id} />}
     </>
   );
 }
