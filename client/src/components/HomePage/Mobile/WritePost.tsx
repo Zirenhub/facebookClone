@@ -1,13 +1,25 @@
 import { useState } from 'react';
 import Pfp from '../../../assets/pfp-two.svg';
 import Pictures from '../../../assets/pictures.svg';
+import { TDBPost } from '../../../types/Post';
 import CreatePostModal from './CreatePost';
 
-function WritePost() {
+type Props = {
+  setPosts: React.Dispatch<React.SetStateAction<TDBPost[]>>;
+  posts: TDBPost[];
+};
+
+function WritePost({ setPosts, posts }: Props) {
   const [openCreatePost, setOpenCreatePost] = useState<boolean>(false);
 
   if (openCreatePost) {
-    return <CreatePostModal close={() => setOpenCreatePost(false)} />;
+    return (
+      <CreatePostModal
+        close={() => setOpenCreatePost(false)}
+        setPosts={setPosts}
+        posts={posts}
+      />
+    );
   }
 
   return (
