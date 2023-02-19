@@ -259,3 +259,39 @@ export const unlikePost = async (
     });
   }
 };
+
+export const deletePost = async (
+  req: IUserRequest,
+  res: Response
+) => {
+  try {
+    const id = req.params.id;
+    const post = await PostModel.findById(id);
+    if (!post) {
+      return res.status(400).json({
+        status: 'error',
+        errors: null,
+        message: 'Post was not found.',
+      });
+    }
+    if (post.author.toString() != req.user._id) {
+      return res.status(403).json({
+        status: 'error',
+        errors: null,
+        message: 'You are not authorized to delete this post.',
+      });
+    }
+    await post.remove();
+    return res.json({
+      status: 'success',
+      data: null,
+      message: null,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      status: 'error',
+      errors: null,
+      message: err.message,
+    });
+  }
+};
