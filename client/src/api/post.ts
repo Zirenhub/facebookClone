@@ -1,44 +1,11 @@
+import {
+  CreatePostRes,
+  EmptyRes,
+  PostsRes,
+  ReactToPostRes,
+} from '../types/Api';
 import { TDBPost } from '../types/Post';
-
-type ValidationError = {
-  location: string;
-  msg: string;
-  param: string;
-  value: string;
-};
-
-type PostRes = {
-  status: 'success' | 'error';
-  data?: TDBPost;
-  errors?: ValidationError[] | null;
-  message: string | null;
-};
-
-type TimelinePosts = {
-  status: 'success' | 'error';
-  data?: TDBPost[];
-  errors?: null;
-  message: string | null;
-};
-
-function getFinal(
-  status: 'success' | 'error',
-  data: any,
-  errors: ValidationError[] | null | undefined,
-  message: string | null
-) {
-  if (status === 'success') {
-    return data;
-  }
-  if (status === 'error' && message) {
-    return Promise.reject(new Error(message));
-  }
-  if (errors) {
-    const errorsString = new Error(errors.map((e) => e.msg).join('\n'));
-    return Promise.reject(errorsString);
-  }
-  return Promise.reject(new Error('Something went wrong'));
-}
+import getFinal from './getError';
 
 export async function postImage(
   content: string,
@@ -54,7 +21,7 @@ export async function postImage(
     method: 'POST',
     body: formData,
   });
-  const { status, data, errors, message }: PostRes = await res.json();
+  const { status, data, errors, message }: CreatePostRes = await res.json();
   return getFinal(status, data, errors, message);
 }
 
@@ -68,13 +35,19 @@ export async function postDefault(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ content, background, audience, type: 'default' }),
   });
-  const { status, data, errors, message }: PostRes = await res.json();
+  const { status, data, errors, message }: CreatePostRes = await res.json();
   return getFinal(status, data, errors, message);
 }
 
 export async function getPosts(): Promise<TDBPost[]> {
   const res = await fetch('/api/v1/timeline');
-  const { status, data, errors, message }: TimelinePosts = await res.json();
+  const { status, data, errors, message }: PostsRes = await res.json();
+  return getFinal(status, data, errors, message);
+}
+
+export async function deletePost(postID: string) {
+  const res = await fetch(`/api/v1/post/${postID}/delete`, { method: 'POST' });
+  const { status, data, errors, message }: EmptyRes = await res.json();
   return getFinal(status, data, errors, message);
 }
 
@@ -87,7 +60,7 @@ export async function postReact(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ reaction }),
   });
-  const { status, data, errors, message } = await res.json();
+  const { status, data, errors, message }: ReactToPostRes = await res.json();
   return getFinal(status, data, errors, message);
 }
 
@@ -95,6 +68,6 @@ export async function removePostReact(postID: string) {
   const res = await fetch(`/api/v1/post/${postID}/unlike`, {
     method: 'POST',
   });
-  const { status, data, errors, message } = await res.json();
+  const { status, data, errors, message }: EmptyRes = await res.json();
   return getFinal(status, data, errors, message);
 }
