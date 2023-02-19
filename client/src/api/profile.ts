@@ -1,65 +1,58 @@
-function getError(data: any) {
-  return data.message ? data.message : data.errors.message;
-}
+import {
+  EmptyRes,
+  GetFriendsRes,
+  GetProfilePostsRes,
+  GetProfileRes,
+  GetRequestsRes,
+  SendRequestRes,
+} from '../types/Api';
+import { TProfile, TProfileWithoutFullName } from '../types/Profile';
+import { DefaultReq, TRequest } from '../types/Request';
+import getFinal from './getError';
 
-export async function getProfile(id: string) {
+export async function getProfile(id: string): Promise<TProfile> {
   const res = await fetch(`/api/v1/profile/${id}`);
-  const resData = await res.json();
-  if (resData.status === 'success') {
-    return resData.data;
-  }
-  throw new Error(getError(resData));
+  const { status, data, errors, message }: GetProfileRes = await res.json();
+  return getFinal(status, data, errors, message);
 }
 
-export async function sendRequest(id: string) {
+export async function getProfilePosts(id: string) {
+  const res = await fetch(`/api/v1/profile/${id}/posts`);
+  const { status, data, errors, message }: GetProfilePostsRes =
+    await res.json();
+  return getFinal(status, data, errors, message);
+}
+
+export async function sendRequest(id: string): Promise<DefaultReq> {
   const res = await fetch(`/api/v1/profile/${id}/request`, { method: 'POST' });
-  const resData = await res.json();
-  if (resData.status === 'success') {
-    return resData.data;
-  }
-  throw new Error(getError(resData));
+  const { status, data, errors, message }: SendRequestRes = await res.json();
+  return getFinal(status, data, errors, message);
 }
 
-export async function getRequests() {
+export async function getRequests(): Promise<TRequest[]> {
   const res = await fetch(`/api/v1/profile/requests`);
-  const resData = await res.json();
-  if (resData.status === 'success') {
-    return resData.data;
-  }
-
-  throw new Error(getError(resData));
+  const { status, data, errors, message }: GetRequestsRes = await res.json();
+  return getFinal(status, data, errors, message);
 }
 
-export async function acceptRequest(reqID: string) {
+export async function acceptRequest(reqID: string): Promise<DefaultReq> {
   const res = await fetch(`/api/v1/profile/${reqID}/accept`, {
     method: 'POST',
   });
-  const resData = await res.json();
-  if (resData.status === 'success') {
-    return resData.data;
-  }
-
-  throw new Error(getError(resData));
+  const { status, data, errors, message }: SendRequestRes = await res.json();
+  return getFinal(status, data, errors, message);
 }
 
 export async function rejectRequest(reqID: string) {
   const res = await fetch(`/api/v1/profile/${reqID}/reject`, {
     method: 'POST',
   });
-  const resData = await res.json();
-  if (resData.status === 'success') {
-    return resData.data;
-  }
-
-  throw new Error(getError(resData));
+  const { status, data, errors, message }: EmptyRes = await res.json();
+  return getFinal(status, data, errors, message);
 }
 
-export async function getFriends() {
+export async function getFriends(): Promise<TProfileWithoutFullName> {
   const res = await fetch('/api/v1/profile/friends');
-  const resData = await res.json();
-  if (resData.status === 'success') {
-    return resData.data;
-  }
-
-  throw new Error(getError(resData));
+  const { status, data, errors, message }: GetFriendsRes = await res.json();
+  return getFinal(status, data, errors, message);
 }
