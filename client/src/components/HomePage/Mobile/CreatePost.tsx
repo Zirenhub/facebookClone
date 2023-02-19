@@ -23,6 +23,7 @@ function CreatePost({ close, setPosts, posts }: Props) {
     audience: 'friends',
   });
   const [canSendPost, setCanSendPost] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   const auth = useAuthContext();
 
@@ -38,8 +39,8 @@ function CreatePost({ close, setPosts, posts }: Props) {
       }
       setPosts([...posts, res]);
       close();
-    } catch (err) {
-      console.log(err);
+    } catch (err: any) {
+      setError(err.message);
     }
   }
 
@@ -135,6 +136,11 @@ function CreatePost({ close, setPosts, posts }: Props) {
           )}
           {postType === 'image' && (
             <CreateImagePost post={post} setPost={setPost} />
+          )}
+          {error && (
+            <p className="text-center mt-5 border-t-2 text-xl font-bold">
+              {error}
+            </p>
           )}
         </div>
       </div>
