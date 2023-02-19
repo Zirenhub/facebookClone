@@ -6,6 +6,7 @@ import {
   getPost,
   likePost,
   unlikePost,
+  deletePost,
 } from '../controllers/postController';
 
 const router = express.Router();
@@ -14,7 +15,7 @@ const upload = multer({ dest: 'uploads/' });
 router.post('/', jwtAuth, upload.single('image'), createPost);
 router.post('/:id/like', jwtAuth, likePost);
 router.post('/:id/unlike', jwtAuth, unlikePost);
-router.post('/:id/delete'); // delete post
+router.post('/:id/delete', jwtAuth, deletePost);
 
 router.get('/:id', jwtAuth, getPost);
 // update post ?
