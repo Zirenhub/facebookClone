@@ -29,7 +29,7 @@ module.exports = {
         '8xl': '6.132rem',
       },
       fontFamily: {
-        poppins: ['Poppins'],
+        roboto: ['Roboto'],
       },
       backgroundImage: {
         'post-bg-one': "url('../public/assets/post-bg-one.jpg')",
