@@ -3,9 +3,13 @@ import mongoose from 'mongoose';
 import { IUserRequest } from '../middleware/jwtAuth';
 import ProfileModel from '../models/profile';
 import FriendModel from '../models/friend';
+import PostModel from '../models/post';
 import getFriendsIds from '../utils/getFriendsIds';
 
-export const getProfile = async (req: IUserRequest, res: Response) => {
+export const getProfile = async (
+  req: IUserRequest,
+  res: Response
+) => {
   const id = req.params.id;
   try {
     const profile = await ProfileModel.findById(id);
@@ -36,25 +40,30 @@ export const getProfile = async (req: IUserRequest, res: Response) => {
       data: { ...profile.toObject(), friendStatus },
       message: null,
     });
-  } catch (err) {
+  } catch (err: any) {
     res.status(404).json({
       status: 'error',
-      errors: err,
-      message: null,
+      errors: null,
+      message: err.message,
     });
   }
 };
 
-export const sendRequest = async (req: IUserRequest, res: Response) => {
+export const sendRequest = async (
+  req: IUserRequest,
+  res: Response
+) => {
   try {
     const user = req.user._id;
     const requestedProfile = req.params.id;
 
     // check if the id is valid
     if (!mongoose.Types.ObjectId.isValid(requestedProfile)) {
-      return res
-        .status(404)
-        .json({ status: 'error', errors: null, message: 'Invalid ID' });
+      return res.status(404).json({
+        status: 'error',
+        errors: null,
+        message: 'Invalid ID',
+      });
     }
 
     // check if the requested id is the same as the user iq
@@ -108,16 +117,19 @@ export const sendRequest = async (req: IUserRequest, res: Response) => {
       data: friend,
       message: null,
     });
-  } catch (err) {
+  } catch (err: any) {
     res.status(500).json({
       status: 'error',
-      errors: err,
-      message: null,
+      errors: null,
+      message: err.message,
     });
   }
 };
 
-export const getRequests = async (req: IUserRequest, res: Response) => {
+export const getRequests = async (
+  req: IUserRequest,
+  res: Response
+) => {
   try {
     const requests = await FriendModel.find({
       profile: req.user._id,
@@ -129,31 +141,38 @@ export const getRequests = async (req: IUserRequest, res: Response) => {
       data: requests,
       message: null,
     });
-  } catch (err) {
+  } catch (err: any) {
     res.status(500).json({
       status: 'error',
-      errors: err,
-      message: null,
+      errors: null,
+      message: err.message,
     });
   }
 };
 
-export const acceptRequest = async (req: IUserRequest, res: Response) => {
+export const acceptRequest = async (
+  req: IUserRequest,
+  res: Response
+) => {
   try {
     const requestID = req.params.id;
 
     if (!mongoose.Types.ObjectId.isValid(requestID)) {
-      return res
-        .status(404)
-        .json({ status: 'error', errors: null, message: 'Invalid ID' });
+      return res.status(404).json({
+        status: 'error',
+        errors: null,
+        message: 'Invalid ID',
+      });
     }
 
     const request = await FriendModel.findById(requestID);
 
     if (!request) {
-      return res
-        .status(404)
-        .json({ status: 'error', errors: null, message: 'Invalid request ID' });
+      return res.status(404).json({
+        status: 'error',
+        errors: null,
+        message: 'Invalid request ID',
+      });
     }
 
     if (request.status === 'Accepted') {
@@ -169,9 +188,11 @@ export const acceptRequest = async (req: IUserRequest, res: Response) => {
       req.user._id !== request.profile.toString() &&
       req.user.id !== request.friend.toString()
     ) {
-      return res
-        .status(403)
-        .json({ status: 'error', errors: null, message: 'Unauthorized' });
+      return res.status(403).json({
+        status: 'error',
+        errors: null,
+        message: 'Unauthorized',
+      });
     }
 
     request.status = 'Accepted';
@@ -182,31 +203,38 @@ export const acceptRequest = async (req: IUserRequest, res: Response) => {
       data: request,
       message: null,
     });
-  } catch (err) {
+  } catch (err: any) {
     res.status(500).json({
       status: 'error',
-      errors: err,
-      message: null,
+      errors: null,
+      message: err.message,
     });
   }
 };
 
-export const rejectRequest = async (req: IUserRequest, res: Response) => {
+export const rejectRequest = async (
+  req: IUserRequest,
+  res: Response
+) => {
   try {
     const requestID = req.params.id;
 
     if (!mongoose.Types.ObjectId.isValid(requestID)) {
-      return res
-        .status(404)
-        .json({ status: 'error', errors: null, message: 'Invalid ID' });
+      return res.status(404).json({
+        status: 'error',
+        errors: null,
+        message: 'Invalid ID',
+      });
     }
 
     const request = await FriendModel.findById(requestID);
 
     if (!request) {
-      return res
-        .status(404)
-        .json({ status: 'error', errors: null, message: 'Invalid request ID' });
+      return res.status(404).json({
+        status: 'error',
+        errors: null,
+        message: 'Invalid request ID',
+      });
     }
 
     // check if request status is not pending and if its not throw error?
@@ -219,9 +247,11 @@ export const rejectRequest = async (req: IUserRequest, res: Response) => {
       req.user._id !== request.profile.toString() &&
       req.user.id !== request.friend.toString()
     ) {
-      return res
-        .status(403)
-        .json({ status: 'error', errors: null, message: 'Unauthorized' });
+      return res.status(403).json({
+        status: 'error',
+        errors: null,
+        message: 'Unauthorized',
+      });
     }
 
     await request.deleteOne();
@@ -231,16 +261,19 @@ export const rejectRequest = async (req: IUserRequest, res: Response) => {
       data: null,
       message: null,
     });
-  } catch (err) {
+  } catch (err: any) {
     res.status(500).json({
       status: 'error',
-      errors: err,
-      message: null,
+      errors: null,
+      message: err.message,
     });
   }
 };
 
-export const getFriends = async (req: IUserRequest, res: Response) => {
+export const getFriends = async (
+  req: IUserRequest,
+  res: Response
+) => {
   try {
     const friends = await getFriendsIds(req.user._id);
     const populatedFriends = await ProfileModel.find({
@@ -251,11 +284,31 @@ export const getFriends = async (req: IUserRequest, res: Response) => {
       data: populatedFriends,
       message: null,
     });
-  } catch (err) {
+  } catch (err: any) {
     res.status(500).json({
       status: 'error',
-      errors: err,
+      errors: null,
+      message: err.message,
+    });
+  }
+};
+
+export const getPosts = async (req: IUserRequest, res: Response) => {
+  try {
+    const id = req.params.id;
+    const posts = await PostModel.find({ author: id }).populate(
+      'author'
+    );
+    return res.json({
+      status: 'success',
+      data: posts,
       message: null,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      status: 'error',
+      errors: null,
+      message: err.message,
     });
   }
 };
