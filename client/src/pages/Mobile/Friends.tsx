@@ -21,7 +21,7 @@ function Friends() {
               key={page}
               type="button"
               className={`rounded-full px-2 py-1 ${
-                currentPage === page ? 'bg-green-300' : 'bg-gray-300'
+                currentPage === page ? 'bg-green-400' : 'bg-gray-300'
               }`}
               onClick={() => setCurrentPage(page)}
             >
