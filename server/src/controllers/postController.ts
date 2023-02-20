@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { body, validationResult } from 'express-validator';
-import { Types } from 'mongoose';
+import { Document, Types } from 'mongoose';
 import { IUserRequest } from '../middleware/jwtAuth';
 import PostModel from '../models/post';
 import path from 'path';
@@ -113,32 +113,38 @@ export const createPost = [
     const { content, audience, background, type } = req.body;
 
     try {
-      let newPost;
       if (type === 'image' && req['file']) {
         const imagePath = req['file'].path;
         const image = await cloudinary.uploader.upload(imagePath);
 
-        newPost = new PostModel({
+        const newPost = await new PostModel({
           author,
           audience,
           content,
           image: image.url,
+        }).populate('author');
+
+        await newPost.save();
+        return res.json({
+          status: 'success',
+          data: newPost,
+          message: null,
         });
       } else {
-        newPost = new PostModel({
+        // fix this
+        const newPost = await new PostModel({
           author,
           audience,
           content,
           background,
+        }).populate('author');
+        await newPost.save();
+        return res.json({
+          status: 'success',
+          data: newPost,
+          message: null,
         });
       }
-
-      await newPost.save();
-      return res.json({
-        status: 'success',
-        data: newPost,
-        message: null,
-      });
     } catch (err: any) {
       res.status(500).json({
         status: 'error',
