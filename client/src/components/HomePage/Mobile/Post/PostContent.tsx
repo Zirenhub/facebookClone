@@ -1,6 +1,6 @@
 import { UseMutationResult } from '@tanstack/react-query';
 import moment from 'moment';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TDBPost } from '../../../../types/Post';
 import postBackgrounds from '../../../PostBackgrounds';
@@ -92,7 +92,8 @@ function PostContent({ post, openPost, deletePost }: Props) {
           <div className="bg-gray-200 font-bold rounded-md px-3 py-2 absolute right-2 top-12 z-10 flex flex-col">
             <button
               type="button"
-              onClick={() => {
+              onClick={(e: React.SyntheticEvent) => {
+                e.stopPropagation();
                 if (deletePost) deletePost.mutate(post._id);
               }}
               className="border-b-2"

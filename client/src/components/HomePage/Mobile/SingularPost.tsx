@@ -25,7 +25,11 @@ function SingularPost({ post, deletePost, reactPost }: Props) {
 
   return (
     <>
-      <PostContent post={post} openPost={() => setOpenPost(true)} />
+      <PostContent
+        post={post}
+        openPost={() => setOpenPost(true)}
+        deletePost={deletePost}
+      />
       <PostFooter
         postID={post._id}
         postReactions={post.reactions}
