@@ -1,4 +1,4 @@
-import { TDBPost } from './Post';
+import { ReactionTypes, TDBPost } from './Post';
 import { TProfile, TProfileWithoutFullName } from './Profile';
 import { DefaultReq, TRequest } from './Request';
 
@@ -30,9 +30,15 @@ export type EmptyRes = {
   message: null | string;
 };
 
+export type ReactToPostData = {
+  author: string;
+  type: ReactionTypes;
+  _id: string;
+};
+
 export type ReactToPostRes = {
   status: 'success' | 'error';
-  data?: null;
+  data?: ReactToPostData;
   errors?: ValidationError[] | null;
   message: string | null;
 };
