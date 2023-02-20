@@ -1,92 +1,27 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import Loading from '../../components/Loading';
 import MobileWritePost from '../../components/HomePage/Mobile/WritePost';
 import MobileAddStory from '../../components/HomePage/Mobile/AddStory';
-import {
-  deletePost,
-  getPosts,
-  postReact,
-  removePostReact,
-} from '../../api/post';
-import { ReactionTypes, TDBPost } from '../../types/Post';
+import { getTimeline } from '../../api/post';
+import { TDBPost } from '../../types/Post';
 import SingularPost from '../../components/HomePage/Mobile/SingularPost';
 import useAuthContext from '../../hooks/useAuthContext';
+import usePosts from '../../hooks/usePosts';
 
 function HomePage() {
-  const [posts, setPosts] = useState<TDBPost[]>([]);
-
   const auth = useAuthContext();
+  const { mutationDeletePost, mutationReactPost, posts, setPosts } = usePosts();
 
   const { isLoading, isError, data, error } = useQuery<TDBPost[], Error>({
     queryKey: ['posts', 'timeline'],
-    queryFn: () => getPosts(),
+    queryFn: () => getTimeline(),
     refetchOnWindowFocus: false,
-  });
-
-  const mutationDeletePost = useMutation({
-    mutationFn: (postID: string) => {
-      return deletePost(postID);
-    },
-    onSuccess(successData, variables, context) {
-      setPosts(posts.filter((post) => post._id !== variables));
-    },
-  });
-
-  const mutationReactPost = useMutation({
-    mutationFn: ([postID, r]: [string, ReactionTypes | null]) => {
-      if (r) {
-        return postReact(postID, r);
-      }
-      return removePostReact(postID);
-    },
-    onSuccess(successData, variables, context) {
-      const [postID, reaction] = variables;
-      let updatedPosts;
-      if (reaction && successData) {
-        updatedPosts = posts.map((post) => {
-          if (post._id === postID) {
-            const myReaction = post.reactions.find(
-              (r) => r.author === auth.user?._id
-            );
-            if (!myReaction) {
-              return {
-                ...post,
-                reactions: [...post.reactions, successData],
-              };
-            }
-            return {
-              ...post,
-              reactions: [
-                ...post.reactions.map((r) => {
-                  if (r.author === auth.user?._id) {
-                    return { ...r, type: reaction };
-                  }
-                  return { ...r };
-                }),
-              ],
-            };
-          }
-          return { ...post };
-        });
-      } else {
-        updatedPosts = posts.map((p) => {
-          if (p._id === postID) {
-            const reactions = p.reactions.filter(
-              (r) => r.author !== auth.user?._id
-            );
-            return { ...p, reactions };
-          }
-          return { ...p };
-        });
-      }
-      setPosts(updatedPosts);
-    },
   });
 
   useEffect(() => {
     if (data) setPosts(data);
-  }, [data]);
+  }, [data, setPosts]);
 
   if (isLoading) {
     return <Loading />;
