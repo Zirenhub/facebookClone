@@ -2,6 +2,7 @@ import {
   CreatePostRes,
   EmptyRes,
   PostsRes,
+  ReactToPostData,
   ReactToPostRes,
 } from '../types/Api';
 import { TDBPost } from '../types/Post';
@@ -54,7 +55,7 @@ export async function deletePost(postID: string) {
 export async function postReact(
   postID: string,
   reaction: 'laugh' | 'heart' | 'like'
-) {
+): Promise<ReactToPostData> {
   const res = await fetch(`/api/v1/post/${postID}/like`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -64,7 +65,7 @@ export async function postReact(
   return getFinal(status, data, errors, message);
 }
 
-export async function removePostReact(postID: string) {
+export async function removePostReact(postID: string): Promise<null> {
   const res = await fetch(`/api/v1/post/${postID}/unlike`, {
     method: 'POST',
   });
