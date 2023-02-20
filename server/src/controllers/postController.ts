@@ -195,11 +195,11 @@ export const likePost = [
           message: 'Post was not found.',
         });
       }
-      const hasReacted = post.reactions.find((reaction) => {
+      const savedReaction = post.reactions.find((reaction) => {
         return reaction.author.toString() === req.user._id;
       });
-      if (hasReacted) {
-        hasReacted.type = reaction;
+      if (savedReaction) {
+        savedReaction.type = reaction;
       } else {
         post.reactions.push({ author: req.user._id, type: reaction });
       }
@@ -207,7 +207,9 @@ export const likePost = [
       await post.save();
       return res.json({
         status: 'success',
-        data: null,
+        data: post.reactions.find((reaction) => {
+          return reaction.author.toString() === req.user._id;
+        }),
         message: null,
       });
     } catch (err: any) {
