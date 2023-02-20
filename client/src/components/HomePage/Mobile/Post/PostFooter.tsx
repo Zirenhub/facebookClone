@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLongPress, LongPressDetectEvents } from 'use-long-press';
-import { postReact, removePostReact } from '../../../../api/post';
+import { UseMutationResult } from '@tanstack/react-query';
 import { Reactions, ReactionTypes } from '../../../../types/Post';
 import LaughingReaction from '../../../../assets/laughing-reaction.gif';
 import HeartReaction from '../../../../assets/heart-reaction.gif';
@@ -14,9 +14,15 @@ import useAuthContext from '../../../../hooks/useAuthContext';
 type Props = {
   postID: string;
   postReactions: Reactions;
+  reactPost: UseMutationResult<
+    any,
+    unknown,
+    [string, ReactionTypes | null],
+    unknown
+  >;
 };
 
-function PostFooter({ postID, postReactions }: Props) {
+function PostFooter({ postID, postReactions, reactPost }: Props) {
   const [reactionsMenu, setReactionsMenu] = useState<boolean>(false);
   const [reaction, setReaction] = useState<ReactionTypes | null>(null);
   const [reactionsDetail, setReactionsDetail] = useState({
@@ -40,14 +46,9 @@ function PostFooter({ postID, postReactions }: Props) {
   }
 
   async function handleReaction(r: ReactionTypes) {
-    try {
-      await postReact(postID, r);
-      setReaction(r);
-      if (!reaction) {
-        increaseDecreaseReactions(r, '+');
-      }
-    } catch (err) {
-      console.log(err);
+    reactPost.mutate([postID, r]);
+    if (!reaction) {
+      increaseDecreaseReactions(r, '+');
     }
   }
 
@@ -56,20 +57,14 @@ function PostFooter({ postID, postReactions }: Props) {
       setReactionsMenu(!reactionsMenu);
     },
     {
-      onCancel: async () => {
+      onCancel: () => {
         if (setReactionsMenu) setReactionsMenu(false);
-        try {
-          if (reaction) {
-            await removePostReact(postID);
-            setReaction(null);
-            increaseDecreaseReactions(reaction, '-');
-          } else {
-            await postReact(postID, 'like');
-            setReaction('like');
-            increaseDecreaseReactions('like', '+');
-          }
-        } catch (err) {
-          console.log(err);
+        if (reaction) {
+          reactPost.mutate([postID, null]);
+          increaseDecreaseReactions(reaction, '-');
+        } else {
+          reactPost.mutate([postID, 'like']);
+          increaseDecreaseReactions('like', '+');
         }
       },
       threshold: 700,
@@ -77,7 +72,9 @@ function PostFooter({ postID, postReactions }: Props) {
       detect: LongPressDetectEvents.TOUCH,
     }
   );
-
+  if (reactPost.isError) {
+    console.log(reactPost.error);
+  }
   function getReactionButton() {
     function getReactionDisplay() {
       if (reaction === 'heart') {
@@ -138,11 +135,12 @@ function PostFooter({ postID, postReactions }: Props) {
       e.preventDefault();
     };
   }, []);
-
   useEffect(() => {
     const myReaction = postReactions.find((r) => r.author === auth.user?._id);
     if (myReaction) {
       setReaction(myReaction.type);
+    } else {
+      setReaction(null);
     }
 
     const laughs = postReactions.filter((r) => r.type === 'laugh');
