@@ -1,6 +1,6 @@
 import TextareaAutosize from 'react-textarea-autosize';
 import { TPost } from '../../../../types/Post';
-import postBackgrounds from '../../../PostBackgrounds';
+import postBackgrounds from '../Post/PostBackgrounds';
 
 type Props = {
   post: TPost;

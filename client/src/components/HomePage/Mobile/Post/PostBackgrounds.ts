@@ -1,7 +1,7 @@
-import postBgOne from '../../public/assets/post-bg-one.jpg';
-import postBgTwo from '../../public/assets/post-bg-two.jpg';
-import postBgThree from '../../public/assets/post-bg-three.jpg';
-import postBgFour from '../../public/assets/post-bg-four.jpg';
+import postBgOne from '../../../../../public/assets/post-bg-one.jpg';
+import postBgTwo from '../../../../../public/assets/post-bg-two.jpg';
+import postBgThree from '../../../../../public/assets/post-bg-three.jpg';
+import postBgFour from '../../../../../public/assets/post-bg-four.jpg';
 
 type BackgroundsType = {
   desc: string;
