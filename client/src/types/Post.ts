@@ -18,6 +18,16 @@ export type Reactions = {
   _id: string;
 }[];
 
+export type ReactionsDetails = {
+  reactionsInfo: {
+    like: number;
+    heart: number;
+    laugh: number;
+  };
+  reactionsNum: number;
+  commentsNum: number;
+};
+
 export type TDBPost = {
   __v: string;
   _id: string;
