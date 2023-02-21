@@ -9,6 +9,9 @@ import Like from '../../../../assets/like.svg';
 import Comment from '../../../../assets/comment.svg';
 import Share from '../../../../assets/share.svg';
 import useAuthContext from '../../../../hooks/useAuthContext';
+import PostComments from './PostComments';
+import usePostInfo from '../../../../hooks/usePostInfo';
+import PostFooterReactions from './PostFooterReactions';
 /* eslint react/jsx-props-no-spreading: 0 */
 
 type Props = {
@@ -24,26 +27,12 @@ type Props = {
 
 function PostFooter({ postID, postReactions, reactPost }: Props) {
   const [reactionsMenu, setReactionsMenu] = useState<boolean>(false);
+  const [commentsOpen, setCommentsOpen] = useState<boolean>(false);
   const [reaction, setReaction] = useState<ReactionTypes | null>(null);
-  const [reactionsDetail, setReactionsDetail] = useState({
-    reactionsInfo: { like: 0, heart: 0, laugh: 0 },
-    commentsNum: 0,
-  });
 
   const auth = useAuthContext();
-
-  function increaseDecreaseReactions(r: ReactionTypes, operation: '+' | '-') {
-    setReactionsDetail({
-      ...reactionsDetail,
-      reactionsInfo: {
-        ...reactionsDetail.reactionsInfo,
-        [r]:
-          operation === '+'
-            ? (reactionsDetail.reactionsInfo[r] += 1)
-            : (reactionsDetail.reactionsInfo[r] -= 1),
-      },
-    });
-  }
+  const { increaseDecreaseReactions, reactionsDetail } =
+    usePostInfo(postReactions);
 
   async function handleReaction(r: ReactionTypes) {
     reactPost.mutate([postID, r]);
@@ -72,6 +61,7 @@ function PostFooter({ postID, postReactions, reactPost }: Props) {
       detect: LongPressDetectEvents.TOUCH,
     }
   );
+  // handle error
   if (reactPost.isError) {
     console.log(reactPost.error);
   }
@@ -135,6 +125,7 @@ function PostFooter({ postID, postReactions, reactPost }: Props) {
       e.preventDefault();
     };
   }, []);
+
   useEffect(() => {
     const myReaction = postReactions.find((r) => r.author === auth.user?._id);
     if (myReaction) {
@@ -142,31 +133,20 @@ function PostFooter({ postID, postReactions, reactPost }: Props) {
     } else {
       setReaction(null);
     }
-
-    const laughs = postReactions.filter((r) => r.type === 'laugh');
-    const likes = postReactions.filter((r) => r.type === 'like');
-    const hearts = postReactions.filter((r) => r.type === 'heart');
-
-    setReactionsDetail({
-      reactionsInfo: {
-        laugh: laughs.length,
-        heart: hearts.length,
-        like: likes.length,
-      },
-      commentsNum: 0,
-    });
   }, [postReactions, auth]);
+
+  if (commentsOpen) {
+    return (
+      <PostComments
+        postID={postID}
+        reactionsNum={reactionsDetail.reactionsNum}
+      />
+    );
+  }
 
   return (
     <>
-      <div className="flex items-center">
-        <Like fill="rgb(6 165 250)" />
-        <p>
-          {reactionsDetail.reactionsInfo.like +
-            reactionsDetail.reactionsInfo.heart +
-            reactionsDetail.reactionsInfo.laugh}
-        </p>
-      </div>
+      <PostFooterReactions reactionsDetail={reactionsDetail} />
       <div className="flex relative h-12 items-center justify-between text-gray-600 px-4 mt-1 py-1 border-t-2">
         {reactionsMenu && (
           <div className="bg-white rounded-md flex absolute -top-12 left-10">
@@ -194,7 +174,11 @@ function PostFooter({ postID, postReactions, reactPost }: Props) {
           </div>
         )}
         {getReactionButton()}
-        <button type="button" className="flex items-center">
+        <button
+          type="button"
+          onClick={() => setCommentsOpen(true)}
+          className="flex items-center"
+        >
           <Comment height="30px" width="30px" />
           Comment
         </button>
