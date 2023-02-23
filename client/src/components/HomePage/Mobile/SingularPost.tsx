@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { UseMutationResult } from '@tanstack/react-query';
 import { ReactionTypes, TDBPost } from '../../../types/Post';
 import PostFooter from './Post/PostFooter';
@@ -38,9 +38,7 @@ function SingularPost({ post, deletePost, reactPost }: Props) {
           </button>
         </header>
         <div className="flex flex-col mt-3">
-          <div className="flex justify-between">
-            <PostHeader post={post} deletePost={deletePost} />
-          </div>
+          <PostHeader post={post} deletePost={deletePost} />
           <PostStyle post={post} />
           <PostFooter
             postID={post._id}
@@ -52,14 +50,19 @@ function SingularPost({ post, deletePost, reactPost }: Props) {
     );
   }
 
+  function switchToFullPost(e: React.SyntheticEvent) {
+    e.stopPropagation();
+    setOpenPost(true);
+  }
+
   return (
     <>
       <div
-        onClick={() => setOpenPost(true)}
-        onKeyDown={() => setOpenPost(true)}
+        onClick={switchToFullPost}
+        onKeyDown={switchToFullPost}
         role="button"
         tabIndex={0}
-        className="flex justify-between relative"
+        className="relative"
       >
         <PostHeader post={post} deletePost={deletePost} />
       </div>

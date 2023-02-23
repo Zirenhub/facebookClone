@@ -26,7 +26,7 @@ function PostHeader({ post, deletePost }: Props) {
   }, [post]);
 
   return (
-    <>
+    <div className="flex justify-between relative">
       <div
         onClick={navigateProfile}
         onKeyDown={navigateProfile}
@@ -69,7 +69,7 @@ function PostHeader({ post, deletePost }: Props) {
           <button type="button">Update</button>
         </div>
       )}
-    </>
+    </div>
   );
 }
 
