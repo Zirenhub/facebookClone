@@ -15,6 +15,7 @@
   html {
     @apply h-full;
     @apply overflow-x-hidden;
+    overscroll-behavior: contain;
     @apply font-roboto;
   }
 
