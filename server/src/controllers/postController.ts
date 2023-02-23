@@ -6,6 +6,7 @@ import PostModel from '../models/post';
 import path from 'path';
 
 import dotenv from 'dotenv';
+import CommentModel from '../models/comment';
 dotenv.config();
 
 const cloudinary = require('cloudinary').v2;
@@ -303,3 +304,101 @@ export const deletePost = async (
     });
   }
 };
+
+export const getPostComments = async (
+  req: IUserRequest,
+  res: Response
+) => {
+  const postID = req.params.id;
+  // const post = await PostModel.findById(postID);
+  // if (!post) {
+  //   return res.status(400).json({
+  //     status: 'error',
+  //     errors: null,
+  //     message: 'Post was not found.',
+  //   });
+  // }
+  try {
+    const comments = await CommentModel.find({
+      post: postID,
+    }).populate('author');
+    return res.json({
+      status: 'success',
+      data: comments,
+      message: null,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      status: 'error',
+      errors: null,
+      message: err.message,
+    });
+  }
+};
+
+export const postComment = [
+  body('comment')
+    .trim()
+    .escape()
+    .notEmpty()
+    .withMessage("Comment can't be empty")
+    .isLength({ min: 1, max: 250 })
+    .withMessage(
+      "Comment length can't be larger than 250 characters"
+    ),
+
+  async (req: IUserRequest, res: Response) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          status: 'error',
+          errors: errors.array(),
+          message: null,
+        });
+      }
+      const postID = req.params.id;
+      const { comment, parent } = req.body;
+
+      const post = await PostModel.findById(postID);
+      if (!post) {
+        return res.status(400).json({
+          status: 'error',
+          errors: null,
+          message: 'Post was not found.',
+        });
+      }
+
+      if (parent) {
+        const parentComment = await CommentModel.findById(parent);
+        if (!parentComment) {
+          return res.status(400).json({
+            status: 'error',
+            errors: null,
+            message: 'Parent comment was not found.',
+          });
+        }
+      }
+
+      const newComment = await new CommentModel({
+        author: req.user._id,
+        post: postID,
+        parent,
+        content: comment,
+      }).populate('author');
+
+      await newComment.save();
+      return res.json({
+        status: 'success',
+        data: newComment,
+        message: null,
+      });
+    } catch (err: any) {
+      res.status(500).json({
+        status: 'error',
+        errors: null,
+        message: err.message,
+      });
+    }
+  },
+];
