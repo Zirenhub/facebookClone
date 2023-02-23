@@ -117,12 +117,20 @@ function PostFooter({ postID, postReactions, reactPost }: Props) {
   }
 
   useEffect(() => {
+    function closeReactions() {
+      setReactionsMenu(false);
+    }
+
     const mainEl = document.querySelector('main');
-    mainEl?.addEventListener('click', () => setReactionsMenu(false));
+    mainEl?.addEventListener('click', closeReactions);
 
     // on mobile after a long tap on reaction button, prevent context menu popup.
     window.oncontextmenu = (e) => {
       e.preventDefault();
+    };
+
+    return () => {
+      mainEl?.removeEventListener('click', closeReactions);
     };
   }, []);
 
@@ -135,17 +143,15 @@ function PostFooter({ postID, postReactions, reactPost }: Props) {
     }
   }, [postReactions, auth]);
 
-  if (commentsOpen) {
-    return (
-      <PostComments
-        postID={postID}
-        reactionsNum={reactionsDetail.reactionsNum}
-      />
-    );
-  }
-
   return (
     <>
+      {commentsOpen && (
+        <PostComments
+          postID={postID}
+          reactionsDetail={reactionsDetail}
+          close={() => setCommentsOpen(false)}
+        />
+      )}
       <PostFooterReactions reactionsDetail={reactionsDetail} />
       <div className="flex relative h-12 items-center justify-between text-gray-600 px-4 mt-1 py-1 border-t-2">
         {reactionsMenu && (
