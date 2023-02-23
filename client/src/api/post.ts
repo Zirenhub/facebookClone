@@ -1,11 +1,13 @@
 import {
   CreatePostRes,
   EmptyRes,
+  GetPostCommentsRes,
+  PostCommentRes,
   PostsRes,
   ReactToPostData,
   ReactToPostRes,
 } from '../types/Api';
-import { TDBPost } from '../types/Post';
+import { Comment, TDBPost } from '../types/Post';
 import getFinal from './getError';
 
 export async function postImage(
@@ -47,7 +49,7 @@ export async function getTimeline(): Promise<TDBPost[]> {
 }
 
 export async function deletePost(postID: string) {
-  const res = await fetch(`/api/v1/post/${postID}/delete`, { method: 'POST' });
+  const res = await fetch(`/api/v1/post/${postID}`, { method: 'DELETE' });
   const { status, data, errors, message }: EmptyRes = await res.json();
   return getFinal(status, data, errors, message);
 }
@@ -70,5 +72,25 @@ export async function removePostReact(postID: string): Promise<null> {
     method: 'POST',
   });
   const { status, data, errors, message }: EmptyRes = await res.json();
+  return getFinal(status, data, errors, message);
+}
+
+export async function postComment(
+  postID: string,
+  comment: string
+): Promise<Comment> {
+  const res = await fetch(`/api/v1/post/${postID}/comment`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ comment }),
+  });
+  const { status, data, errors, message }: PostCommentRes = await res.json();
+  return getFinal(status, data, errors, message);
+}
+
+export async function getPostComments(postID: string): Promise<Comment[]> {
+  const res = await fetch(`/api/v1/post/${postID}/comments`);
+  const { status, data, errors, message }: GetPostCommentsRes =
+    await res.json();
   return getFinal(status, data, errors, message);
 }
