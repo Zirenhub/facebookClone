@@ -15,7 +15,7 @@ const CommentSchema = new Schema<IComment>(
       ref: 'Post',
       required: true,
     },
-    parentComment: {
+    parent: {
       type: Schema.Types.ObjectId,
       ref: 'Comment',
       required: false,
@@ -24,10 +24,27 @@ const CommentSchema = new Schema<IComment>(
       type: String,
       required: true,
     },
+    reactions: [
+      {
+        author: {
+          type: Schema.Types.ObjectId,
+          ref: 'Profile',
+          required: true,
+        },
+        type: {
+          type: String,
+          enum: ['like', 'heart', 'laugh'],
+          required: true,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );
 
-const CommentModel = mongoose.model<IComment>('Comment', CommentSchema);
+const CommentModel = mongoose.model<IComment>(
+  'Comment',
+  CommentSchema
+);
 
 export default CommentModel;
