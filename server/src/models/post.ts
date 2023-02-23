@@ -26,10 +26,6 @@ const PostSchema = new Schema<IPost>(
       type: String,
       required: false,
     },
-    comments: {
-      type: Schema.Types.ObjectId,
-      ref: 'Comment',
-    },
     reactions: [
       {
         author: {

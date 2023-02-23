@@ -7,6 +7,5 @@ export interface IPost {
   content: string;
   background: string;
   image: string;
-  comments: Types.ObjectId;
   reactions: Types.DocumentArray<IReaction>;
 }
