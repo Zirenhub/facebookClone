@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import useAuthContext from '../../../hooks/useAuthContext';
 import Pfp from '../../../assets/pfp-two.svg';
 import Back from '../../../assets/back.svg';
@@ -7,6 +8,7 @@ import CreateDefaultPost from './CreatePostTypes/CreateDefaultPost';
 import CreateImagePost from './CreatePostTypes/CreateImagePost';
 import { TDBPost, TPost } from '../../../types/Post';
 import { postDefault, postImage } from '../../../api/post';
+import Loading from '../../Loading';
 
 type Props = {
   close: () => void;
@@ -23,26 +25,22 @@ function CreatePost({ close, setPosts, posts }: Props) {
     audience: 'friends',
   });
   const [canSendPost, setCanSendPost] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
 
   const auth = useAuthContext();
 
-  async function handleSubmit() {
-    if (!canSendPost) return;
-    const { content, image, background, audience } = post;
-    try {
-      let res;
+  const mutateSendPost = useMutation<TDBPost, Error>({
+    mutationFn: () => {
+      const { content, image, background, audience } = post;
       if (postType === 'image' && image) {
-        res = await postImage(content, image, audience);
-      } else {
-        res = await postDefault(content, background, audience);
+        return postImage(content, image, audience);
       }
-      setPosts([...posts, res]);
+      return postDefault(content, background, audience);
+    },
+    onSuccess(data, variables, context) {
+      setPosts([...posts, data]);
       close();
-    } catch (err: any) {
-      setError(err.message);
-    }
-  }
+    },
+  });
 
   function handlePostAudience(e: React.SyntheticEvent) {
     const target = e.target as HTMLSelectElement;
@@ -70,6 +68,10 @@ function CreatePost({ close, setPosts, posts }: Props) {
     }
   }, [post, postType]);
 
+  if (mutateSendPost.isLoading) {
+    return <Loading />;
+  }
+
   return (
     <div className="z-10 absolute bg-white top-0 left-0 h-full w-full">
       <header className="flex justify-between p-3 border-b-2">
@@ -88,7 +90,11 @@ function CreatePost({ close, setPosts, posts }: Props) {
         <div>
           <button
             type="button"
-            onClick={handleSubmit}
+            onClick={() => {
+              if (canSendPost) {
+                mutateSendPost.mutate();
+              }
+            }}
             className={`${
               canSendPost
                 ? 'bg-blue-600 text-white'
@@ -137,9 +143,9 @@ function CreatePost({ close, setPosts, posts }: Props) {
           {postType === 'image' && (
             <CreateImagePost post={post} setPost={setPost} />
           )}
-          {error && (
+          {mutateSendPost.isError && (
             <p className="text-center mt-5 border-t-2 text-xl font-bold">
-              {error}
+              {mutateSendPost.error.message}
             </p>
           )}
         </div>
