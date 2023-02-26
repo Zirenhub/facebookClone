@@ -71,8 +71,11 @@ function usePosts(rawPosts?: TDBPost[]) {
               ],
               reactionsDetails: {
                 ...post.reactionsDetails,
-                [myReaction.type]: post.reactionsDetails[myReaction.type] - 1,
-                [successData.type]: post.reactionsDetails[successData.type] + 1,
+                ...(myReaction.type !== successData.type && {
+                  [successData.type]:
+                    post.reactionsDetails[successData.type] + 1,
+                  [myReaction.type]: post.reactionsDetails[myReaction.type] - 1,
+                }),
                 myReaction: reaction,
               },
             };
