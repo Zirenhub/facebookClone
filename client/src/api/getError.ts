@@ -15,13 +15,13 @@ function getFinal(
     return data;
   }
   if (status === 'error' && message) {
-    return Promise.reject(new Error(message));
+    throw new Error(message);
   }
   if (errors) {
-    const errorsString = new Error(errors.map((e) => e.msg).join('\n'));
-    return Promise.reject(errorsString);
+    const errorsString = errors.map((e) => e.msg).join('\n');
+    throw new Error(errorsString);
   }
-  return Promise.reject(new Error('Something went wrong'));
+  throw new Error('Something went wrong');
 }
 
 export default getFinal;
