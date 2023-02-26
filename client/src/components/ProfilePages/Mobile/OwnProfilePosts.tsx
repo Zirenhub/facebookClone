@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { getProfilePosts } from '../../../api/profile';
 import Pfp from '../../../assets/pfp-two.svg';
 import Pictures from '../../../assets/pictures.svg';
@@ -11,17 +11,14 @@ import SingularPost from '../../HomePage/Mobile/SingularPost';
 function OwnProfilePosts({ id }: { id: string }) {
   const [openCreatePost, setOpenCreatePost] = useState<boolean>(false);
 
-  const { mutationDeletePost, mutationReactPost, posts, setPosts } = usePosts();
-
   const { isLoading, isError, data, error } = useQuery<TDBPost[], Error>({
     queryKey: ['posts', id],
     queryFn: () => getProfilePosts(id),
     refetchOnWindowFocus: false,
   });
 
-  useEffect(() => {
-    if (data) setPosts(data);
-  }, [data, setPosts]);
+  const { mutationDeletePost, mutationReactPost, posts, setPosts } =
+    usePosts(data);
 
   if (openCreatePost) {
     return (
@@ -74,6 +71,8 @@ function OwnProfilePosts({ id }: { id: string }) {
           </div>
         </div>
       </div>
+      {isLoading && <p className="text-center">Loading...</p>}
+      {isError && <p className="text-center">{error.message}</p>}
       {posts
         .sort(
           (a, b) =>
