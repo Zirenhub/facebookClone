@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { UseMutationResult } from '@tanstack/react-query';
-import { ReactionTypes, TDBPost } from '../../../types/Post';
+import { ModifiedPost, ReactionTypes } from '../../../types/Post';
 import PostFooter from './Post/PostFooter';
 import PostHeader from './Post/PostHeader';
 import PostStyle from './Post/PostStyle';
 import Back from '../../../assets/back.svg';
 import Search from '../../../assets/search.svg';
+import PostReactions from './Post/PostReactions';
 
 type Props = {
-  post: TDBPost;
+  post: ModifiedPost;
   deletePost?: UseMutationResult<any, unknown, string, unknown>;
   reactPost: UseMutationResult<
     any,
@@ -40,11 +41,7 @@ function SingularPost({ post, deletePost, reactPost }: Props) {
         <div className="flex flex-col mt-3">
           <PostHeader post={post} deletePost={deletePost} />
           <PostStyle post={post} />
-          <PostFooter
-            postID={post._id}
-            postReactions={post.reactions}
-            reactPost={reactPost}
-          />
+          <PostFooter post={post} reactPost={reactPost} />
         </div>
       </div>
     );
@@ -67,11 +64,8 @@ function SingularPost({ post, deletePost, reactPost }: Props) {
         <PostHeader post={post} deletePost={deletePost} />
       </div>
       <PostStyle post={post} />
-      <PostFooter
-        postID={post._id}
-        postReactions={post.reactions}
-        reactPost={reactPost}
-      />
+      <PostReactions reactionsDetail={post.reactionsDetails} />
+      <PostFooter post={post} reactPost={reactPost} />
     </>
   );
 }

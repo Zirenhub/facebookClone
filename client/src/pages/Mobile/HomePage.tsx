@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query';
-import { useEffect } from 'react';
 import Loading from '../../components/Loading';
 import MobileWritePost from '../../components/HomePage/Mobile/WritePost';
 import MobileAddStory from '../../components/HomePage/Mobile/AddStory';
@@ -11,7 +10,6 @@ import usePosts from '../../hooks/usePosts';
 
 function HomePage() {
   const auth = useAuthContext();
-  const { mutationDeletePost, mutationReactPost, posts, setPosts } = usePosts();
 
   const { isLoading, isError, data, error } = useQuery<TDBPost[], Error>({
     queryKey: ['posts', 'timeline'],
@@ -19,9 +17,8 @@ function HomePage() {
     refetchOnWindowFocus: false,
   });
 
-  useEffect(() => {
-    if (data) setPosts(data);
-  }, [data, setPosts]);
+  const { mutationDeletePost, mutationReactPost, posts, setPosts } =
+    usePosts(data);
 
   if (isLoading) {
     return <Loading />;

@@ -5,7 +5,7 @@ function PostFooterReactions({
 }: {
   reactionsDetail: ReactionsDetails;
 }) {
-  const { heart, laugh, like } = reactionsDetail.reactionsInfo;
+  const { heart, laugh, like } = reactionsDetail;
 
   function getReaction(r: ReactionTypes) {
     let emoji;

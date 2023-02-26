@@ -1,17 +1,16 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { getPostComments, postComment } from '../../../../api/post';
-import { Comment, ReactionsDetails } from '../../../../types/Post';
-import PostFooterReactions from './PostFooterReactions';
+import { Comment, ModifiedPost } from '../../../../types/Post';
+import PostReactions from './PostReactions';
 import SingleComment from './SingleComment';
 
 type Props = {
-  postID: string;
-  reactionsDetail: ReactionsDetails;
+  post: ModifiedPost;
   close: () => void;
 };
 
-function PostComments({ postID, reactionsDetail, close }: Props) {
+function PostComments({ post, close }: Props) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [isWriting, setIsWriting] = useState<boolean>(false);
   const [comment, setComment] = useState<string>('');
@@ -19,16 +18,19 @@ function PostComments({ postID, reactionsDetail, close }: Props) {
   const displayHeight = window.innerHeight;
   const heightRef = useRef<HTMLDivElement>(null);
 
-  const { isLoading, isError, data, error } = useQuery<Comment[], Error>({
-    queryKey: ['comments', postID],
-    queryFn: () => getPostComments(postID),
+  const { isLoading, isError, error } = useQuery<Comment[], Error>({
+    queryKey: ['comments', post._id],
+    queryFn: () => getPostComments(post._id),
+    onSuccess(successData) {
+      setComments(successData);
+    },
   });
 
   const mutateSendComment = useMutation({
     mutationFn: () => {
-      return postComment(postID, comment);
+      return postComment(post._id, comment);
     },
-    onSuccess(successData, variables) {
+    onSuccess(successData) {
       setComments([...comments, successData]);
       setComment('');
     },
@@ -46,10 +48,6 @@ function PostComments({ postID, reactionsDetail, close }: Props) {
     }
   }
 
-  useEffect(() => {
-    if (data) setComments(data);
-  }, [data]);
-
   return (
     <div className="absolute h-screen w-full bg-transparent/80 z-40 top-0 left-0 flex flex-col justify-end">
       <div
@@ -60,12 +58,12 @@ function PostComments({ postID, reactionsDetail, close }: Props) {
           className="flex items-center relative"
           onTouchMoveCapture={handleMove}
         >
-          <PostFooterReactions reactionsDetail={reactionsDetail} />
+          <PostReactions reactionsDetail={post.reactionsDetails} />
           <div className="min-h-[5px] min-w-[35px] left-2/4 -translate-x-2/4  absolute rounded-lg bg-gray-300" />
         </div>
         <div className="flex flex-col grow">
           {isLoading && <p className="text-center">Loading...</p>}
-          {isError && <p>Something went wrong.</p>}
+          {isError && <p>{error.message}</p>}
           {comments.length ? (
             <div className="flex flex-col gap-3">
               {comments.map((c) => {
