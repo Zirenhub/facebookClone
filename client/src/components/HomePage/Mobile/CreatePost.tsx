@@ -6,14 +6,15 @@ import Back from '../../../assets/back.svg';
 import Close from '../../../assets/x.svg';
 import CreateDefaultPost from './CreatePostTypes/CreateDefaultPost';
 import CreateImagePost from './CreatePostTypes/CreateImagePost';
-import { TDBPost, TPost } from '../../../types/Post';
+import { ModifiedPost, TDBPost, TPost } from '../../../types/Post';
 import { postDefault, postImage } from '../../../api/post';
 import Loading from '../../Loading';
+import createReactionDetails from '../../../utils/createReactionDetails';
 
 type Props = {
   close: () => void;
-  setPosts: React.Dispatch<React.SetStateAction<TDBPost[]>>;
-  posts: TDBPost[];
+  setPosts: React.Dispatch<React.SetStateAction<ModifiedPost[]>>;
+  posts: ModifiedPost[];
 };
 
 function CreatePost({ close, setPosts, posts }: Props) {
@@ -37,7 +38,7 @@ function CreatePost({ close, setPosts, posts }: Props) {
       return postDefault(content, background, audience);
     },
     onSuccess(data, variables, context) {
-      setPosts([...posts, data]);
+      setPosts([...posts, createReactionDetails(data)]);
       close();
     },
   });

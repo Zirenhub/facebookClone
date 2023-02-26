@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import Pfp from '../../../assets/pfp-two.svg';
 import Pictures from '../../../assets/pictures.svg';
-import { TDBPost } from '../../../types/Post';
+import { ModifiedPost } from '../../../types/Post';
 import CreatePostModal from './CreatePost';
 
 type Props = {
-  setPosts: React.Dispatch<React.SetStateAction<TDBPost[]>>;
-  posts: TDBPost[];
+  setPosts: React.Dispatch<React.SetStateAction<ModifiedPost[]>>;
+  posts: ModifiedPost[];
 };
 
 function WritePost({ setPosts, posts }: Props) {

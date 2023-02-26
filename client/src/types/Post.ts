@@ -19,13 +19,12 @@ export type Reactions = {
 }[];
 
 export type ReactionsDetails = {
-  reactionsInfo: {
-    like: number;
-    heart: number;
-    laugh: number;
-  };
+  like: number;
+  heart: number;
+  laugh: number;
   reactionsNum: number;
   commentsNum: number;
+  myReaction: ReactionTypes | null;
 };
 
 type PopulatedAuthor = {
@@ -50,6 +49,27 @@ export type TDBPost = {
   image?: string;
   background?: string | null;
   reactions: Reactions;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ModifiedPost = {
+  __v: string;
+  _id: string;
+  author: PopulatedAuthor;
+  audience: string;
+  content: string;
+  image?: string;
+  background?: string | null;
+  reactions: Reactions;
+  reactionsDetails: {
+    laugh: number;
+    heart: number;
+    like: number;
+    reactionsNum: number;
+    commentsNum: number;
+    myReaction: ReactionTypes | null;
+  };
   createdAt: string;
   updatedAt: string;
 };
