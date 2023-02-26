@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import {
   acceptRequest,
@@ -7,6 +7,7 @@ import {
   sendRequest,
 } from '../../../api/profile';
 import useAuthContext from '../../../hooks/useAuthContext';
+import usePosts from '../../../hooks/usePosts';
 import { TDBPost } from '../../../types/Post';
 import { TProfile, TProfileFriend } from '../../../types/Profile';
 import SingularPost from '../../HomePage/Mobile/SingularPost';
@@ -17,8 +18,8 @@ type TPages = 'Posts' | 'About' | 'Photos' | 'Videos' | 'Mentions';
 
 function StangerProfile({ profileData }: { profileData: TProfile }) {
   const [currentPage, setCurrentPage] = useState<TPages>('Posts');
-  const [requestError, setRequestError] = useState<string | null>(null);
   const [friendStatus, setFriendStatus] = useState<TProfileFriend | null>(null);
+  const [requestError, setRequestError] = useState<string | null>(null);
 
   const pages: readonly ['Posts', 'About', 'Photos', 'Videos', 'Mentions'] = [
     'Posts',
@@ -35,21 +36,28 @@ function StangerProfile({ profileData }: { profileData: TProfile }) {
     refetchOnWindowFocus: false,
   });
 
-  async function handleRequest(status: 'send' | 'accept' | 'cancel') {
-    try {
-      let res = null;
+  const { mutationReactPost, posts } = usePosts(data);
+
+  const requestMutation = useMutation({
+    mutationFn: (status: 'send' | 'accept' | 'cancel') => {
       if (status === 'send') {
-        res = await sendRequest(profileData._id);
-      } else if (status === 'accept' && friendStatus) {
-        res = await acceptRequest(friendStatus._id);
-      } else if (status === 'cancel' && friendStatus) {
-        res = await rejectRequest(friendStatus._id);
+        return sendRequest(profileData._id);
       }
-      setFriendStatus(res);
-    } catch (err: any) {
-      setRequestError(err.message);
-    }
-  }
+      if (status === 'accept' && friendStatus) {
+        return acceptRequest(friendStatus._id);
+      }
+      if (status === 'cancel' && friendStatus) {
+        return rejectRequest(friendStatus._id);
+      }
+      return Promise.resolve(null);
+    },
+    onSuccess(successData) {
+      setFriendStatus(successData);
+    },
+    onError(errorData: Error) {
+      setRequestError(errorData.message);
+    },
+  });
 
   useEffect(() => {
     setFriendStatus(profileData.friendStatus);
@@ -62,7 +70,7 @@ function StangerProfile({ profileData }: { profileData: TProfile }) {
           <button
             type="button"
             className="bg-red-500 text-white font-bold py-1 rounded-md grow"
-            onClick={() => handleRequest('cancel')}
+            onClick={() => requestMutation.mutate('cancel')}
           >
             Unfriend
           </button>
@@ -76,7 +84,7 @@ function StangerProfile({ profileData }: { profileData: TProfile }) {
           <button
             type="button"
             className="bg-red-500 text-white font-bold py-1 rounded-md grow"
-            onClick={() => handleRequest('cancel')}
+            onClick={() => requestMutation.mutate('cancel')}
           >
             Cancel Request
           </button>
@@ -87,7 +95,7 @@ function StangerProfile({ profileData }: { profileData: TProfile }) {
         <button
           type="button"
           className="bg-green-500 text-white font-bold py-1 rounded-md grow"
-          onClick={() => handleRequest('accept')}
+          onClick={() => requestMutation.mutate('accept')}
         >
           Accept Friend Request
         </button>
@@ -97,7 +105,7 @@ function StangerProfile({ profileData }: { profileData: TProfile }) {
       <button
         type="button"
         className="bg-blue-500 text-white font-bold py-1 rounded-md grow"
-        onClick={() => handleRequest('send')}
+        onClick={() => requestMutation.mutate('send')}
       >
         Add Friend
       </button>
@@ -136,9 +144,9 @@ function StangerProfile({ profileData }: { profileData: TProfile }) {
           );
         })}
       </div>
-      {currentPage === 'Posts' && data && (
+      {currentPage === 'Posts' && posts && (
         <div className="p-2">
-          {data
+          {posts
             .sort(
               (a, b) =>
                 new Date(b.createdAt).valueOf() -
@@ -150,12 +158,14 @@ function StangerProfile({ profileData }: { profileData: TProfile }) {
                   key={post._id}
                   className="mt-2 border-b-4 border-slate-400"
                 >
-                  <SingularPost post={post} />
+                  <SingularPost post={post} reactPost={mutationReactPost} />
                 </div>
               );
             })}
         </div>
       )}
+      {isError && <p className="text-center">{error.message}</p>}
+      {isLoading && <p className="text-center">Loading...</p>}
     </div>
   );
 }
