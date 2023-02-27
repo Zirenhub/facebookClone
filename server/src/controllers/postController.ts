@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { body, validationResult } from 'express-validator';
-import { Document, Types } from 'mongoose';
+import { Types } from 'mongoose';
 import { IUserRequest } from '../middleware/jwtAuth';
 import PostModel from '../models/post';
 import path from 'path';

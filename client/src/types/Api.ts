@@ -18,7 +18,7 @@ export type CreatePostRes = {
 
 export type PostsRes = {
   status: 'success' | 'error';
-  data?: TDBPost[];
+  data?: { posts: TDBPost[]; nextCursor: string | null };
   errors?: null;
   message: string | null;
 };

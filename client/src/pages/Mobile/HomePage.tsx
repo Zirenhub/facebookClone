@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import Loading from '../../components/Loading';
 import MobileWritePost from '../../components/HomePage/Mobile/WritePost';
 import MobileAddStory from '../../components/HomePage/Mobile/AddStory';
@@ -11,16 +11,31 @@ import usePosts from '../../hooks/usePosts';
 function HomePage() {
   const auth = useAuthContext();
 
-  const { isLoading, isError, data, error } = useQuery<TDBPost[], Error>({
+  // const { isLoading, isError, data, error } = useQuery<TDBPost[], Error>({
+  //   queryKey: ['posts', 'timeline'],
+  //   queryFn: () => getTimeline(),
+  //   refetchOnWindowFocus: false,
+  // });
+
+  const {
+    data,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    status,
+  } = useInfiniteQuery({
     queryKey: ['posts', 'timeline'],
-    queryFn: () => getTimeline(),
-    refetchOnWindowFocus: false,
+    queryFn: getTimeline,
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
 
-  const { mutationDeletePost, mutationReactPost, posts, setPosts } =
-    usePosts(data);
+  const { mutationDeletePost, mutationReactPost, posts, setPosts } = usePosts(
+    data?.posts
+  );
 
-  if (isLoading) {
+  if (status === 'loading') {
     return <Loading />;
   }
 
@@ -49,7 +64,7 @@ function HomePage() {
             </div>
           );
         })}
-      {isError && <p>{error.message}</p>}
+      {status === 'error' && <p>{error.message}</p>}
     </div>
   );
 }
