@@ -44,7 +44,7 @@ export async function postDefault(
 
 export async function getTimeline({
   pageParam = 0,
-}): Promise<{ posts: TDBPost[]; nextCursor: string | null }> {
+}): Promise<{ posts: TDBPost[]; nextCursor: number }> {
   const res = await fetch(`/api/v1/timeline?cursor=${pageParam}`);
   const { status, data, errors, message }: PostsRes = await res.json();
   return getFinal(status, data, errors, message);

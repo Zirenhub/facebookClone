@@ -13,22 +13,14 @@ export const getTimeline = async (
 
     const friends = await getFriendsIds(req.user._id);
     const posts = await PostModel.find({
-      $and: [
-        {
-          $or: [
-            { author: { $in: friends } },
-            { author: req.user._id },
-          ],
-        },
-        { _id: { $lt: cursor } },
-      ],
+      $or: [{ author: { $in: friends } }, { author: req.user._id }],
     })
-      .populate('author')
-      .sort({ _id: -1 })
-      .limit(limit);
+      .sort({ createdAt: -1 })
+      .skip(cursor)
+      .limit(limit)
+      .populate('author');
 
-    const nextCursor =
-      posts.length > 0 ? posts[posts.length - 1]._id : null;
+    const nextCursor = cursor + posts.length;
 
     return res.json({
       status: 'success',
