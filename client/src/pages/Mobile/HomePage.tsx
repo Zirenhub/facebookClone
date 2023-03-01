@@ -1,11 +1,10 @@
 /* eslint-disable no-nested-ternary */
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { useMemo } from 'react';
+import { useEffect } from 'react';
 import Loading from '../../components/Loading';
 import MobileWritePost from '../../components/HomePage/Mobile/WritePost';
 import MobileAddStory from '../../components/HomePage/Mobile/AddStory';
 import { getTimeline } from '../../api/post';
-import { TDBPost } from '../../types/Post';
 import SingularPost from '../../components/HomePage/Mobile/SingularPost';
 import useAuthContext from '../../hooks/useAuthContext';
 import usePosts from '../../hooks/usePosts';
@@ -24,25 +23,55 @@ function HomePage() {
   } = useInfiniteQuery({
     queryKey: ['posts', 'timeline'],
     queryFn: getTimeline,
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
+    getNextPageParam: (lastPage, pages) => lastPage.nextCursor,
+    refetchOnWindowFocus: false,
   });
 
-  const allPosts: TDBPost[] = useMemo(() => [], []);
+  const {
+    mutationCreatePost,
+    mutationDeletePost,
+    mutationReactPost,
+    posts,
+    setInitialPosts,
+  } = usePosts();
 
-  data?.pages.forEach((page) => {
-    allPosts.push(...page.posts);
-  });
+  useEffect(() => {
+    if (status === 'success' && !isFetching) {
+      const allPosts = data.pages.reduce((acc, page) => {
+        return acc.concat(page.posts as []);
+      }, []);
+      setInitialPosts(allPosts);
+    }
+  }, [data, isFetching, setInitialPosts, status]);
 
-  const { mutationDeletePost, mutationReactPost, posts, setPosts } =
-    usePosts(allPosts);
+  useEffect(() => {
+    function handleScroll() {
+      const isAtBottom =
+        window.innerHeight + window.scrollY >= document.body.offsetHeight;
+      if (isAtBottom && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+    }
+
+    const pageEl = document.querySelector('body');
+    if (pageEl) {
+      pageEl.addEventListener('scroll', handleScroll);
+    }
+
+    return () => {
+      if (pageEl) {
+        pageEl.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   if (status === 'loading') {
     return <Loading />;
   }
 
   return (
-    <div className="p-2">
-      <MobileWritePost setPosts={setPosts} posts={posts} />
+    <div className="p-2" id="homepage">
+      <MobileWritePost mutationCreatePost={mutationCreatePost} />
       <MobileAddStory />
       {posts
         .sort(
@@ -65,7 +94,7 @@ function HomePage() {
             </div>
           );
         })}
-      {/* {status === 'error' && <p>{error.message}</p>} */}
+      {status === 'error' && error instanceof Error && <p>{error.message}</p>}
       <p>
         {isFetchingNextPage
           ? 'Loading more...'

@@ -8,6 +8,7 @@ import {
   ReactToPostRes,
 } from '../types/Api';
 import { Comment, TDBPost } from '../types/Post';
+import createReactionDetails from '../utils/createReactionDetails';
 import getFinal from './getError';
 
 export async function postImage(
@@ -44,7 +45,7 @@ export async function postDefault(
 
 export async function getTimeline({
   pageParam = 0,
-}): Promise<{ posts: TDBPost[]; nextCursor: number }> {
+}): Promise<{ posts: TDBPost[]; nextCursor: number | null }> {
   const res = await fetch(`/api/v1/timeline?cursor=${pageParam}`);
   const { status, data, errors, message }: PostsRes = await res.json();
   return getFinal(status, data, errors, message);

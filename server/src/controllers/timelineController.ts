@@ -20,7 +20,11 @@ export const getTimeline = async (
       .limit(limit)
       .populate('author');
 
-    const nextCursor = cursor + posts.length;
+    let nextCursor: number | null = cursor + posts.length;
+
+    if (posts.length < limit) {
+      nextCursor = null;
+    }
 
     return res.json({
       status: 'success',
