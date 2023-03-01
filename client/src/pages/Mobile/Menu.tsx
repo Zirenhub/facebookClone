@@ -17,7 +17,7 @@ function MobileMenu() {
   }
 
   return (
-    <div className="bg-gray-200 p-2">
+    <div className="bg-gray-200 flex flex-col py-5 px-3 h-full">
       <header className="flex flex-col pb-4 border-b-2 border-gray-400">
         <div className="flex justify-between items-center">
           <p className="font-bold text-3xl">Menu</p>
@@ -52,7 +52,7 @@ function MobileMenu() {
           </div>
         </div>
       </header>
-      <div className="grid grid-cols-2 gap-2 mt-3">
+      <div className="grid grid-cols-2 gap-2 mt-3 grow">
         <button type="button" className="bg-white p-3 rounded-md shadow-md">
           Find friends
         </button>
@@ -87,7 +87,7 @@ function MobileMenu() {
       <div className="w-full mt-5">
         <button
           type="button"
-          className="bg-gray-300 w-full rounded-md"
+          className="bg-gray-300 w-full rounded-md py-2 font-bold"
           onClick={handleLogOut}
         >
           Log out

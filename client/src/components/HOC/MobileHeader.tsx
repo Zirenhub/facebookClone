@@ -82,7 +82,7 @@ function MobileHeader() {
           })}
         </div>
       </header>
-      <main>
+      <main className="grow">
         <Outlet />
       </main>
     </>
