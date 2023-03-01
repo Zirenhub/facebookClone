@@ -56,7 +56,9 @@ function PostFooterReactions({
         );
       })}
       <div style={{ marginLeft: getReactionsWidth() }}>
-        <p>{reactionsDetail.reactionsNum}</p>
+        {reactionsDetail.reactionsNum > 0 && (
+          <p>{reactionsDetail.reactionsNum}</p>
+        )}
       </div>
     </div>
   );
