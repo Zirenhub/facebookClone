@@ -7,6 +7,8 @@ import PostStyle from './Post/PostStyle';
 import Back from '../../../assets/back.svg';
 import Search from '../../../assets/search.svg';
 import PostReactions from './Post/PostReactions';
+import FooterPostComments from './Post/FooterPostComments';
+import FullPostComments from './Post/FullPostComments';
 
 type Props = {
   post: ModifiedPost;
@@ -21,10 +23,11 @@ type Props = {
 
 function SingularPost({ post, deletePost, reactPost }: Props) {
   const [openPost, setOpenPost] = useState<boolean>(false);
+  const [commentsOpen, setCommentsOpen] = useState<boolean>(false);
 
   if (openPost) {
     return (
-      <div className="z-10 absolute bg-white h-full w-full top-0 left-0 p-2">
+      <div className="z-10 flex flex-col absolute bg-white h-full w-full top-0 left-0 p-2">
         <header className="flex items-center justify-between">
           <button
             type="button"
@@ -38,10 +41,12 @@ function SingularPost({ post, deletePost, reactPost }: Props) {
             <Search height="100%" width="100%" />
           </button>
         </header>
-        <div className="flex flex-col mt-3">
+        <div className="flex flex-col mt-3 grow">
           <PostHeader post={post} deletePost={deletePost} />
           <PostStyle post={post} />
           <PostFooter post={post} reactPost={reactPost} />
+          <PostReactions reactionsDetail={post.reactionsDetails} />
+          <FullPostComments postID={post._id} />
         </div>
       </div>
     );
@@ -65,7 +70,14 @@ function SingularPost({ post, deletePost, reactPost }: Props) {
       </div>
       <PostStyle post={post} />
       <PostReactions reactionsDetail={post.reactionsDetails} />
-      <PostFooter post={post} reactPost={reactPost} />
+      <PostFooter
+        post={post}
+        reactPost={reactPost}
+        setCommentsOpen={() => setCommentsOpen(true)}
+      />
+      {commentsOpen && (
+        <FooterPostComments post={post} close={() => setCommentsOpen(false)} />
+      )}
     </>
   );
 }

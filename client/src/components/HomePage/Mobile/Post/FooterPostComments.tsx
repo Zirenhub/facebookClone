@@ -1,7 +1,7 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
-import React, { useRef, useState } from 'react';
-import { getPostComments, postComment } from '../../../../api/post';
-import { Comment, ModifiedPost } from '../../../../types/Post';
+import { useRef } from 'react';
+import useComments from '../../../../hooks/useComments';
+import { ModifiedPost } from '../../../../types/Post';
+import CommentInput from './CommentInput';
 import PostReactions from './PostReactions';
 import SingleComment from './SingleComment';
 
@@ -11,30 +11,11 @@ type Props = {
 };
 
 function PostComments({ post, close }: Props) {
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [isWriting, setIsWriting] = useState<boolean>(false);
-  const [comment, setComment] = useState<string>('');
-
   const displayHeight = window.innerHeight;
   const heightRef = useRef<HTMLDivElement>(null);
 
-  const { isLoading, isError, error } = useQuery<Comment[], Error>({
-    queryKey: ['comments', post._id],
-    queryFn: () => getPostComments(post._id),
-    onSuccess(successData) {
-      setComments(successData);
-    },
-  });
-
-  const mutateSendComment = useMutation({
-    mutationFn: () => {
-      return postComment(post._id, comment);
-    },
-    onSuccess(successData) {
-      setComments([...comments, successData]);
-      setComment('');
-    },
-  });
+  const { comments, mutateSendComment, isLoading, isError, error } =
+    useComments(post._id);
 
   function handleMove(e: React.TouchEvent) {
     if (heightRef.current) {
@@ -63,7 +44,7 @@ function PostComments({ post, close }: Props) {
         </div>
         <div className="flex flex-col grow">
           {isLoading && <p className="text-center">Loading...</p>}
-          {isError && <p>{error.message}</p>}
+          {isError && error && <p>{error.message}</p>}
           {comments.length ? (
             <div className="flex flex-col gap-3">
               {comments.map((c) => {
@@ -78,39 +59,7 @@ function PostComments({ post, close }: Props) {
             <p className="text-center">No comments yet.</p>
           )}
         </div>
-        <div className="border-t-2 py-1">
-          <input
-            type="text"
-            placeholder="Write a comment..."
-            value={comment}
-            className="w-full bg-gray-200 rounded-lg p-1"
-            onFocus={() => setIsWriting(true)}
-            onBlur={() => setIsWriting(false)}
-            onChange={(e: React.SyntheticEvent) => {
-              const target = e.target as HTMLInputElement;
-              setComment(target.value);
-            }}
-          />
-          {isWriting && (
-            <div className="flex justify-between items-center">
-              <div className="flex gap-2 items-center">
-                <button type="button">Photo</button>
-                <button type="button">Gif</button>
-                <button type="button">Emoji</button>
-              </div>
-              <button
-                type="button"
-                onMouseDown={() => {
-                  if (comment) {
-                    mutateSendComment.mutate();
-                  }
-                }}
-              >
-                Send
-              </button>
-            </div>
-          )}
-        </div>
+        <CommentInput mutateSendComment={mutateSendComment} />
       </div>
     </div>
   );

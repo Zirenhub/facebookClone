@@ -8,7 +8,6 @@ import LikeReaction from '../../../../assets/like-reaction.gif';
 import Like from '../../../../assets/like.svg';
 import Comment from '../../../../assets/comment.svg';
 import Share from '../../../../assets/share.svg';
-import FooterPostComments from './FooterPostComments';
 /* eslint react/jsx-props-no-spreading: 0 */
 
 type Props = {
@@ -19,11 +18,11 @@ type Props = {
     [string, ReactionTypes | null],
     unknown
   >;
+  setCommentsOpen?: () => void;
 };
 
-function PostFooter({ post, reactPost }: Props) {
+function PostFooter({ post, reactPost, setCommentsOpen }: Props) {
   const [reactionsMenu, setReactionsMenu] = useState<boolean>(false);
-  const [commentsOpen, setCommentsOpen] = useState<boolean>(false);
 
   const reaction = post.reactionsDetails.myReaction;
 
@@ -123,52 +122,51 @@ function PostFooter({ post, reactPost }: Props) {
   }, []);
 
   return (
-    <>
-      {commentsOpen && (
-        <FooterPostComments post={post} close={() => setCommentsOpen(false)} />
+    <div className="flex relative h-12 items-center justify-between text-gray-600 px-4 mt-1 py-1 border-t-2">
+      {reactionsMenu && (
+        <div className="bg-white rounded-md flex absolute -top-12 left-10">
+          <button type="button" onTouchStart={() => handleReaction('laugh')}>
+            <img
+              src={LaughingReaction}
+              alt="laughing reaction"
+              className="bg-contain h-12 w-12 "
+            />
+          </button>
+          <button type="button" onTouchStart={() => handleReaction('heart')}>
+            <img
+              src={HeartReaction}
+              alt="heart reaction"
+              className="h-12 w-12 bg-contain"
+            />
+          </button>
+          <button type="button" onTouchStart={() => handleReaction('like')}>
+            <img
+              src={LikeReaction}
+              alt="like reaction"
+              className="h-12 w-12 bg-contain"
+            />
+          </button>
+        </div>
       )}
-      <div className="flex relative h-12 items-center justify-between text-gray-600 px-4 mt-1 py-1 border-t-2">
-        {reactionsMenu && (
-          <div className="bg-white rounded-md flex absolute -top-12 left-10">
-            <button type="button" onTouchStart={() => handleReaction('laugh')}>
-              <img
-                src={LaughingReaction}
-                alt="laughing reaction"
-                className="bg-contain h-12 w-12 "
-              />
-            </button>
-            <button type="button" onTouchStart={() => handleReaction('heart')}>
-              <img
-                src={HeartReaction}
-                alt="heart reaction"
-                className="h-12 w-12 bg-contain"
-              />
-            </button>
-            <button type="button" onTouchStart={() => handleReaction('like')}>
-              <img
-                src={LikeReaction}
-                alt="like reaction"
-                className="h-12 w-12 bg-contain"
-              />
-            </button>
-          </div>
-        )}
-        {getReactionButton()}
-        <button
-          type="button"
-          onClick={() => setCommentsOpen(true)}
-          className="flex items-center"
-        >
-          <Comment height="30px" width="30px" />
-          Comment
-        </button>
-        <button type="button" className="flex items-center">
-          <Share height="30px" width="30px" />
-          Share
-        </button>
-      </div>
-    </>
+      {getReactionButton()}
+      <button
+        type="button"
+        onClick={setCommentsOpen}
+        className="flex items-center"
+      >
+        <Comment height="30px" width="30px" />
+        Comment
+      </button>
+      <button type="button" className="flex items-center">
+        <Share height="30px" width="30px" />
+        Share
+      </button>
+    </div>
   );
 }
+
+PostFooter.defaultProps = {
+  setCommentsOpen: undefined,
+};
 
 export default PostFooter;
