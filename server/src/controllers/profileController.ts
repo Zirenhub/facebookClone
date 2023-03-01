@@ -295,13 +295,25 @@ export const getFriends = async (
 
 export const getPosts = async (req: IUserRequest, res: Response) => {
   try {
+    const cursor = parseInt(req.query.cursor as string) || 0;
+    const limit = 3;
+
     const id = req.params.id;
-    const posts = await PostModel.find({ author: id }).populate(
-      'author'
-    );
+    const posts = await PostModel.find({ author: id })
+      .sort({ createdAt: -1 })
+      .skip(cursor)
+      .limit(limit)
+      .populate('author');
+
+    let nextCursor: number | null = cursor + posts.length;
+
+    if (posts.length < limit) {
+      nextCursor = null;
+    }
+
     return res.json({
       status: 'success',
-      data: posts,
+      data: { posts, nextCursor },
       message: null,
     });
   } catch (err: any) {

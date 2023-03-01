@@ -73,7 +73,7 @@ export type GetFriendsRes = {
 
 export type GetProfilePostsRes = {
   status: 'success' | 'error';
-  data?: TDBPost[];
+  data?: { posts: TDBPost[]; nextCursor: number | null };
   errors?: null;
   message: string | null;
 };

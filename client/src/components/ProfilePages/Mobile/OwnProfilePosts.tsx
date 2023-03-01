@@ -1,31 +1,73 @@
-import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import { getProfilePosts } from '../../../api/profile';
 import Pfp from '../../../assets/pfp-two.svg';
 import Pictures from '../../../assets/pictures.svg';
 import usePosts from '../../../hooks/usePosts';
-import { TDBPost } from '../../../types/Post';
 import CreatePostModal from '../../HomePage/Mobile/CreatePost';
 import SingularPost from '../../HomePage/Mobile/SingularPost';
 
 function OwnProfilePosts({ id }: { id: string }) {
   const [openCreatePost, setOpenCreatePost] = useState<boolean>(false);
 
-  const { isLoading, isError, data, error } = useQuery<TDBPost[], Error>({
-    queryKey: ['posts', id],
-    queryFn: () => getProfilePosts(id),
+  const {
+    data,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    status,
+  } = useInfiniteQuery({
+    queryKey: ['posts', 'timeline'],
+    queryFn: ({ pageParam = 0 }) => getProfilePosts(id, pageParam),
+    getNextPageParam: (lastPage, pages) => lastPage.nextCursor,
     refetchOnWindowFocus: false,
   });
 
-  const { mutationDeletePost, mutationReactPost, posts, setPosts } =
-    usePosts(data);
+  const {
+    mutationCreatePost,
+    mutationDeletePost,
+    mutationReactPost,
+    posts,
+    setInitialPosts,
+  } = usePosts();
+
+  useEffect(() => {
+    if (status === 'success' && !isFetching) {
+      const allPosts = data.pages.reduce((acc, page) => {
+        return acc.concat(page.posts as []);
+      }, []);
+      setInitialPosts(allPosts);
+    }
+  }, [data, isFetching, setInitialPosts, status]);
+
+  useEffect(() => {
+    function handleScroll() {
+      const isAtBottom =
+        window.innerHeight + window.scrollY >= document.body.offsetHeight;
+      if (isAtBottom && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+    }
+
+    const pageEl = document.querySelector('body');
+    if (pageEl) {
+      pageEl.addEventListener('scroll', handleScroll);
+    }
+
+    return () => {
+      if (pageEl) {
+        pageEl.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   if (openCreatePost) {
     return (
       <CreatePostModal
         close={() => setOpenCreatePost(false)}
-        posts={posts}
-        setPosts={setPosts}
+        mutationCreatePost={mutationCreatePost}
       />
     );
   }
@@ -71,8 +113,10 @@ function OwnProfilePosts({ id }: { id: string }) {
           </div>
         </div>
       </div>
-      {isLoading && <p className="text-center">Loading...</p>}
-      {isError && <p className="text-center">{error.message}</p>}
+      {status === 'loading' && <p className="text-center">Loading...</p>}
+      {status === 'error' && error instanceof Error && (
+        <p className="text-center">{error.message}</p>
+      )}
       {posts
         .sort(
           (a, b) =>
