@@ -1,23 +1,27 @@
+import { UseMutationResult } from '@tanstack/react-query';
 import { useState } from 'react';
 import Pfp from '../../../assets/pfp-two.svg';
 import Pictures from '../../../assets/pictures.svg';
-import { ModifiedPost } from '../../../types/Post';
+import { TDBPost, TPost } from '../../../types/Post';
 import CreatePostModal from './CreatePost';
 
 type Props = {
-  setPosts: React.Dispatch<React.SetStateAction<ModifiedPost[]>>;
-  posts: ModifiedPost[];
+  mutationCreatePost: UseMutationResult<
+    TDBPost,
+    unknown,
+    [TPost, 'default' | 'image'],
+    unknown
+  >;
 };
 
-function WritePost({ setPosts, posts }: Props) {
+function WritePost({ mutationCreatePost }: Props) {
   const [openCreatePost, setOpenCreatePost] = useState<boolean>(false);
 
   if (openCreatePost) {
     return (
       <CreatePostModal
+        mutationCreatePost={mutationCreatePost}
         close={() => setOpenCreatePost(false)}
-        setPosts={setPosts}
-        posts={posts}
       />
     );
   }

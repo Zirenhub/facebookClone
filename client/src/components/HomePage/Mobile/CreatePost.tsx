@@ -1,23 +1,25 @@
 import { useEffect, useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { UseMutationResult } from '@tanstack/react-query';
 import useAuthContext from '../../../hooks/useAuthContext';
 import Pfp from '../../../assets/pfp-two.svg';
 import Back from '../../../assets/back.svg';
 import Close from '../../../assets/x.svg';
 import CreateDefaultPost from './CreatePostTypes/CreateDefaultPost';
 import CreateImagePost from './CreatePostTypes/CreateImagePost';
-import { ModifiedPost, TDBPost, TPost } from '../../../types/Post';
-import { postDefault, postImage } from '../../../api/post';
+import { TDBPost, TPost } from '../../../types/Post';
 import Loading from '../../Loading';
-import createReactionDetails from '../../../utils/createReactionDetails';
 
 type Props = {
+  mutationCreatePost: UseMutationResult<
+    TDBPost,
+    unknown,
+    [TPost, 'default' | 'image'],
+    unknown
+  >;
   close: () => void;
-  setPosts: React.Dispatch<React.SetStateAction<ModifiedPost[]>>;
-  posts: ModifiedPost[];
 };
 
-function CreatePost({ close, setPosts, posts }: Props) {
+function CreatePost({ mutationCreatePost, close }: Props) {
   const [postType, setPostType] = useState<'default' | 'image'>('default');
   const [post, setPost] = useState<TPost>({
     content: '',
@@ -28,20 +30,6 @@ function CreatePost({ close, setPosts, posts }: Props) {
   const [canSendPost, setCanSendPost] = useState<boolean>(false);
 
   const auth = useAuthContext();
-
-  const mutateSendPost = useMutation<TDBPost, Error>({
-    mutationFn: () => {
-      const { content, image, background, audience } = post;
-      if (postType === 'image' && image) {
-        return postImage(content, image, audience);
-      }
-      return postDefault(content, background, audience);
-    },
-    onSuccess(data, variables, context) {
-      setPosts([...posts, createReactionDetails(data)]);
-      close();
-    },
-  });
 
   function handlePostAudience(e: React.SyntheticEvent) {
     const target = e.target as HTMLSelectElement;
@@ -69,7 +57,7 @@ function CreatePost({ close, setPosts, posts }: Props) {
     }
   }, [post, postType]);
 
-  if (mutateSendPost.isLoading) {
+  if (mutationCreatePost.isLoading) {
     return <Loading />;
   }
 
@@ -93,7 +81,7 @@ function CreatePost({ close, setPosts, posts }: Props) {
             type="button"
             onClick={() => {
               if (canSendPost) {
-                mutateSendPost.mutate();
+                mutationCreatePost.mutate([post, postType]);
               }
             }}
             className={`${
@@ -144,9 +132,10 @@ function CreatePost({ close, setPosts, posts }: Props) {
           {postType === 'image' && (
             <CreateImagePost post={post} setPost={setPost} />
           )}
-          {mutateSendPost.isError && (
+          {mutationCreatePost.isError && (
             <p className="text-center mt-5 border-t-2 text-xl font-bold">
-              {mutateSendPost.error.message}
+              {mutationCreatePost.error instanceof Error &&
+                mutationCreatePost.error.message}
             </p>
           )}
         </div>

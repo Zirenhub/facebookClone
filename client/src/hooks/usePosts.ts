@@ -1,24 +1,41 @@
 import { useMutation } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import { deletePost, postReact, removePostReact } from '../api/post';
+import {
+  deletePost,
+  postDefault,
+  postImage,
+  postReact,
+  removePostReact,
+} from '../api/post';
 import createReactionDetails from '../utils/createReactionDetails';
-import { ModifiedPost, ReactionTypes, TDBPost } from '../types/Post';
+import { ModifiedPost, ReactionTypes, TDBPost, TPost } from '../types/Post';
 import useAuthContext from './useAuthContext';
 
-function usePosts(rawPosts?: TDBPost[]) {
+function usePosts() {
+  const [initialPosts, setInitialPosts] = useState<TDBPost[]>([]);
   const [posts, setPosts] = useState<ModifiedPost[]>([]);
 
   const auth = useAuthContext();
 
   useEffect(() => {
-    if (rawPosts) {
-      setPosts(
-        rawPosts.map((post) => {
-          return createReactionDetails(post, auth.user?._id);
-        })
-      );
-    }
-  }, [rawPosts, auth.user]);
+    const modifiedPosts = initialPosts.map((post) => {
+      return createReactionDetails(post, auth.user?._id);
+    });
+    setPosts(modifiedPosts);
+  }, [initialPosts, auth]);
+
+  const mutationCreatePost = useMutation({
+    mutationFn: ([post, postType]: [TPost, 'default' | 'image']) => {
+      const { content, image, background, audience } = post;
+      if (postType === 'image' && image) {
+        return postImage(content, image, audience);
+      }
+      return postDefault(content, background, audience);
+    },
+    onSuccess(data, variables, context) {
+      setPosts([...posts, createReactionDetails(data)]);
+    },
+  });
 
   const mutationDeletePost = useMutation({
     mutationFn: (postID: string) => {
@@ -112,7 +129,13 @@ function usePosts(rawPosts?: TDBPost[]) {
     },
   });
 
-  return { mutationDeletePost, mutationReactPost, posts, setPosts };
+  return {
+    mutationCreatePost,
+    mutationDeletePost,
+    mutationReactPost,
+    posts,
+    setInitialPosts,
+  };
 }
 
 export default usePosts;
