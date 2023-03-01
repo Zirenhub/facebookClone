@@ -23,7 +23,7 @@ function HomePage() {
   } = useInfiniteQuery({
     queryKey: ['posts', 'timeline'],
     queryFn: getTimeline,
-    getNextPageParam: (lastPage, pages) => lastPage.nextCursor,
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
     refetchOnWindowFocus: false,
   });
 

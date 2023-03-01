@@ -74,7 +74,7 @@ export type ModifiedPost = {
   updatedAt: string;
 };
 
-export type Comment = {
+export type TComment = {
   __v: string;
   _id: string;
   author: PopulatedAuthor;
