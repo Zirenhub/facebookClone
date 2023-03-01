@@ -19,9 +19,9 @@ function OwnProfilePosts({ id }: { id: string }) {
     isFetchingNextPage,
     status,
   } = useInfiniteQuery({
-    queryKey: ['posts', 'timeline'],
+    queryKey: ['posts', id],
     queryFn: ({ pageParam = 0 }) => getProfilePosts(id, pageParam),
-    getNextPageParam: (lastPage, pages) => lastPage.nextCursor,
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
     refetchOnWindowFocus: false,
   });
 
