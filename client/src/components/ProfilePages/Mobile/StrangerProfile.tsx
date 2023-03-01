@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import {
   acceptRequest,
@@ -8,7 +8,6 @@ import {
 } from '../../../api/profile';
 import useAuthContext from '../../../hooks/useAuthContext';
 import usePosts from '../../../hooks/usePosts';
-import { TDBPost } from '../../../types/Post';
 import { TProfile, TProfileFriend } from '../../../types/Profile';
 import SingularPost from '../../HomePage/Mobile/SingularPost';
 import Popup from '../../Popup';
@@ -30,23 +29,62 @@ function StangerProfile({ profileData }: { profileData: TProfile }) {
   ];
   const auth = useAuthContext();
 
-  const { isLoading, isError, data, error } = useQuery<TDBPost[], Error>({
+  const {
+    data,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    status,
+  } = useInfiniteQuery({
     queryKey: ['posts', profileData._id],
-    queryFn: () => getProfilePosts(profileData._id),
+    queryFn: ({ pageParam = 0 }) => getProfilePosts(profileData._id, pageParam),
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
     refetchOnWindowFocus: false,
   });
 
-  const { mutationReactPost, posts } = usePosts(data);
+  const { mutationReactPost, posts, setInitialPosts } = usePosts();
+
+  useEffect(() => {
+    if (status === 'success' && !isFetching) {
+      const allPosts = data.pages.reduce((acc, page) => {
+        return acc.concat(page.posts as []);
+      }, []);
+      setInitialPosts(allPosts);
+    }
+  }, [data, isFetching, setInitialPosts, status]);
+
+  useEffect(() => {
+    function handleScroll() {
+      const isAtBottom =
+        window.innerHeight + window.scrollY >= document.body.offsetHeight;
+      if (isAtBottom && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+    }
+
+    const pageEl = document.querySelector('body');
+    if (pageEl) {
+      pageEl.addEventListener('scroll', handleScroll);
+    }
+
+    return () => {
+      if (pageEl) {
+        pageEl.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const requestMutation = useMutation({
-    mutationFn: (status: 'send' | 'accept' | 'cancel') => {
-      if (status === 'send') {
+    mutationFn: (fStatus: 'send' | 'accept' | 'cancel') => {
+      if (fStatus === 'send') {
         return sendRequest(profileData._id);
       }
-      if (status === 'accept' && friendStatus) {
+      if (fStatus === 'accept' && friendStatus) {
         return acceptRequest(friendStatus._id);
       }
-      if (status === 'cancel' && friendStatus) {
+      if (fStatus === 'cancel' && friendStatus) {
         return rejectRequest(friendStatus._id);
       }
       return Promise.resolve(null);
@@ -164,8 +202,7 @@ function StangerProfile({ profileData }: { profileData: TProfile }) {
             })}
         </div>
       )}
-      {isError && <p className="text-center">{error.message}</p>}
-      {isLoading && <p className="text-center">Loading...</p>}
+      {status === 'loading' && <p className="text-center">Loading...</p>}
     </div>
   );
 }
