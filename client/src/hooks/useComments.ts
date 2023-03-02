@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import { getPostComments, postComment } from '../api/post';
+import { getPostComments, likeComment, postComment } from '../api/post';
 import { TComment } from '../types/Post';
 
 function useComments(postID: string) {
@@ -15,15 +15,39 @@ function useComments(postID: string) {
   });
 
   const mutateSendComment = useMutation({
-    mutationFn: (comment: string) => {
-      return postComment(postID, comment);
+    mutationFn: (commentID: string) => {
+      return postComment(postID, commentID);
     },
     onSuccess(successData) {
       setComments([...comments, successData]);
     },
   });
 
-  return { comments, mutateSendComment, isLoading, isError, error };
+  const mutateLikeComment = useMutation({
+    mutationFn: (commentID: string) => {
+      return likeComment(commentID);
+    },
+    onSuccess(data, variables) {
+      const updatedComments = comments.map((c) => {
+        if (c._id === variables) {
+          const updatedReactions = [...c.reactions, data];
+          return { ...c, reactions: updatedReactions };
+        }
+        return { ...c };
+      });
+
+      setComments(updatedComments);
+    },
+  });
+
+  return {
+    comments,
+    mutateSendComment,
+    mutateLikeComment,
+    isLoading,
+    isError,
+    error,
+  };
 }
 
 export default useComments;

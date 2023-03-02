@@ -1,13 +1,25 @@
-import { useState } from 'react';
 import useComments from '../../../../hooks/useComments';
+import Loading from '../../../Loading';
 import CommentInput from './CommentInput';
 import SingleComment from './SingleComment';
 
 function FullPostComments({ postID }: { postID: string }) {
-  const [comment, setComment] = useState<string>('');
+  const {
+    comments,
+    mutateSendComment,
+    mutateLikeComment,
+    isLoading,
+    isError,
+    error,
+  } = useComments(postID);
 
-  const { comments, mutateSendComment, isLoading, isError, error } =
-    useComments(postID);
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  if (isError) {
+    return <p>{error?.message}</p>;
+  }
 
   return (
     <div className="flex flex-col grow">
@@ -16,7 +28,10 @@ function FullPostComments({ postID }: { postID: string }) {
           comments.map((c) => {
             return (
               <div key={c._id} className="flex">
-                <SingleComment comment={c} />
+                <SingleComment
+                  comment={c}
+                  mutateLikeComment={mutateLikeComment}
+                />
               </div>
             );
           })
