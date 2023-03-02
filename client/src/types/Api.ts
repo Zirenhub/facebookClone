@@ -1,4 +1,4 @@
-import { ReactionTypes, TDBPost } from './Post';
+import { ReactionTypes, TComment, TDBPost } from './Post';
 import { TProfile, TProfileWithoutFullName } from './Profile';
 import { DefaultReq, TRequest } from './Request';
 
@@ -87,14 +87,14 @@ export type GetProfilePostsRes = {
 
 export type PostCommentRes = {
   status: 'success' | 'error';
-  data?: Comment;
+  data?: TComment;
   errors?: ValidationError[] | null;
   message: string | null;
 };
 
 export type GetPostCommentsRes = {
   status: 'success' | 'error';
-  data?: Comment[];
+  data?: TComment[];
   errors?: null;
   message: string | null;
 };
