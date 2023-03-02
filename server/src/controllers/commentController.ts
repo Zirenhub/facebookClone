@@ -1,6 +1,7 @@
 import { IUserRequest } from '../middleware/jwtAuth';
 import { Response } from 'express';
 import CommentModel from '../models/comment';
+import { body, validationResult } from 'express-validator';
 
 export const likeComment = async (
   req: IUserRequest,
@@ -88,6 +89,59 @@ export const unlikeComment = async (
   }
 };
 
-export const replyToComment = (req: IUserRequest, res: Response) => {
-  // todo
-};
+export const replyToComment = [
+  body('comment')
+    .trim()
+    .escape()
+    .notEmpty()
+    .withMessage("Comment can't be empty")
+    .isLength({ min: 1, max: 250 })
+    .withMessage(
+      "Comment length can't be larger than 250 characters"
+    ),
+
+  async (req: IUserRequest, res: Response) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          status: 'error',
+          errors: errors.array(),
+          message: null,
+        });
+      }
+
+      const { postID, comment } = req.body;
+      const parentComment = await CommentModel.findById(
+        req.params.id
+      );
+      if (!parentComment) {
+        return res.status(400).json({
+          status: 'error',
+          errors: null,
+          message: 'Comment was not found.',
+        });
+      }
+
+      const newComment = await new CommentModel({
+        author: req.user._id,
+        post: postID,
+        parent: parentComment._id,
+        content: comment,
+      }).populate('author');
+      await newComment.save();
+
+      return res.json({
+        status: 'success',
+        data: newComment,
+        message: null,
+      });
+    } catch (err: any) {
+      res.status(500).json({
+        status: 'error',
+        errors: null,
+        message: err.message,
+      });
+    }
+  },
+];
