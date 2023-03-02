@@ -91,11 +91,33 @@ export async function postComment(
   return getFinal(status, data, errors, message);
 }
 
+export async function replyToComment(
+  postID: string,
+  commentID: string,
+  comment: string
+): Promise<TComment> {
+  const res = await fetch(`/api/v1/comment/${commentID}/reply`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ comment, postID }),
+  });
+  const { status, data, errors, message }: PostCommentRes = await res.json();
+  return getFinal(status, data, errors, message);
+}
+
 export async function likeComment(commentID: string): Promise<ReactToPostData> {
   const res = await fetch(`/api/v1/comment/${commentID}/like`, {
     method: 'POST',
   });
   const { status, data, errors, message }: LikeCommentRes = await res.json();
+  return getFinal(status, data, errors, message);
+}
+
+export async function unlikeComment(commentID: string) {
+  const res = await fetch(`/api/v1/comment/${commentID}/unlike`, {
+    method: 'POST',
+  });
+  const { status, data, errors, message }: EmptyRes = await res.json();
   return getFinal(status, data, errors, message);
 }
 
