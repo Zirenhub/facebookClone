@@ -9,7 +9,7 @@ export const getTimeline = async (
 ) => {
   try {
     const cursor = parseInt(req.query.cursor as string) || 0;
-    const limit = 3;
+    const limit = 5;
 
     const friends = await getFriendsIds(req.user._id);
     const posts = await PostModel.find({
