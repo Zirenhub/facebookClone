@@ -2,13 +2,13 @@ import {
   CreatePostRes,
   EmptyRes,
   GetPostCommentsRes,
+  LikeCommentRes,
   PostCommentRes,
   PostsRes,
   ReactToPostData,
   ReactToPostRes,
 } from '../types/Api';
-import { Comment, TDBPost } from '../types/Post';
-import createReactionDetails from '../utils/createReactionDetails';
+import { TComment, TDBPost } from '../types/Post';
 import getFinal from './getError';
 
 export async function postImage(
@@ -81,7 +81,7 @@ export async function removePostReact(postID: string): Promise<null> {
 export async function postComment(
   postID: string,
   comment: string
-): Promise<Comment> {
+): Promise<TComment> {
   const res = await fetch(`/api/v1/post/${postID}/comment`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -91,7 +91,15 @@ export async function postComment(
   return getFinal(status, data, errors, message);
 }
 
-export async function getPostComments(postID: string): Promise<Comment[]> {
+export async function likeComment(commentID: string): Promise<ReactToPostData> {
+  const res = await fetch(`/api/v1/comment/${commentID}/like`, {
+    method: 'POST',
+  });
+  const { status, data, errors, message }: LikeCommentRes = await res.json();
+  return getFinal(status, data, errors, message);
+}
+
+export async function getPostComments(postID: string): Promise<TComment[]> {
   const res = await fetch(`/api/v1/post/${postID}/comments`);
   const { status, data, errors, message }: GetPostCommentsRes =
     await res.json();
