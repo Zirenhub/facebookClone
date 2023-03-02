@@ -1,8 +1,9 @@
 import { UseMutationResult } from '@tanstack/react-query';
 import { useState } from 'react';
+import { TComment } from '../../../../types/Post';
 
 type Props = {
-  mutateSendComment: UseMutationResult<Comment, unknown, string, unknown>;
+  mutateSendComment: UseMutationResult<TComment, unknown, string, unknown>;
 };
 
 function CommentInput({ mutateSendComment }: Props) {

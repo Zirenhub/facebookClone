@@ -81,6 +81,7 @@ export type TComment = {
   post: string;
   parent?: string;
   content: string;
+  reactions: Reactions;
   createdAt: string;
   updatedAt: string;
 };
