@@ -1,6 +1,6 @@
 /* eslint-disable no-nested-ternary */
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import Loading from '../../components/Loading';
 import MobileWritePost from '../../components/HomePage/Mobile/WritePost';
 import MobileAddStory from '../../components/HomePage/Mobile/AddStory';
@@ -45,23 +45,20 @@ function HomePage() {
   }, [data, isFetching, setInitialPosts, status]);
 
   useEffect(() => {
+    const container = document.body;
+
     function handleScroll() {
       const isAtBottom =
-        window.innerHeight + window.scrollY >= document.body.offsetHeight;
+        container.scrollTop + container.clientHeight >= container.scrollHeight;
       if (isAtBottom && hasNextPage && !isFetchingNextPage) {
         fetchNextPage();
       }
     }
 
-    const pageEl = document.querySelector('body');
-    if (pageEl) {
-      pageEl.addEventListener('scroll', handleScroll);
-    }
+    container.addEventListener('scroll', handleScroll);
 
     return () => {
-      if (pageEl) {
-        pageEl.removeEventListener('scroll', handleScroll);
-      }
+      container.removeEventListener('scroll', handleScroll);
     };
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
@@ -70,7 +67,7 @@ function HomePage() {
   }
 
   return (
-    <div className="p-2" id="homepage">
+    <div className="p-2 h-full overflow-auto" id="homepage">
       <MobileWritePost mutationCreatePost={mutationCreatePost} />
       <MobileAddStory />
       {posts
@@ -96,13 +93,11 @@ function HomePage() {
         })}
       {status === 'error' && error instanceof Error && <p>{error.message}</p>}
       <p>
-        {isFetchingNextPage
-          ? 'Loading more...'
-          : hasNextPage
-          ? 'Load More'
-          : 'Nothing more to load'}
+        {isFetchingNextPage && 'Loading more...'}
+        {hasNextPage && 'Load More'}
+        {!isFetchingNextPage && !hasNextPage && 'Nothing more to load'}
       </p>
-      <p>{isFetching && !isFetchingNextPage ? 'Fetching...' : null}</p>
+      {isFetching && !isFetchingNextPage && <p>Fetching...</p>}
     </div>
   );
 }

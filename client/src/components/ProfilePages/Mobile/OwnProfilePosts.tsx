@@ -43,23 +43,20 @@ function OwnProfilePosts({ id }: { id: string }) {
   }, [data, isFetching, setInitialPosts, status]);
 
   useEffect(() => {
+    const container = document.body;
+
     function handleScroll() {
       const isAtBottom =
-        window.innerHeight + window.scrollY >= document.body.offsetHeight;
+        container.scrollTop + container.clientHeight >= container.scrollHeight;
       if (isAtBottom && hasNextPage && !isFetchingNextPage) {
         fetchNextPage();
       }
     }
 
-    const pageEl = document.querySelector('body');
-    if (pageEl) {
-      pageEl.addEventListener('scroll', handleScroll);
-    }
+    container.addEventListener('scroll', handleScroll);
 
     return () => {
-      if (pageEl) {
-        pageEl.removeEventListener('scroll', handleScroll);
-      }
+      container.removeEventListener('scroll', handleScroll);
     };
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
