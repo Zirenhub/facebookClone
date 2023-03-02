@@ -6,8 +6,11 @@ import SingleComment from './SingleComment';
 function FullPostComments({ postID }: { postID: string }) {
   const {
     comments,
-    mutateSendComment,
+    mutateReply,
     mutateLikeComment,
+    mutateUnlikeComment,
+    replyingTo,
+    setReplyingTo,
     isLoading,
     isError,
     error,
@@ -31,6 +34,9 @@ function FullPostComments({ postID }: { postID: string }) {
                 <SingleComment
                   comment={c}
                   mutateLikeComment={mutateLikeComment}
+                  mutateUnlikeComment={mutateUnlikeComment}
+                  setReplyingTo={setReplyingTo}
+                  replyingTo={replyingTo}
                 />
               </div>
             );
@@ -39,7 +45,7 @@ function FullPostComments({ postID }: { postID: string }) {
           <p className="text-center text-dimGray">No comments here...</p>
         )}
       </div>
-      <CommentInput mutateSendComment={mutateSendComment} />
+      <CommentInput mutateReply={mutateReply} replyingTo={replyingTo} />
     </div>
   );
 }
