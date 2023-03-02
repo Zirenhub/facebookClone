@@ -1,17 +1,23 @@
 import { UseMutationResult } from '@tanstack/react-query';
 import { useState } from 'react';
-import { TComment } from '../../../../types/Post';
+import { TComment, UpdatedComment } from '../../../../types/Post';
 
 type Props = {
-  mutateSendComment: UseMutationResult<TComment, unknown, string, unknown>;
+  mutateReply: UseMutationResult<TComment, unknown, string, unknown>;
+  replyingTo: UpdatedComment | null;
 };
 
-function CommentInput({ mutateSendComment }: Props) {
+function CommentInput({ mutateReply, replyingTo }: Props) {
   const [comment, setComment] = useState<string>('');
   const [isWriting, setIsWriting] = useState<boolean>(false);
 
   return (
     <div className="border-t-2 py-1">
+      {replyingTo && (
+        <p className="text-dimGray">
+          Replying to {replyingTo.author.fullName}...
+        </p>
+      )}
       <input
         type="text"
         placeholder="Write a comment..."
@@ -35,7 +41,7 @@ function CommentInput({ mutateSendComment }: Props) {
             type="button"
             onMouseDown={() => {
               if (comment) {
-                mutateSendComment.mutate(comment);
+                mutateReply.mutate(comment);
               }
             }}
           >
