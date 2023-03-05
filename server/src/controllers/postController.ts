@@ -7,6 +7,7 @@ import path from 'path';
 
 import dotenv from 'dotenv';
 import CommentModel from '../models/comment';
+import { IComment, ModifiedComment } from '../interfaces/IComment';
 dotenv.config();
 
 const cloudinary = require('cloudinary').v2;
@@ -322,9 +323,37 @@ export const getPostComments = async (
     const comments = await CommentModel.find({
       post: postID,
     }).populate('author');
+
+    const commentIds: { [key: string]: ModifiedComment } = {};
+
+    comments.forEach((comment) => {
+      commentIds[comment._id.toString()] = {
+        ...comment.toObject(),
+        children: [],
+      };
+    });
+
+    comments.forEach((comment) => {
+      if (comment.parent) {
+        const parentID = comment.parent.toString();
+
+        commentIds[parentID].children.push(comment.toObject());
+      }
+    });
+
+    for (const comment in commentIds) {
+      if (commentIds[comment].parent) {
+        delete commentIds[comment];
+      }
+    }
+
+    const updatedComments = Object.keys(commentIds).map(
+      (key) => commentIds[key]
+    );
+
     return res.json({
       status: 'success',
-      data: comments,
+      data: updatedComments,
       message: null,
     });
   } catch (err: any) {

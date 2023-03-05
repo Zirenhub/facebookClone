@@ -8,3 +8,12 @@ export interface IComment {
   content: string;
   reactions: Types.DocumentArray<IReaction>;
 }
+
+export interface ModifiedComment {
+  author: Types.ObjectId;
+  post: Types.ObjectId;
+  parent: Types.ObjectId;
+  content: string;
+  reactions: Types.DocumentArray<IReaction>;
+  children: IComment[];
+}
