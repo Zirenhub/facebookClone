@@ -1,15 +1,26 @@
-import { UseMutationResult } from '@tanstack/react-query';
-import { useState } from 'react';
-import { TComment, UpdatedComment } from '../../../../types/Post';
+import { useMutation } from '@tanstack/react-query';
+import React, { useState } from 'react';
+import { postComment } from '../../../../api/post';
+import { TComment } from '../../../../types/Post';
 
 type Props = {
-  mutateReply: UseMutationResult<TComment, unknown, string, unknown>;
-  replyingTo: UpdatedComment | null;
+  onAddComment: (comment: TComment) => void;
+  replyingTo: TComment | null;
+  postID: string;
 };
 
-function CommentInput({ mutateReply, replyingTo }: Props) {
+function CommentInput({ onAddComment, replyingTo, postID }: Props) {
   const [comment, setComment] = useState<string>('');
   const [isWriting, setIsWriting] = useState<boolean>(false);
+
+  const mutateReply = useMutation({
+    mutationFn: () => {
+      return postComment(postID, comment);
+    },
+    onSuccess(data) {
+      onAddComment(data);
+    },
+  });
 
   return (
     <div className="border-t-2 py-1">
@@ -37,14 +48,7 @@ function CommentInput({ mutateReply, replyingTo }: Props) {
             <button type="button">Gif</button>
             <button type="button">Emoji</button>
           </div>
-          <button
-            type="button"
-            onMouseDown={() => {
-              if (comment) {
-                mutateReply.mutate(comment);
-              }
-            }}
-          >
+          <button type="button" onMouseDown={() => mutateReply.mutate()}>
             Send
           </button>
         </div>
