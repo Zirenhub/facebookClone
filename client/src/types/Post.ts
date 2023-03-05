@@ -84,17 +84,5 @@ export type TComment = {
   reactions: Reactions;
   createdAt: string;
   updatedAt: string;
-};
-
-export type UpdatedComment = {
-  __v: string;
-  _id: string;
-  author: PopulatedAuthor;
-  post: string;
-  parent?: string;
-  content: string;
-  reactions: Reactions;
-  createdAt: string;
-  updatedAt: string;
-  children: TComment[];
+  children?: [];
 };
