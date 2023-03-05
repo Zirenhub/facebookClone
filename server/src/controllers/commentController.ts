@@ -119,7 +119,7 @@ export const replyToComment = [
         return res.status(400).json({
           status: 'error',
           errors: null,
-          message: 'Comment was not found.',
+          message: 'Parent comment was not found.',
         });
       }
 
@@ -145,3 +145,26 @@ export const replyToComment = [
     }
   },
 ];
+
+export const getReplies = async (
+  req: IUserRequest,
+  res: Response
+) => {
+  try {
+    const replies = await CommentModel.find({
+      parent: req.params.id,
+    }).populate('author');
+
+    return res.json({
+      status: 'success',
+      data: replies,
+      message: null,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      status: 'error',
+      errors: null,
+      message: err.message,
+    });
+  }
+};

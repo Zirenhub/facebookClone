@@ -18,7 +18,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <QueryClientProvider client={queryClient}>
       <AuthContextProvider>
         <RouterProvider router={isMobile ? mobileRouter : desktopRouter} />
-        <ReactQueryDevtools />
+        {/* <ReactQueryDevtools /> */}
       </AuthContextProvider>
     </QueryClientProvider>
   </React.StrictMode>
