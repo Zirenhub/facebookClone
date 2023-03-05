@@ -1,27 +1,38 @@
-import useComments from '../../../../hooks/useComments';
+import { useQuery } from '@tanstack/react-query';
+import { useCallback, useState } from 'react';
+import { getPostComments } from '../../../../api/post';
+import { TComment } from '../../../../types/Post';
 import Loading from '../../../Loading';
 import CommentInput from './CommentInput';
+
 import SingleComment from './SingleComment';
 
 function FullPostComments({ postID }: { postID: string }) {
-  const {
-    comments,
-    mutateReply,
-    mutateLikeComment,
-    mutateUnlikeComment,
-    replyingTo,
-    setReplyingTo,
-    isLoading,
-    isError,
-    error,
-  } = useComments(postID);
+  const [comments, setComments] = useState<TComment[]>([]);
+  const [replyingTo, setReplyingTo] = useState<TComment | null>(null);
+
+  const { isLoading, isError, error } = useQuery<TComment[], Error>({
+    queryKey: ['comments', postID],
+    queryFn: () => getPostComments(postID),
+    onSuccess(successData) {
+      console.log(successData);
+      setComments(successData);
+    },
+  });
+
+  const handleAddComment = useCallback(
+    (c: TComment) => {
+      setComments([...comments, c]);
+    },
+    [comments]
+  );
 
   if (isLoading) {
     return <Loading />;
   }
 
   if (isError) {
-    return <p>{error?.message}</p>;
+    return <p>{error.message}</p>;
   }
 
   return (
@@ -30,13 +41,11 @@ function FullPostComments({ postID }: { postID: string }) {
         {comments.length ? (
           comments.map((c) => {
             return (
-              <div key={c._id} className="flex">
+              <div key={c._id} className="flex flex-col">
                 <SingleComment
                   comment={c}
-                  mutateLikeComment={mutateLikeComment}
-                  mutateUnlikeComment={mutateUnlikeComment}
-                  setReplyingTo={setReplyingTo}
                   replyingTo={replyingTo}
+                  setReplyingTo={setReplyingTo}
                 />
               </div>
             );
@@ -45,7 +54,11 @@ function FullPostComments({ postID }: { postID: string }) {
           <p className="text-center text-dimGray">No comments here...</p>
         )}
       </div>
-      <CommentInput mutateReply={mutateReply} replyingTo={replyingTo} />
+      <CommentInput
+        onAddComment={handleAddComment}
+        replyingTo={replyingTo}
+        postID={postID}
+      />
     </div>
   );
 }
