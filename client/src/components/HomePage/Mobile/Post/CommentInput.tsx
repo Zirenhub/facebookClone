@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import React, { useState } from 'react';
-import { postComment } from '../../../../api/post';
+import { postComment, replyToComment } from '../../../../api/post';
 import { TComment } from '../../../../types/Post';
 
 type Props = {
@@ -15,6 +15,9 @@ function CommentInput({ onAddComment, replyingTo, postID }: Props) {
 
   const mutateReply = useMutation({
     mutationFn: () => {
+      if (replyingTo) {
+        return replyToComment(postID, replyingTo._id, comment);
+      }
       return postComment(postID, comment);
     },
     onSuccess(data) {

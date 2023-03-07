@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { useCallback, useState } from 'react';
 import { getPostComments } from '../../../../api/post';
-import { TComment } from '../../../../types/Post';
+import { NestedComment, TComment } from '../../../../types/Post';
+import addComment from '../../../../utils/recurseNestedComments';
 import Loading from '../../../Loading';
 import CommentInput from './CommentInput';
 
@@ -15,14 +16,19 @@ function FullPostComments({ postID }: { postID: string }) {
     queryKey: ['comments', postID],
     queryFn: () => getPostComments(postID),
     onSuccess(successData) {
-      console.log(successData);
       setComments(successData);
     },
   });
 
   const handleAddComment = useCallback(
     (c: TComment) => {
-      setComments([...comments, c]);
+      console.log(c);
+      if (c.parent) {
+        const updatedComments = addComment(c as NestedComment, [...comments]);
+        setComments(updatedComments);
+      } else {
+        setComments([...comments, c]);
+      }
     },
     [comments]
   );
