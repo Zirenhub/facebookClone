@@ -8,11 +8,10 @@ import { likeComment, unlikeComment } from '../../../../api/post';
 
 type Props = {
   comment: TComment;
-  setReplyingTo: React.Dispatch<React.SetStateAction<TComment | null>>;
-  replyingTo: TComment | null;
+  handleReplyingTo: () => void;
 };
 
-function CommentFooter({ comment, setReplyingTo, replyingTo }: Props) {
+function CommentFooter({ comment, handleReplyingTo }: Props) {
   const [commentIsLiked, setCommentIsLiked] = useState<boolean>(false);
   const [dateAgo, setDateAgo] = useState<string | null>(null);
   const [numLikes, setNumLikes] = useState<number>(0);
@@ -64,14 +63,6 @@ function CommentFooter({ comment, setReplyingTo, replyingTo }: Props) {
     );
   }
 
-  function handleReplyingTo() {
-    if (replyingTo) {
-      setReplyingTo(null);
-    } else {
-      setReplyingTo(comment);
-    }
-  }
-
   useEffect(() => {
     const commentDate = new Date(comment.createdAt);
     const ago = moment(commentDate).fromNow();
@@ -90,7 +81,7 @@ function CommentFooter({ comment, setReplyingTo, replyingTo }: Props) {
     <div className="flex text-dimGray gap-3">
       <p>{dateAgo}</p>
       {getLikedButton()}
-      <button type="button" onClick={handleReplyingTo}>
+      <button type="button" onClick={() => handleReplyingTo()}>
         Reply
       </button>
       <div className="ml-auto mr-2 flex items-center">
