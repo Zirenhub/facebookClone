@@ -74,6 +74,19 @@ export type ModifiedPost = {
   updatedAt: string;
 };
 
+export type NestedComment = {
+  __v: string;
+  _id: string;
+  author: PopulatedAuthor;
+  post: string;
+  parent: string;
+  content: string;
+  reactions: Reactions;
+  createdAt: string;
+  updatedAt: string;
+  children?: [];
+};
+
 export type TComment = {
   __v: string;
   _id: string;
@@ -84,5 +97,5 @@ export type TComment = {
   reactions: Reactions;
   createdAt: string;
   updatedAt: string;
-  children?: [];
+  children?: NestedComment[];
 };
