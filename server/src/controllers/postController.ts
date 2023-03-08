@@ -322,38 +322,39 @@ export const getPostComments = async (
   try {
     const comments = await CommentModel.find({
       post: postID,
+      parent: { $exists: false },
     }).populate('author');
 
-    const commentIds: { [key: string]: ModifiedComment } = {};
+    // const commentIds: { [key: string]: ModifiedComment } = {};
 
-    comments.forEach((comment) => {
-      commentIds[comment._id.toString()] = {
-        ...comment.toObject(),
-        children: [],
-      };
-    });
+    // comments.forEach((comment) => {
+    //   commentIds[comment._id.toString()] = {
+    //     ...comment.toObject(),
+    //     children: [],
+    //   };
+    // });
 
-    comments.forEach((comment) => {
-      if (comment.parent) {
-        const parentID = comment.parent.toString();
+    // comments.forEach((comment) => {
+    //   if (comment.parent) {
+    //     const parentID = comment.parent.toString();
 
-        commentIds[parentID].children.push(comment.toObject());
-      }
-    });
+    //     commentIds[parentID].children.push(comment.toObject());
+    //   }
+    // });
 
-    for (const comment in commentIds) {
-      if (commentIds[comment].parent) {
-        delete commentIds[comment];
-      }
-    }
+    // for (const comment in commentIds) {
+    //   if (commentIds[comment].parent) {
+    //     delete commentIds[comment];
+    //   }
+    // }
 
-    const updatedComments = Object.keys(commentIds).map(
-      (key) => commentIds[key]
-    );
+    // const updatedComments = Object.keys(commentIds).map(
+    //   (key) => commentIds[key]
+    // );
 
     return res.json({
       status: 'success',
-      data: updatedComments,
+      data: comments,
       message: null,
     });
   } catch (err: any) {
