@@ -129,7 +129,11 @@ export const replyToComment = [
         parent: parentComment._id,
         content: comment,
       }).populate('author');
+
       await newComment.save();
+
+      parentComment.replies += 1;
+      await parentComment.save();
 
       return res.json({
         status: 'success',

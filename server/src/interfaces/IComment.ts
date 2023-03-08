@@ -6,6 +6,7 @@ export interface IComment {
   post: Types.ObjectId;
   parent: Types.ObjectId;
   content: string;
+  replies: number;
   reactions: Types.DocumentArray<IReaction>;
 }
 
@@ -14,6 +15,7 @@ export interface ModifiedComment {
   post: Types.ObjectId;
   parent: Types.ObjectId;
   content: string;
+  replies: number;
   reactions: Types.DocumentArray<IReaction>;
   children: IComment[];
 }

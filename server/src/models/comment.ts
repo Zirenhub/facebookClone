@@ -24,6 +24,11 @@ const CommentSchema = new Schema<IComment>(
       type: String,
       required: true,
     },
+    replies: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
     reactions: [
       {
         author: {
