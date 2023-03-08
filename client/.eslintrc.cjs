@@ -25,6 +25,7 @@ module.exports = {
     'react/react-in-jsx-scope': 0,
     'jsx-a11y/label-has-associated-control': 0,
     'no-underscore-dangle': 0,
+    'no-restricted-syntax': 0,
     'cypress/no-assigning-return-values': 'error',
     'cypress/no-unnecessary-waiting': 'error',
     'cypress/assertion-before-screenshot': 'warn',
