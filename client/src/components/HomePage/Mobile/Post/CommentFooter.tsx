@@ -8,10 +8,10 @@ import { likeComment, unlikeComment } from '../../../../api/post';
 
 type Props = {
   comment: TComment;
-  handleReplyingTo: () => void;
+  handleSetReplying: () => void;
 };
 
-function CommentFooter({ comment, handleReplyingTo }: Props) {
+function CommentFooter({ comment, handleSetReplying }: Props) {
   const [commentIsLiked, setCommentIsLiked] = useState<boolean>(false);
   const [dateAgo, setDateAgo] = useState<string | null>(null);
   const [numLikes, setNumLikes] = useState<number>(0);
@@ -81,7 +81,7 @@ function CommentFooter({ comment, handleReplyingTo }: Props) {
     <div className="flex text-dimGray gap-3">
       <p>{dateAgo}</p>
       {getLikedButton()}
-      <button type="button" onClick={() => handleReplyingTo()}>
+      <button type="button" onClick={handleSetReplying}>
         Reply
       </button>
       <div className="ml-auto mr-2 flex items-center">
