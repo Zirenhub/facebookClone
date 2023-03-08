@@ -1,25 +1,42 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import getReplies from '../../../../api/comment';
 import Pfp from '../../../../assets/pfp-two.svg';
-import { TComment } from '../../../../types/Post';
+import { NestedComment, TComment } from '../../../../types/Post';
 import CommentContent from './CommentContent';
 import CommentFooter from './CommentFooter';
 
 type Props = {
+  addReplies: (c: NestedComment[]) => void;
   comment: TComment;
   replyingTo: TComment | null;
   setReplyingTo: React.Dispatch<React.SetStateAction<TComment | null>>;
 };
 
-function SingleComment({ comment, replyingTo, setReplyingTo }: Props) {
-  const [replies, setReplies] = useState<TComment[] | null>(null);
+function SingleComment({
+  addReplies,
+  comment,
+  replyingTo,
+  setReplyingTo,
+}: Props) {
   const [openedReplies, setOpenedReplies] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (openedReplies && comment.children) {
-      setReplies(comment.children);
+  async function commentReplies() {
+    try {
+      const res = await getReplies(comment._id);
+      addReplies(res);
+      setOpenedReplies(true);
+    } catch (err) {
+      console.log(err);
     }
-  }, [openedReplies, comment]);
+  }
+
+  const handleReplyingTo = useCallback(() => {
+    if (replyingTo) {
+      setReplyingTo(null);
+    } else {
+      setReplyingTo(comment);
+    }
+  }, [setReplyingTo, replyingTo, comment]);
 
   return (
     <div className="flex">
@@ -27,16 +44,16 @@ function SingleComment({ comment, replyingTo, setReplyingTo }: Props) {
         <Pfp height="100%" width="100%" />
       </div>
       <div className="flex flex-col grow">
-        <CommentContent replyingTo={replyingTo} comment={comment} />
-        <CommentFooter
+        <CommentContent
+          replyingToMe={replyingTo?._id === comment._id}
           comment={comment}
-          replyingTo={replyingTo}
-          setReplyingTo={setReplyingTo}
         />
-        {replies?.map((reply) => {
+        <CommentFooter comment={comment} handleReplyingTo={handleReplyingTo} />
+        {comment.children?.map((reply) => {
           return (
             <div key={reply._id}>
               <SingleComment
+                addReplies={addReplies}
                 comment={reply}
                 setReplyingTo={setReplyingTo}
                 replyingTo={replyingTo}
@@ -44,10 +61,10 @@ function SingleComment({ comment, replyingTo, setReplyingTo }: Props) {
             </div>
           );
         })}
-        {!openedReplies && comment.children && comment.children.length > 0 && (
+        {!openedReplies && comment.replies > 0 && (
           <button
             type="button"
-            onClick={() => setOpenedReplies(true)}
+            onClick={commentReplies}
             className="mr-auto text-dimGray"
           >
             Open replies

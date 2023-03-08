@@ -18,17 +18,25 @@ function FullPostComments({ postID }: { postID: string }) {
     onSuccess(successData) {
       setComments(successData);
     },
+    refetchOnWindowFocus: false,
   });
 
   const handleAddComment = useCallback(
     (c: TComment) => {
-      console.log(c);
       if (c.parent) {
-        const updatedComments = addComment(c as NestedComment, [...comments]);
+        const updatedComments = addComment([c as NestedComment], [...comments]);
         setComments(updatedComments);
       } else {
         setComments([...comments, c]);
       }
+    },
+    [comments]
+  );
+
+  const addReplies = useCallback(
+    (c: NestedComment[]) => {
+      const updatedComments = addComment(c, [...comments]);
+      setComments(updatedComments);
     },
     [comments]
   );
@@ -43,12 +51,13 @@ function FullPostComments({ postID }: { postID: string }) {
 
   return (
     <div className="flex flex-col grow">
-      <div className="flex grow flex-col gap-3 border-t-2 pt-2">
+      <div className="flex grow flex-col gap-3 border-t-2 pt-2 mb-[48px]">
         {comments.length ? (
           comments.map((c) => {
             return (
-              <div key={c._id} className="flex flex-col">
+              <div key={c._id}>
                 <SingleComment
+                  addReplies={addReplies}
                   comment={c}
                   replyingTo={replyingTo}
                   setReplyingTo={setReplyingTo}
