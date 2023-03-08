@@ -26,36 +26,36 @@ function findCommentInChildren(
   return null;
 }
 
-function addComment(newComment: NestedComment, comments: TComment[]) {
+function addComment(newComments: NestedComment[], comments: TComment[]) {
   for (let i = 0; i < comments.length; i += 1) {
     const comment = comments[i];
 
-    if (comment._id === newComment.parent) {
-      // parent comment is found in the root comments
-      if (!comment.children) {
-        comment.children = [];
-      }
-
-      comment.children.push(newComment);
-      break;
-    }
-
-    // parent comment may be in children comments, recursively check each child comment
-    if (comment.children) {
-      const parentComment = findCommentInChildren(
-        comment.children,
-        newComment.parent
-      );
-
-      if (parentComment) {
+    newComments.every((c) => {
+      if (comment._id === c.parent) {
+        // parent comment is found in the root comments
         if (!comment.children) {
           comment.children = [];
         }
 
-        comment.children.push(newComment);
-        break;
+        comment.children.push(c);
+        return true;
       }
-    }
+
+      // parent comment may be in children comments, recursively check each child comment
+      if (comment.children) {
+        const parentComment = findCommentInChildren(comment.children, c.parent);
+
+        if (parentComment) {
+          if (!comment.children) {
+            comment.children = [];
+          }
+
+          comment.children.push(c);
+          return true;
+        }
+      }
+      return false;
+    });
   }
 
   return comments;
