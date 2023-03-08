@@ -85,7 +85,7 @@ export type NestedComment = {
   reactions: Reactions;
   createdAt: string;
   updatedAt: string;
-  children?: [];
+  children?: NestedComment[];
 };
 
 export type TComment = {
