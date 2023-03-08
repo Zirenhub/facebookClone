@@ -21,12 +21,13 @@ function CommentInput({ onAddComment, replyingTo, postID }: Props) {
       return postComment(postID, comment);
     },
     onSuccess(data) {
+      setComment('');
       onAddComment(data);
     },
   });
 
   return (
-    <div className="border-t-2 py-1">
+    <div className="bg-gray-100 p-2 fixed bottom-0 left-0 w-full">
       {replyingTo && (
         <p className="text-dimGray">
           Replying to {replyingTo.author.fullName}...
@@ -36,7 +37,7 @@ function CommentInput({ onAddComment, replyingTo, postID }: Props) {
         type="text"
         placeholder="Write a comment..."
         value={comment}
-        className="w-full bg-gray-200 rounded-lg p-1"
+        className="w-full bg-gray-300 rounded-lg p-1"
         onFocus={() => setIsWriting(true)}
         onBlur={() => setIsWriting(false)}
         onChange={(e: React.SyntheticEvent) => {
