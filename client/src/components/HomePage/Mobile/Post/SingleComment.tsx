@@ -1,77 +1,92 @@
+import { UseMutationResult } from '@tanstack/react-query';
 import { useCallback, useState } from 'react';
-import getReplies from '../../../../api/comment';
 import Pfp from '../../../../assets/pfp-two.svg';
 import { NestedComment, TComment } from '../../../../types/Post';
-import CommentContent from './CommentContent';
 import CommentFooter from './CommentFooter';
 
 type Props = {
-  addReplies: (c: NestedComment[]) => void;
   comment: TComment;
+  getReplies: UseMutationResult<NestedComment[], unknown, string, unknown>;
   replyingTo: TComment | null;
   setReplyingTo: React.Dispatch<React.SetStateAction<TComment | null>>;
+  depth: number;
 };
 
 function SingleComment({
-  addReplies,
   comment,
+  getReplies,
   replyingTo,
   setReplyingTo,
+  depth,
 }: Props) {
-  const [openedReplies, setOpenedReplies] = useState<boolean>(false);
+  const [isRepliesOpen, setIsRepliesOpen] = useState<boolean>(false);
 
-  async function commentReplies() {
-    try {
-      const res = await getReplies(comment._id);
-      addReplies(res);
-      setOpenedReplies(true);
-    } catch (err) {
-      console.log(err);
-    }
+  function handleOpenReplies() {
+    getReplies.mutate(comment._id);
+    setIsRepliesOpen(true);
   }
 
-  const handleReplyingTo = useCallback(() => {
+  const handleSetReplying = useCallback(() => {
     if (replyingTo) {
       setReplyingTo(null);
     } else {
       setReplyingTo(comment);
     }
-  }, [setReplyingTo, replyingTo, comment]);
+  }, [comment, replyingTo, setReplyingTo]);
+
+  function getMargin() {
+    if (depth >= 3) {
+      return 30;
+    }
+    return Number(`${depth}0`);
+  }
 
   return (
-    <div className="flex">
-      <div className="h-12 w-12 mr-2">
-        <Pfp height="100%" width="100%" />
-      </div>
-      <div className="flex flex-col grow">
-        <CommentContent
-          replyingToMe={replyingTo?._id === comment._id}
-          comment={comment}
-        />
-        <CommentFooter comment={comment} handleReplyingTo={handleReplyingTo} />
-        {comment.children?.map((reply) => {
-          return (
-            <div key={reply._id}>
-              <SingleComment
-                addReplies={addReplies}
-                comment={reply}
-                setReplyingTo={setReplyingTo}
-                replyingTo={replyingTo}
-              />
-            </div>
-          );
-        })}
-        {!openedReplies && comment.replies > 0 && (
-          <button
-            type="button"
-            onClick={commentReplies}
-            className="mr-auto text-dimGray"
+    <>
+      <div className="flex" style={{ marginLeft: getMargin() }}>
+        <div className="h-12 w-12 mr-2">
+          <Pfp height="100%" width="100%" />
+        </div>
+        <div className="flex flex-col grow">
+          <div
+            className={`flex flex-col rounded-lg py-1 px-2 ${
+              replyingTo?._id === comment._id ? 'bg-blue-200' : 'bg-gray-200'
+            }`}
           >
-            Open replies
-          </button>
-        )}
+            <p className="font-bold">{comment.author.fullName}</p>
+            <div className="flex flex-col gap-2">
+              <p>{comment.content}</p>
+            </div>
+          </div>
+          <CommentFooter
+            comment={comment}
+            handleSetReplying={handleSetReplying}
+          />
+          {!isRepliesOpen && comment.replies > 0 && (
+            <button
+              type="button"
+              onClick={handleOpenReplies}
+              className="mr-auto text-dimGray"
+            >
+              Open {comment.replies} replies
+            </button>
+          )}
+        </div>
       </div>
-    </div>
+      {comment.children?.map((reply) => {
+        return (
+          <div key={reply._id}>
+            <SingleComment
+              comment={reply}
+              getReplies={getReplies}
+              setReplyingTo={setReplyingTo}
+              replyingTo={replyingTo}
+              depth={depth + 1}
+            />
+          </div>
+        );
+      })}
+    </>
   );
 }
 

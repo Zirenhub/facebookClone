@@ -1,66 +1,33 @@
-import { useQuery } from '@tanstack/react-query';
-import { useCallback, useState } from 'react';
-import { getPostComments } from '../../../../api/post';
-import { NestedComment, TComment } from '../../../../types/Post';
-import addComment from '../../../../utils/recurseNestedComments';
+import useComments from '../../../../hooks/useComments';
 import Loading from '../../../Loading';
 import CommentInput from './CommentInput';
 
 import SingleComment from './SingleComment';
 
 function FullPostComments({ postID }: { postID: string }) {
-  const [comments, setComments] = useState<TComment[]>([]);
-  const [replyingTo, setReplyingTo] = useState<TComment | null>(null);
+  const commentsHook = useComments(postID);
 
-  const { isLoading, isError, error } = useQuery<TComment[], Error>({
-    queryKey: ['comments', postID],
-    queryFn: () => getPostComments(postID),
-    onSuccess(successData) {
-      setComments(successData);
-    },
-    refetchOnWindowFocus: false,
-  });
-
-  const handleAddComment = useCallback(
-    (c: TComment) => {
-      if (c.parent) {
-        const updatedComments = addComment([c as NestedComment], [...comments]);
-        setComments(updatedComments);
-      } else {
-        setComments([...comments, c]);
-      }
-    },
-    [comments]
-  );
-
-  const addReplies = useCallback(
-    (c: NestedComment[]) => {
-      const updatedComments = addComment(c, [...comments]);
-      setComments(updatedComments);
-    },
-    [comments]
-  );
-
-  if (isLoading) {
+  if (commentsHook.isLoading) {
     return <Loading />;
   }
 
-  if (isError) {
-    return <p>{error.message}</p>;
+  if (commentsHook.isError && commentsHook.error) {
+    return <p>{commentsHook.error.message}</p>;
   }
 
   return (
     <div className="flex flex-col grow">
       <div className="flex grow flex-col gap-3 border-t-2 pt-2 mb-[48px]">
-        {comments.length ? (
-          comments.map((c) => {
+        {commentsHook.comments.length ? (
+          commentsHook.comments.map((c) => {
             return (
               <div key={c._id}>
                 <SingleComment
-                  addReplies={addReplies}
                   comment={c}
-                  replyingTo={replyingTo}
-                  setReplyingTo={setReplyingTo}
+                  getReplies={commentsHook.mutateGetCommentReplies}
+                  replyingTo={commentsHook.replyingTo}
+                  setReplyingTo={commentsHook.setReplyingTo}
+                  depth={0}
                 />
               </div>
             );
@@ -70,9 +37,8 @@ function FullPostComments({ postID }: { postID: string }) {
         )}
       </div>
       <CommentInput
-        onAddComment={handleAddComment}
-        replyingTo={replyingTo}
-        postID={postID}
+        sendReply={commentsHook.mutateReply}
+        replyingTo={commentsHook.replyingTo}
       />
     </div>
   );

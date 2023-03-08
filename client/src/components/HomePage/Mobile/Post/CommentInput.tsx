@@ -1,30 +1,22 @@
-import { useMutation } from '@tanstack/react-query';
+import { UseMutationResult } from '@tanstack/react-query';
 import React, { useState } from 'react';
-import { postComment, replyToComment } from '../../../../api/post';
 import { TComment } from '../../../../types/Post';
 
 type Props = {
-  onAddComment: (comment: TComment) => void;
+  sendReply: UseMutationResult<TComment, unknown, string, unknown>;
   replyingTo: TComment | null;
-  postID: string;
 };
 
-function CommentInput({ onAddComment, replyingTo, postID }: Props) {
+function CommentInput({ sendReply, replyingTo }: Props) {
   const [comment, setComment] = useState<string>('');
   const [isWriting, setIsWriting] = useState<boolean>(false);
 
-  const mutateReply = useMutation({
-    mutationFn: () => {
-      if (replyingTo) {
-        return replyToComment(postID, replyingTo._id, comment);
-      }
-      return postComment(postID, comment);
-    },
-    onSuccess(data) {
+  function handleSendReply() {
+    sendReply.mutate(comment);
+    if (sendReply.isSuccess) {
       setComment('');
-      onAddComment(data);
-    },
-  });
+    }
+  }
 
   return (
     <div className="bg-gray-100 p-2 fixed bottom-0 left-0 w-full">
@@ -52,7 +44,7 @@ function CommentInput({ onAddComment, replyingTo, postID }: Props) {
             <button type="button">Gif</button>
             <button type="button">Emoji</button>
           </div>
-          <button type="button" onMouseDown={() => mutateReply.mutate()}>
+          <button type="button" onMouseDown={handleSendReply}>
             Send
           </button>
         </div>
