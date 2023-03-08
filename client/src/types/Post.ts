@@ -81,6 +81,7 @@ export type NestedComment = {
   post: string;
   parent: string;
   content: string;
+  replies: number;
   reactions: Reactions;
   createdAt: string;
   updatedAt: string;
@@ -94,6 +95,7 @@ export type TComment = {
   post: string;
   parent?: string;
   content: string;
+  replies: number;
   reactions: Reactions;
   createdAt: string;
   updatedAt: string;
