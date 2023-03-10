@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import useComments from '../../../../hooks/useComments';
 import { ModifiedPost } from '../../../../types/Post';
 import Loading from '../../../Loading';
 import CommentInput from './CommentInput';
@@ -25,14 +26,15 @@ function PostComments({ post, close }: Props) {
       }
     }
   }
+  const commentsHook = useComments(post._id);
 
-  // if (isLoading) {
-  //   return <Loading />;
-  // }
+  if (commentsHook.isLoading) {
+    return <Loading />;
+  }
 
-  // if (isError) {
-  //   return <p>{error?.message}</p>;
-  // }
+  if (commentsHook.isError && commentsHook.error) {
+    return <p>{commentsHook.error.message}</p>;
+  }
 
   return (
     <div className="absolute h-screen w-full bg-transparent/80 z-40 top-0 left-0 flex flex-col justify-end">
@@ -47,28 +49,32 @@ function PostComments({ post, close }: Props) {
           <PostReactions reactionsDetail={post.reactionsDetails} />
           <div className="min-h-[5px] min-w-[35px] left-2/4 -translate-x-2/4  absolute rounded-lg bg-gray-300" />
         </div>
-        <div className="flex flex-col grow">
-          {/* {isLoading && <p className="text-center">Loading...</p>}
-          {isError && error && <p>{error.message}</p>}
-          {comments.length ? (
-            <div className="flex flex-col gap-3">
-              {comments.map((c) => {
-                return (
-                  <div key={c._id} className="flex">
-                    <SingleComment
-                      mutateLikeComment={mutateLikeComment}
-                      mutateUnlikeComment={mutateUnlikeComment}
-                      comment={c}
-                    />
-                  </div>
-                );
-              })}
-            </div>
+        <div className="flex flex-col grow overflow-auto mb-[48px]">
+          {commentsHook.comments.length ? (
+            commentsHook.comments.map((c) => {
+              return (
+                <div key={c._id} className="relative">
+                  {c.children && (
+                    <div className="left-0 top-5 bottom-14 bg-gray-500 absolute w-1" />
+                  )}
+                  <SingleComment
+                    comment={c}
+                    getReplies={commentsHook.mutateGetCommentReplies}
+                    replyingTo={commentsHook.replyingTo}
+                    setReplyingTo={commentsHook.setReplyingTo}
+                    depth={0}
+                  />
+                </div>
+              );
+            })
           ) : (
-            <p className="text-center">No comments yet.</p>
-          )} */}
+            <p className="text-center text-dimGray">No comments here...</p>
+          )}
         </div>
-        {/* <CommentInput mutateReplyToPost={mutateReplyToPost} /> */}
+        <CommentInput
+          sendReply={commentsHook.mutateReply}
+          replyingTo={commentsHook.replyingTo}
+        />
       </div>
     </div>
   );

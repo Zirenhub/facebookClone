@@ -1,6 +1,7 @@
 import { UseMutationResult } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import { TComment } from '../../../../types/Post';
+import Send from '../../../../assets/send.svg';
 
 type Props = {
   sendReply: UseMutationResult<TComment, unknown, string, unknown>;
@@ -12,14 +13,16 @@ function CommentInput({ sendReply, replyingTo }: Props) {
   const [isWriting, setIsWriting] = useState<boolean>(false);
 
   function handleSendReply() {
-    sendReply.mutate(comment);
-    if (sendReply.isSuccess) {
-      setComment('');
+    if (comment) {
+      sendReply.mutate(comment);
+      if (sendReply.isSuccess) {
+        setComment('');
+      }
     }
   }
 
   return (
-    <div className="bg-gray-100 p-2 fixed bottom-0 left-0 w-full">
+    <div className="bg-gray-100 p-2 fixed bottom-0 left-0 w-full z-50">
       {replyingTo && (
         <p className="text-dimGray">
           Replying to {replyingTo.author.fullName}...
@@ -44,9 +47,18 @@ function CommentInput({ sendReply, replyingTo }: Props) {
             <button type="button">Gif</button>
             <button type="button">Emoji</button>
           </div>
-          <button type="button" onMouseDown={handleSendReply}>
-            Send
-          </button>
+          <div
+            tabIndex={0}
+            className="h-8 w-8"
+            role="button"
+            onMouseDown={handleSendReply}
+          >
+            <Send
+              height="100%"
+              width="100%"
+              fill={comment ? 'rgb(96 165 250)' : 'rgb(209 213 219)'}
+            />
+          </div>
         </div>
       )}
     </div>

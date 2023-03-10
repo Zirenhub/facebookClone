@@ -21,7 +21,10 @@ function FullPostComments({ postID }: { postID: string }) {
         {commentsHook.comments.length ? (
           commentsHook.comments.map((c) => {
             return (
-              <div key={c._id}>
+              <div key={c._id} className="relative">
+                {c.children && (
+                  <div className="left-0 top-5 bottom-14 bg-gray-500 absolute w-1" />
+                )}
                 <SingleComment
                   comment={c}
                   getReplies={commentsHook.mutateGetCommentReplies}

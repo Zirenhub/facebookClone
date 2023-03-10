@@ -34,17 +34,25 @@ function SingleComment({
     }
   }, [comment, replyingTo, setReplyingTo]);
 
-  function getMargin() {
-    if (depth >= 3) {
-      return 30;
-    }
-    return Number(`${depth}0`);
-  }
-
   return (
     <>
-      <div className="flex" style={{ marginLeft: getMargin() }}>
-        <div className="h-12 w-12 mr-2">
+      <div
+        className="flex relative"
+        style={
+          {
+            // paddingLeft: depth >= 3 ? 30 : Number(`${depth}0`),
+          }
+        }
+      >
+        {/* {isRepliesOpen && (
+          <div className="absolute -bottom-1 left-0.3 bg-gray-500 h-16 rounded-full w-2" />
+        )} */}
+        {depth > 0 && (
+          <div style={{ width: depth >= 3 ? 30 : Number(`${depth}0`) }}>
+            <div className="h-1 w-full bg-gray-500 mt-5" />
+          </div>
+        )}
+        <div className="h-12 w-12 mr-2 z-20">
           <Pfp height="100%" width="100%" />
         </div>
         <div className="flex flex-col grow">
