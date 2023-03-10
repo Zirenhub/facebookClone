@@ -7,7 +7,7 @@ import {
   SendRequestRes,
 } from '../types/Api';
 import { TDBPost } from '../types/Post';
-import { TProfile, TProfileWithoutFullName } from '../types/Profile';
+import { TProfile, TProfileDefault } from '../types/Profile';
 import { DefaultReq, TRequest } from '../types/Request';
 import getFinal from './getError';
 
@@ -56,7 +56,7 @@ export async function rejectRequest(reqID: string): Promise<null> {
   return getFinal(status, data, errors, message);
 }
 
-export async function getFriends(): Promise<TProfileWithoutFullName> {
+export async function getFriends(): Promise<TProfileDefault[]> {
   const res = await fetch('/api/v1/profile/friends');
   const { status, data, errors, message }: GetFriendsRes = await res.json();
   return getFinal(status, data, errors, message);

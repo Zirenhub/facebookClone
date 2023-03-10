@@ -3,13 +3,16 @@ import { useQuery } from '@tanstack/react-query';
 import { getFriends } from '../../api/profile';
 import Loading from '../Loading';
 import Pfp from '../../assets/pfp-two.svg';
-import { TProfile } from '../../types/Profile';
+import { TProfileDefault } from '../../types/Profile';
 /* eslint react/jsx-no-useless-fragment: 0 */
 
 function FriendsAccepted() {
   const navigate = useNavigate();
 
-  const { isLoading, isError, data, error } = useQuery<TProfile[], Error>({
+  const { isLoading, isError, data, error } = useQuery<
+    TProfileDefault[],
+    Error
+  >({
     queryKey: ['friends'],
     queryFn: () => getFriends(),
   });
