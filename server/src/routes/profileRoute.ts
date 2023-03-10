@@ -1,5 +1,4 @@
 import express from 'express';
-import { jwtAuth } from '../middleware/jwtAuth';
 import {
   getProfile,
   sendRequest,
@@ -12,12 +11,12 @@ import {
 
 const router = express.Router();
 
-router.post('/:id/request', jwtAuth, sendRequest);
-router.post('/:id/accept', jwtAuth, acceptRequest);
-router.post('/:id/reject', jwtAuth, rejectRequest);
-router.get('/requests', jwtAuth, getRequests);
-router.get('/friends', jwtAuth, getFriends);
-router.get('/:id', jwtAuth, getProfile);
-router.get('/:id/posts', jwtAuth, getPosts);
+router.post('/:id/request', sendRequest);
+router.post('/:id/accept', acceptRequest);
+router.post('/:id/reject', rejectRequest);
+router.get('/requests', getRequests);
+router.get('/friends', getFriends);
+router.get('/:id', getProfile);
+router.get('/:id/posts', getPosts);
 
 export default router;

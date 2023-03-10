@@ -4,6 +4,6 @@ import { jwtAuth } from '../middleware/jwtAuth';
 
 const router = express.Router();
 
-router.get('/', jwtAuth, getTimeline);
+router.get('/', getTimeline);
 
 export default router;

@@ -14,15 +14,16 @@ import {
 const router = express.Router();
 const upload = multer({ dest: 'uploads/' });
 
-router.post('/', jwtAuth, upload.single('image'), createPost);
-router.get('/:id', jwtAuth, getPost);
-router.delete('/:id', jwtAuth, deletePost);
+router.post('/', upload.single('image'), createPost);
+router.get('/:id', getPost);
+router.delete('/:id', deletePost);
 
-router.post('/:id/like', jwtAuth, likePost);
-router.post('/:id/unlike', jwtAuth, unlikePost);
+router.post('/:id/like', likePost);
+router.post('/:id/unlike', unlikePost);
 
-router.post('/:id/comment', jwtAuth, postComment);
-router.get('/:id/comments', jwtAuth, getPostComments);
+router.post('/:id/comment', postComment);
+router.get('/:id/comments', getPostComments);
+
 // update post ?
 
 export default router;
