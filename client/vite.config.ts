@@ -7,6 +7,9 @@ dotenv.config();
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  define: {
+    __PORT__: process.env.PORT,
+  },
   server: {
     proxy: {
       '/api/v1': `http://localhost:${process.env.PORT}`,
