@@ -5,6 +5,7 @@ import { TProfileDefault } from '../types/Profile';
 import Back from '../assets/back.svg';
 import Pfp from '../assets/pfp-two.svg';
 import Send from '../assets/send.svg';
+import useAuthContext from '../hooks/useAuthContext';
 
 type Props = {
   profile: TProfileDefault;
@@ -16,6 +17,8 @@ let socket: Socket | null = null;
 function Chat({ profile, close }: Props) {
   const [message, setMessage] = useState<string>('');
 
+  const auth = useAuthContext();
+
   function handleMessage(e: React.SyntheticEvent) {
     const target = e.target as HTMLInputElement;
     setMessage(target.value);
@@ -23,21 +26,22 @@ function Chat({ profile, close }: Props) {
 
   function handleSend() {
     if (message && socket) {
-      socket.emit('message', message);
+      socket.emit('message', message, profile._id);
       setMessage('');
     }
   }
 
   useEffect(() => {
-    socket = io(`http://localhost:${__PORT__}`, {
+    socket = io(`http://localhost:${__PORT__}/`, {
       transports: ['websocket', 'polling'],
+      withCredentials: true,
     });
 
     return () => {
       socket?.disconnect();
       socket?.off();
     };
-  }, []);
+  }, [auth]);
 
   return (
     <div className="flex flex-col h-full">

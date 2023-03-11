@@ -22,9 +22,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 const server = http.createServer(app);
-const io = new Server(server, {
-  cookie: true,
-});
+const io = new Server(server);
 
 const port = process.env.PORT || 5000;
 
@@ -35,21 +33,19 @@ app.use('/api/v1/search', jwtAuth, searchRoute);
 app.use('/api/v1/timeline', jwtAuth, timelineRoute);
 app.use('/api/v1/comment', jwtAuth, commentRoute);
 
-mongoose.connect(process.env.DB_URI!).then(() => {
-  io.on('connection', (socket) => {
-    const cookie = socket.request;
-    console.log(cookie);
-    console.log('a user connected');
+io.on('connection', (socket) => {
+  console.log('a user connected');
 
-    socket.on('disconnect', () => {
-      console.log('user disconnected');
-    });
-
-    socket.on('message', (msg) => {
-      console.log('message', msg);
-    });
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
   });
 
+  socket.on('message', (msg, receiverID) => {
+    console.log('message', msg, receiverID);
+  });
+});
+
+mongoose.connect(process.env.DB_URI!).then(() => {
   server.listen(port, () =>
     console.log(`Server is running at http://localhost:${port}`)
   );

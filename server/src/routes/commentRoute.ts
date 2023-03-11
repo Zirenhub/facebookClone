@@ -3,13 +3,14 @@ import {
   likeComment,
   unlikeComment,
   replyToComment,
+  getReplies,
 } from '../controllers/commentController';
-import { jwtAuth } from '../middleware/jwtAuth';
 
 const router = express.Router();
 
-router.post('/:id/like', jwtAuth, likeComment);
-router.post('/:id/unlike', jwtAuth, unlikeComment);
-router.post('/:id/reply', jwtAuth, replyToComment);
+router.post('/:id/like', likeComment);
+router.post('/:id/unlike', unlikeComment);
+router.post('/:id/reply', replyToComment);
+router.get('/:id/replies', getReplies);
 
 export default router;
