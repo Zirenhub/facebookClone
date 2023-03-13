@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import http from 'http';
 import { Server } from 'socket.io';
+import cors from 'cors';
 
 import authRoute from './routes/authRoute';
 import postRoute from './routes/postRoute';
@@ -11,18 +12,32 @@ import profileRoute from './routes/profileRoute';
 import searchRoute from './routes/searchRoute';
 import timelineRoute from './routes/timelineRoute';
 import commentRoute from './routes/commentRoute';
+import messagesRoute from './routes/messagesRoute';
 import { jwtAuth } from './middleware/jwtAuth';
 
 dotenv.config();
 
 const app: Express = express();
 
+app.use(
+  cors({
+    origin: process.env.CLIENT_HOST,
+    allowedHeaders: '*',
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+  cors: {
+    origin: process.env.CLIENT_HOST,
+    allowedHeaders: '*',
+    credentials: true,
+  },
+});
 
 const port = process.env.PORT || 5000;
 
@@ -34,16 +49,16 @@ app.use('/api/v1/timeline', jwtAuth, timelineRoute);
 app.use('/api/v1/comment', jwtAuth, commentRoute);
 
 io.on('connection', (socket) => {
-  console.log('a user connected');
+  const id = socket.handshake.auth.id;
+  socket.join(id);
+  console.log('a user connected', id);
 
   socket.on('disconnect', () => {
     console.log('user disconnected');
   });
-
-  socket.on('message', (msg, receiverID) => {
-    console.log('message', msg, receiverID);
-  });
 });
+
+app.use('/api/v1/messages', jwtAuth, messagesRoute(io));
 
 mongoose.connect(process.env.DB_URI!).then(() => {
   server.listen(port, () =>

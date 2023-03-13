@@ -6,16 +6,17 @@ import Back from '../assets/back.svg';
 import Pfp from '../assets/pfp-two.svg';
 import Send from '../assets/send.svg';
 import useAuthContext from '../hooks/useAuthContext';
+import TMessage from '../types/Message';
 
 type Props = {
   profile: TProfileDefault;
   close: () => void;
 };
 
-let socket: Socket | null = null;
-
 function Chat({ profile, close }: Props) {
+  const [messages, setMessages] = useState<TMessage[]>([]);
   const [message, setMessage] = useState<string>('');
+  const [socket, setSocket] = useState<Socket | null>(null);
 
   const auth = useAuthContext();
 
@@ -24,24 +25,45 @@ function Chat({ profile, close }: Props) {
     setMessage(target.value);
   }
 
-  function handleSend() {
-    if (message && socket) {
-      socket.emit('message', message, profile._id);
-      setMessage('');
+  async function handleSend() {
+    if (message) {
+      try {
+        const res = await fetch('/api/v1/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ receiver: profile._id, message }),
+        });
+        if (res.ok) {
+          setMessage('');
+        }
+      } catch (err) {
+        console.log(err);
+      }
     }
   }
 
   useEffect(() => {
-    socket = io(`http://localhost:${__PORT__}/`, {
-      transports: ['websocket', 'polling'],
+    const newSocket = io(`http://localhost:${__PORT__}`, {
+      autoConnect: false,
+      auth: { id: auth.user?._id },
       withCredentials: true,
     });
+    setSocket(newSocket);
+    newSocket.connect();
 
     return () => {
-      socket?.disconnect();
-      socket?.off();
+      newSocket.disconnect();
+      newSocket.off();
     };
   }, [auth]);
+
+  useEffect(() => {
+    if (socket) {
+      socket.on('receiveMessage', (m: TMessage) => {
+        setMessages([...messages, m]);
+      });
+    }
+  }, [socket, messages]);
 
   return (
     <div className="flex flex-col h-full">
@@ -56,8 +78,15 @@ function Chat({ profile, close }: Props) {
           <p className="font-bold text-xl">{profile.fullName}</p>
         </div>
       </div>
-      {/* chat here */}
-      <div className="grow" />
+      <div className="grow">
+        {messages.map((msg) => {
+          return (
+            <div key={msg._id}>
+              <p>{msg.message}</p>
+            </div>
+          );
+        })}
+      </div>
       <div className="p-2 flex items-center">
         <input
           type="text"
