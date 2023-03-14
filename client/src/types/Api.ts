@@ -1,3 +1,4 @@
+import TMessage from './Message';
 import { ReactionTypes, TComment, TDBPost } from './Post';
 import { TProfile, TProfileWithoutFullName } from './Profile';
 import { DefaultReq, TRequest } from './Request';
@@ -96,5 +97,19 @@ export type GetPostCommentsRes = {
   status: 'success' | 'error';
   data?: TComment[];
   errors?: null;
+  message: string | null;
+};
+
+export type GetMessagesRes = {
+  status: 'success' | 'error';
+  data?: TMessage[];
+  errors?: null;
+  message: string | null;
+};
+
+export type SendMessageRes = {
+  status: 'success' | 'error';
+  data?: TMessage;
+  errors?: ValidationError[] | null;
   message: string | null;
 };

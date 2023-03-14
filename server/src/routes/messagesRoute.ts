@@ -1,10 +1,14 @@
 import express from 'express';
 import { Server } from 'socket.io';
-import { postMessage } from '../controllers/messageController';
+import {
+  postMessage,
+  getMessages,
+} from '../controllers/messageController';
 
 const messagesRoute = (io: Server) => {
   const router = express.Router();
 
+  router.get('/:id', getMessages);
   router.post('/', postMessage(io));
 
   return router;

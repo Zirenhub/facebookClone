@@ -41,7 +41,7 @@ export const postMessage = (io: Server) => [
 
       return res.json({
         status: 'success',
-        data: null,
+        data: newMessage,
         message: null,
       });
     } catch (err: any) {
@@ -53,3 +53,34 @@ export const postMessage = (io: Server) => [
     }
   },
 ];
+
+export async function getMessages(req: IUserRequest, res: Response) {
+  try {
+    const id = req.params.id;
+
+    const messages = await MessageModel.find({
+      $or: [
+        {
+          sender: req.user._id,
+          receiver: id,
+        },
+        {
+          sender: id,
+          receiver: req.user._id,
+        },
+      ],
+    });
+
+    return res.json({
+      status: 'success',
+      data: messages,
+      message: null,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      status: 'error',
+      errors: null,
+      message: err.message,
+    });
+  }
+}

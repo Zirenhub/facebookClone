@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { Socket } from 'socket.io-client/build/esm/socket';
-import { TProfileDefault } from '../types/Profile';
-import Back from '../assets/back.svg';
-import Pfp from '../assets/pfp-two.svg';
-import Send from '../assets/send.svg';
-import useAuthContext from '../hooks/useAuthContext';
-import TMessage from '../types/Message';
+import { useQuery } from '@tanstack/react-query';
+import { TProfileDefault } from '../../types/Profile';
+import Back from '../../assets/back.svg';
+import Pfp from '../../assets/pfp-two.svg';
+import Send from '../../assets/send.svg';
+import useAuthContext from '../../hooks/useAuthContext';
+import TMessage from '../../types/Message';
+import getMessages from '../../api/message';
+import { SendMessageRes } from '../../types/Api';
+import Message from './Message';
 
 type Props = {
   profile: TProfileDefault;
@@ -19,6 +23,16 @@ function Chat({ profile, close }: Props) {
   const [socket, setSocket] = useState<Socket | null>(null);
 
   const auth = useAuthContext();
+
+  const messagesQuery = useQuery({
+    queryKey: ['chat', profile._id],
+    queryFn: () => {
+      return getMessages(profile._id);
+    },
+    onSuccess(data) {
+      setMessages(data);
+    },
+  });
 
   function handleMessage(e: React.SyntheticEvent) {
     const target = e.target as HTMLInputElement;
@@ -33,8 +47,12 @@ function Chat({ profile, close }: Props) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ receiver: profile._id, message }),
         });
-        if (res.ok) {
+        const data: SendMessageRes = await res.json();
+        if (data.status === 'success' && data.data) {
+          setMessages([...messages, data.data]);
           setMessage('');
+        } else {
+          throw new Error('something went wrong');
         }
       } catch (err) {
         console.log(err);
@@ -78,11 +96,17 @@ function Chat({ profile, close }: Props) {
           <p className="font-bold text-xl">{profile.fullName}</p>
         </div>
       </div>
-      <div className="grow">
-        {messages.map((msg) => {
+      <div className="grow flex flex-col p-3">
+        {messages.map((m) => {
+          const isMyMessage = m.sender === auth.user?._id;
           return (
-            <div key={msg._id}>
-              <p>{msg.message}</p>
+            <div
+              key={m._id}
+              className={`flex flex-col max-w-[280px] ${
+                isMyMessage ? 'ml-auto' : 'mr-auto'
+              }`}
+            >
+              <Message message={m} isMyMessage={isMyMessage} />
             </div>
           );
         })}
