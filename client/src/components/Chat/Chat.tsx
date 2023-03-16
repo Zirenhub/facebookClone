@@ -1,6 +1,4 @@
-import { useEffect, useState } from 'react';
-import { io } from 'socket.io-client';
-import { Socket } from 'socket.io-client/build/esm/socket';
+import { useContext, useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { TProfileDefault } from '../../types/Profile';
 import Back from '../../assets/back.svg';
@@ -11,6 +9,7 @@ import TMessage from '../../types/Message';
 import getMessages from '../../api/message';
 import { SendMessageRes } from '../../types/Api';
 import Message from './Message';
+import { SocketContext } from '../../context/socketContext';
 
 type Props = {
   profile: TProfileDefault;
@@ -20,9 +19,9 @@ type Props = {
 function Chat({ profile, close }: Props) {
   const [messages, setMessages] = useState<TMessage[]>([]);
   const [message, setMessage] = useState<string>('');
-  const [socket, setSocket] = useState<Socket | null>(null);
 
   const auth = useAuthContext();
+  const socket = useContext(SocketContext);
 
   const messagesQuery = useQuery({
     queryKey: ['chat', profile._id],
@@ -61,27 +60,14 @@ function Chat({ profile, close }: Props) {
   }
 
   useEffect(() => {
-    const newSocket = io(`http://localhost:${__PORT__}`, {
-      autoConnect: false,
-      auth: { id: auth.user?._id },
-      withCredentials: true,
-    });
-    setSocket(newSocket);
-    newSocket.connect();
-
-    return () => {
-      newSocket.disconnect();
-      newSocket.off();
-    };
-  }, [auth]);
-
-  useEffect(() => {
     if (socket) {
-      socket.on('receiveMessage', (m: TMessage) => {
-        setMessages([...messages, m]);
+      socket.on('receiveMessage', (m: TMessage, sender: string) => {
+        if (sender === profile._id) {
+          setMessages([...messages, m]);
+        }
       });
     }
-  }, [socket, messages]);
+  }, [socket, messages, profile]);
 
   return (
     <div className="flex flex-col h-full">
