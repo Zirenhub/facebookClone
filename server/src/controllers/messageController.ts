@@ -36,7 +36,11 @@ export const postMessage = (io: Server) => [
 
       await newMessage.save();
 
-      io.to(receiver).emit('receiveMessage', newMessage.toObject());
+      io.to(receiver).emit(
+        'receiveMessage',
+        newMessage.toObject(),
+        req.user._id
+      );
 
       return res.json({
         status: 'success',
