@@ -33,7 +33,6 @@ if (
 export const createPost = [
   body('content')
     .trim()
-    .escape()
     .notEmpty()
     .withMessage("Post can't be empty")
     .isLength({ min: 1, max: 450 })
@@ -93,7 +92,6 @@ export const createPost = [
   }),
   body('audience')
     .trim()
-    .escape()
     .notEmpty()
     .custom((value) => {
       const audiences = ['friends', 'public'];
@@ -369,7 +367,6 @@ export const getPostComments = async (
 export const postComment = [
   body('comment')
     .trim()
-    .escape()
     .notEmpty()
     .withMessage("Comment can't be empty")
     .isLength({ min: 1, max: 250 })

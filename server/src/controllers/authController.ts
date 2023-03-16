@@ -17,15 +17,16 @@ export const login = [
     .withMessage('Email is invalid.'),
   body('password')
     .trim()
-    .escape()
     .isLength({ min: 8 })
     .withMessage('Password must be at least 8 characters long.'),
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res
-        .status(400)
-        .json({ status: 'error', errors: errors.array(), message: null });
+      return res.status(400).json({
+        status: 'error',
+        errors: errors.array(),
+        message: null,
+      });
     }
     const email: string = req.body.email;
     const password: string = req.body.password;
@@ -49,9 +50,13 @@ export const login = [
           message: null,
         });
       }
-      const token = jwt.sign(profile.toObject(), process.env.JWT_SECRET!, {
-        expiresIn: '1h',
-      });
+      const token = jwt.sign(
+        profile.toObject(),
+        process.env.JWT_SECRET!,
+        {
+          expiresIn: '1h',
+        }
+      );
       res.cookie('token', token, {
         httpOnly: true,
       });
@@ -76,23 +81,24 @@ export const logout = (req: IUserRequest, res: Response) => {
 };
 
 export const signup = [
-  body('firstName').notEmpty().trim().escape(),
-  body('lastName').notEmpty().trim().escape(),
+  body('firstName').notEmpty().trim(),
+  body('lastName').notEmpty().trim(),
   body('email')
     .isEmail()
     .normalizeEmail()
     .trim()
     .escape()
     .custom(async (value) => {
-      return CredentialsModel.exists({ email: value }).then((user) => {
-        if (user) {
-          return Promise.reject('E-mail already in use');
+      return CredentialsModel.exists({ email: value }).then(
+        (user) => {
+          if (user) {
+            return Promise.reject('E-mail already in use');
+          }
         }
-      });
+      );
     }),
   body('password')
     .trim()
-    .escape()
     .isLength({ min: 8 })
     .withMessage('Password must be at least 8 characters long.'),
   body('birthday')
@@ -119,16 +125,18 @@ export const signup = [
   body('gender')
     .notEmpty()
     .trim()
-    .escape()
     .custom((value) => {
-      if (value !== 'male' && value !== 'female' && value !== 'custom') {
+      if (
+        value !== 'male' &&
+        value !== 'female' &&
+        value !== 'custom'
+      ) {
         return Promise.reject('Gender is not valid.');
       }
       return true;
     }),
   body('customGender')
     .trim()
-    .escape()
     .custom((value, { req, location, path }) => {
       if (req.body.gender === 'custom' && value === '') {
         return Promise.reject('Custom gender must be provided.');
@@ -139,9 +147,11 @@ export const signup = [
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res
-        .status(400)
-        .json({ status: 'error', errors: errors.array(), message: null });
+      return res.status(400).json({
+        status: 'error',
+        errors: errors.array(),
+        message: null,
+      });
     }
     const firstName: string = req.body.firstName;
     const lastName: string = req.body.lastName;
@@ -170,7 +180,9 @@ export const signup = [
     try {
       await newProfile.save();
       await newUser.save();
-      res.status(201).json({ status: 'success', data: null, message: null });
+      res
+        .status(201)
+        .json({ status: 'success', data: null, message: null });
     } catch (err) {
       res.status(400).json({
         status: 'error',

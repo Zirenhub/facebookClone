@@ -7,7 +7,6 @@ import MessageModel from '../models/message';
 export const postMessage = (io: Server) => [
   body('message')
     .trim()
-    .escape()
     .notEmpty()
     .withMessage("Comment can't be empty")
     .isLength({ min: 1, max: 250 })
