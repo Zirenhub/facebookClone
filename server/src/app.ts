@@ -13,6 +13,7 @@ import searchRoute from './routes/searchRoute';
 import timelineRoute from './routes/timelineRoute';
 import commentRoute from './routes/commentRoute';
 import messagesRoute from './routes/messagesRoute';
+import onlineRoute from './routes/onlineRoute';
 import { jwtAuth } from './middleware/jwtAuth';
 
 dotenv.config();
@@ -48,9 +49,15 @@ app.use('/api/v1/search', jwtAuth, searchRoute);
 app.use('/api/v1/timeline', jwtAuth, timelineRoute);
 app.use('/api/v1/comment', jwtAuth, commentRoute);
 
+const onlineUsers: string[] = [];
+
 io.on('connection', (socket) => {
-  const id = socket.handshake.auth.id;
+  const id: string = socket.handshake.auth.id;
   socket.join(id);
+
+  if (!onlineUsers.some((onlineID) => onlineID === id)) {
+    onlineUsers.push(id);
+  }
   console.log('a user connected', id);
 
   socket.on('disconnect', () => {
@@ -59,6 +66,7 @@ io.on('connection', (socket) => {
 });
 
 app.use('/api/v1/messages', jwtAuth, messagesRoute(io));
+app.use('/api/v1/online', jwtAuth, onlineRoute(onlineUsers));
 
 mongoose.connect(process.env.DB_URI!).then(() => {
   server.listen(port, () =>
