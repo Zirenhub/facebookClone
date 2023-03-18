@@ -13,8 +13,8 @@ import searchRoute from './routes/searchRoute';
 import timelineRoute from './routes/timelineRoute';
 import commentRoute from './routes/commentRoute';
 import messagesRoute from './routes/messagesRoute';
-import onlineRoute from './routes/onlineRoute';
 import { jwtAuth } from './middleware/jwtAuth';
+import getFriendsIds from './utils/getFriendsIds';
 
 dotenv.config();
 
@@ -49,24 +49,47 @@ app.use('/api/v1/search', jwtAuth, searchRoute);
 app.use('/api/v1/timeline', jwtAuth, timelineRoute);
 app.use('/api/v1/comment', jwtAuth, commentRoute);
 
-const onlineUsers: string[] = [];
+let onlineUsers: string[] = [];
 
 io.on('connection', (socket) => {
-  const id: string = socket.handshake.auth.id;
+  // for some reason can't get token from socket initialization
+  const id = socket.handshake.auth.id;
+  if (!id) {
+    socket.disconnect();
+  }
   socket.join(id);
 
   if (!onlineUsers.some((onlineID) => onlineID === id)) {
     onlineUsers.push(id);
   }
-  console.log('a user connected', id);
+
+  console.log('a user connected', onlineUsers);
 
   socket.on('disconnect', () => {
-    console.log('user disconnected');
+    onlineUsers = onlineUsers.filter((onlineID) => onlineID !== id);
+    console.log('user disconnected', onlineUsers);
+  });
+
+  socket.on('offline', () => {
+    onlineUsers = onlineUsers.filter((onlineID) => onlineID !== id);
+    console.log('user is offline', onlineUsers);
+  });
+
+  socket.on('get-online-friends', async (callback) => {
+    callback = typeof callback == 'function' ? callback : () => {};
+    try {
+      const friends = await getFriendsIds(id);
+      const onlineFriends = onlineUsers.filter((onlineID) => {
+        return friends.some((friendID) => friendID === onlineID);
+      });
+      callback({ status: 'OK', data: onlineFriends });
+    } catch (err: any) {
+      callback({ status: 'ERROR', data: err.message });
+    }
   });
 });
 
 app.use('/api/v1/messages', jwtAuth, messagesRoute(io));
-app.use('/api/v1/online', jwtAuth, onlineRoute(onlineUsers));
 
 mongoose.connect(process.env.DB_URI!).then(() => {
   server.listen(port, () =>
