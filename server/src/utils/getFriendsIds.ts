@@ -14,12 +14,13 @@ async function getFriendsIds(userID: string) {
     // if im the one that accepted the request,
     // give me the request profile id,
     // otherwise give me the id of the profile that accepted the request.
-    return relationship.profile.toString() === userID.toString()
-      ? relationship.friend
-      : relationship.profile;
+    const myID = userID.toString();
+    const profileID = relationship.profile.toString();
+    const friendID = relationship.friend.toString();
+    return profileID === myID ? friendID : profileID;
   });
 
-  return friends;
+  return friends as string[];
 }
 
 export default getFriendsIds;
