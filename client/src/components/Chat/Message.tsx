@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { Fragment, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import TMessage from '../../types/Message';
 
 type Props = {
@@ -15,13 +15,11 @@ function Message({ message, isMyMessage }: Props) {
     setDateAgo(ago);
   }, [message]);
 
-  // todo, escape html symbols: ` ' <  >
-
   return (
     <>
       <div
-        className={`p-4 rounded-lg text-center text-white ${
-          isMyMessage ? 'bg-blue-600' : 'bg-green-600'
+        className={`p-2 max-w-[280px] w-max flex justify-center rounded-lg text-white ${
+          isMyMessage ? 'bg-blue-600 self-end' : 'bg-green-600'
         }`}
       >
         <p>{message.message}</p>
