@@ -1,15 +1,15 @@
-import { useContext, useEffect, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { TProfileDefault } from '../../types/Profile';
 import Back from '../../assets/back.svg';
 import Pfp from '../../assets/pfp-two.svg';
 import Send from '../../assets/send.svg';
 import useAuthContext from '../../hooks/useAuthContext';
 import TMessage from '../../types/Message';
-import getMessages from '../../api/message';
-import { SendMessageRes } from '../../types/Api';
+import { sendMessage, getMessages } from '../../api/message';
 import Message from './Message';
 import { SocketContext } from '../../context/socketContext';
+import Loading from '../Loading';
 
 type Props = {
   profile: TProfileDefault;
@@ -22,8 +22,9 @@ function Chat({ profile, close }: Props) {
 
   const auth = useAuthContext();
   const socket = useContext(SocketContext);
+  const lastMessageRef = useRef<HTMLDivElement | null>(null);
 
-  const messagesQuery = useQuery({
+  const messagesQuery = useQuery<TMessage[], Error>({
     queryKey: ['chat', profile._id],
     queryFn: () => {
       return getMessages(profile._id);
@@ -33,45 +34,55 @@ function Chat({ profile, close }: Props) {
     },
   });
 
+  const handleSend = useMutation({
+    mutationFn: () => {
+      if (message) {
+        return sendMessage(profile._id, message);
+      }
+      return Promise.resolve(null);
+    },
+    onSuccess(successData) {
+      if (successData) {
+        setMessages([...messages, successData]);
+        setMessage('');
+      }
+    },
+  });
+
   function handleMessage(e: React.SyntheticEvent) {
     const target = e.target as HTMLInputElement;
     setMessage(target.value);
-  }
-
-  async function handleSend() {
-    if (message) {
-      try {
-        const res = await fetch('/api/v1/messages', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ receiver: profile._id, message }),
-        });
-        const data: SendMessageRes = await res.json();
-        if (data.status === 'success' && data.data) {
-          setMessages([...messages, data.data]);
-          setMessage('');
-        } else {
-          throw new Error('something went wrong');
-        }
-      } catch (err) {
-        console.log(err);
-      }
-    }
   }
 
   useEffect(() => {
     if (socket) {
       socket.on('receiveMessage', (m: TMessage, sender: string) => {
         if (sender === profile._id) {
-          setMessages([...messages, m]);
+          setMessages((prevState) => {
+            return [...prevState, m];
+          });
         }
       });
     }
-  }, [socket, messages, profile]);
+  }, [socket, profile]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      lastMessageRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 550);
+  }, [lastMessageRef]);
+
+  if (messagesQuery.isLoading) {
+    return <Loading />;
+  }
+
+  if (messagesQuery.isError) {
+    return <p className="text-center">{messagesQuery.error.message}</p>;
+  }
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex items-center gap-2 border-b-2 pb-2 shadow-sm pl-2 py-2">
+    <div className="flex flex-col h-full relative">
+      <div className="sticky top-0 bg-white flex items-center gap-2 border-b-2 pb-2 shadow-sm pl-2 py-2">
         <button type="button" onClick={close} className="h-9 w-9">
           <Back height="100%" width="100%" fill="gray" />
         </button>
@@ -83,35 +94,42 @@ function Chat({ profile, close }: Props) {
         </div>
       </div>
       <div className="grow flex flex-col p-3">
-        {messages.map((m) => {
+        {messages.map((m, i) => {
           const isMyMessage = m.sender === auth.user?._id;
           return (
             <div
               key={m._id}
-              className={`flex flex-col max-w-[280px] ${
-                isMyMessage ? 'ml-auto' : 'mr-auto'
-              }`}
+              className={`flex flex-col ${isMyMessage ? 'ml-auto' : 'mr-auto'}`}
+              ref={messages.length - 1 === i ? lastMessageRef : null}
             >
               <Message message={m} isMyMessage={isMyMessage} />
             </div>
           );
         })}
       </div>
-      <div className="p-2 flex items-center">
-        <input
-          type="text"
-          autoComplete="off"
-          className="bg-gray-200 h-9 p-2 rounded-full w-full"
-          onChange={handleMessage}
-          value={message}
-        />
-        <button className="h-8 w-8" type="button" onClick={handleSend}>
-          <Send
-            height="100%"
-            width="100%"
-            fill={message ? 'rgb(96 165 250)' : 'rgb(209 213 219)'}
+      <div className="p-2 sticky bottom-0 bg-white">
+        <form
+          onSubmit={(e: React.SyntheticEvent) => {
+            e.preventDefault();
+            handleSend.mutate();
+          }}
+          className="flex items-center"
+        >
+          <input
+            type="text"
+            autoComplete="off"
+            className="bg-gray-200 p-2 rounded-full grow"
+            onChange={handleMessage}
+            value={message}
           />
-        </button>
+          <button className="h-8 w-8" type="button">
+            <Send
+              height="100%"
+              width="100%"
+              fill={message ? 'rgb(96 165 250)' : 'rgb(209 213 219)'}
+            />
+          </button>
+        </form>
       </div>
     </div>
   );
