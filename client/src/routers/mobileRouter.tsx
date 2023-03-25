@@ -20,38 +20,22 @@ const router = createBrowserRouter([
     children: [
       {
         path: '/home',
-        element: (
-          <ProtectedRoute>
-            <MobileHomePage />
-          </ProtectedRoute>
-        ),
+        element: <MobileHomePage />,
       },
       {
         path: '/:id',
-        element: (
-          <ProtectedRoute>
-            <ProfilePage isMobile />
-          </ProtectedRoute>
-        ),
-        errorElement: <ErrorPage />,
+        element: <ProfilePage isMobile />,
       },
       {
         path: '/menu',
-        element: (
-          <ProtectedRoute>
-            <Menu />
-          </ProtectedRoute>
-        ),
+        element: <Menu />,
       },
       {
         path: '/friends',
-        element: (
-          <ProtectedRoute>
-            <Friends />
-          </ProtectedRoute>
-        ),
+        element: <Friends />,
       },
     ],
+    errorElement: <ErrorPage />,
   },
   {
     path: '/',

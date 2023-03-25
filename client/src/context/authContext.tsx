@@ -20,13 +20,13 @@ type TUser = {
   createdAt: string;
   updatedAt: string;
 };
-interface ContextType {
+interface AuthContextType {
   user: TUser | null;
   loading: boolean;
   dispatch: React.Dispatch<TAction>;
 }
 
-const AuthContext = createContext<ContextType | null>(null);
+const AuthContext = createContext<AuthContextType | null>(null);
 
 interface IState {
   user: TUser | null;

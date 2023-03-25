@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { TProfileDefault } from '../../types/Profile';
 import Back from '../../assets/back.svg';
@@ -8,8 +8,8 @@ import useAuthContext from '../../hooks/useAuthContext';
 import TMessage from '../../types/Message';
 import { sendMessage, getMessages } from '../../api/message';
 import Message from './Message';
-import { SocketContext } from '../../context/socketContext';
 import Loading from '../Loading';
+import useSocketContext from '../../hooks/useSocketContext';
 
 type Props = {
   profile: TProfileDefault;
@@ -21,7 +21,7 @@ function Chat({ profile, close }: Props) {
   const [message, setMessage] = useState<string>('');
 
   const auth = useAuthContext();
-  const socket = useContext(SocketContext);
+  const soc = useSocketContext();
   const lastMessageRef = useRef<HTMLDivElement | null>(null);
 
   const messagesQuery = useQuery<TMessage[], Error>({
@@ -55,16 +55,14 @@ function Chat({ profile, close }: Props) {
   }
 
   useEffect(() => {
-    if (socket) {
-      socket.on('receiveMessage', (m: TMessage, sender: string) => {
-        if (sender === profile._id) {
-          setMessages((prevState) => {
-            return [...prevState, m];
-          });
-        }
-      });
-    }
-  }, [socket, profile]);
+    soc.socket?.on('receiveMessage', (m: TMessage, sender: string) => {
+      if (sender === profile._id) {
+        setMessages((prevState) => {
+          return [...prevState, m];
+        });
+      }
+    });
+  }, [soc, profile]);
 
   useEffect(() => {
     setTimeout(() => {

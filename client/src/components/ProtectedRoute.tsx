@@ -1,10 +1,11 @@
+import { useContext } from 'react';
 import { Navigate } from 'react-router-dom';
-import useAuthContext from '../hooks/useAuthContext';
+import { AuthContext } from '../context/authContext';
 
 function ProtectedRoute({ children }: { children: JSX.Element }) {
-  const auth = useAuthContext();
+  const context = useContext(AuthContext);
 
-  if (auth.user) {
+  if (context && context.user) {
     return children;
   }
 

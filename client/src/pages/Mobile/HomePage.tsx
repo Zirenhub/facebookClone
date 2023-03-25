@@ -76,10 +76,7 @@ function HomePage() {
             new Date(b.createdAt).valueOf() - new Date(a.createdAt).valueOf()
         )
         .map((post) => {
-          let isAuthor = false;
-          if (post.author._id === auth.user?._id) {
-            isAuthor = true;
-          }
+          const isAuthor = post.author._id === auth.user?._id;
 
           return (
             <div key={post._id} className="mt-2 border-b-4 border-slate-400">

@@ -1,30 +1,73 @@
-import { createContext, ReactNode, useEffect, useMemo, useState } from 'react';
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+import { Navigate } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
-import useAuthContext from '../hooks/useAuthContext';
+import GetOnlineFriends from '../types/SocketIo';
+import { AuthContext } from './authContext';
 
-const SocketContext = createContext<Socket | null>(null);
+type SocketContextT = {
+  socket: Socket | null;
+  getOnlineFriends: (callback: (data: string[]) => void) => void;
+};
+
+const SocketContext = createContext<SocketContextT | null>(null);
 
 function SocketContextProvider({ children }: { children: ReactNode }) {
   const [socket, setSocket] = useState<Socket | null>(null);
 
-  const auth = useAuthContext();
+  const auth = useContext(AuthContext);
+  if (!auth || !auth.user) {
+    <Navigate to="/" replace />;
+  }
+
+  const getOnlineFriends = useMemo(() => {
+    return (callback: (data: string[]) => void) => {
+      socket?.emit(
+        'get-online-friends',
+        ({ status, data }: GetOnlineFriends) => {
+          if (status === 'OK' && Array.isArray(data)) {
+            callback(data);
+          } else if (typeof data === 'string') {
+            // handle error
+          }
+        }
+      );
+    };
+  }, [socket]);
 
   useEffect(() => {
-    const newSocket = io(`http://localhost:${__PORT__}`, {
-      autoConnect: false,
-      auth: { id: auth.user?._id },
-      withCredentials: true,
-    });
-    newSocket.connect();
+    function connect(id: string | undefined) {
+      if (id) {
+        const newSocket = io(`http://localhost:${__PORT__}`, {
+          auth: { id },
+          withCredentials: true,
+        });
+        return newSocket;
+      }
+      return null;
+    }
 
-    setSocket(newSocket);
+    const connectedSocket = connect(auth?.user?._id);
+    if (connectedSocket) {
+      setSocket(connectedSocket);
+    }
+
     return () => {
-      newSocket.disconnect();
-      newSocket.off();
+      connectedSocket?.disconnect();
+      connectedSocket?.off();
     };
   }, [auth]);
 
-  const ProviderValue = useMemo(() => socket, [socket]);
+  const ProviderValue = useMemo(
+    () => ({ socket, getOnlineFriends }),
+    [socket, getOnlineFriends]
+  );
 
   return (
     <SocketContext.Provider value={ProviderValue}>
