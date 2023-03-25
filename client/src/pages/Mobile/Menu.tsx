@@ -4,14 +4,18 @@ import CogWheel from '../../assets/cog-wheel.svg';
 import Pfp from '../../assets/pfp-two.svg';
 import useAuthContext from '../../hooks/useAuthContext';
 import { logOutUser } from '../../api/auth';
+import useSocketContext from '../../hooks/useSocketContext';
 
 function MobileMenu() {
   const auth = useAuthContext();
+  const socket = useSocketContext();
   const navigate = useNavigate();
 
   async function handleLogOut() {
     const res = await logOutUser();
     if (res.status === 'success') {
+      socket.socket?.disconnect();
+      socket.socket?.off();
       auth.dispatch({ type: 'LOGOUT' });
     }
   }
