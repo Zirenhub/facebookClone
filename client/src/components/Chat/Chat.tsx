@@ -9,7 +9,6 @@ import TMessage from '../../types/Message';
 import { sendMessage, getMessages } from '../../api/message';
 import Message from './Message';
 import Loading from '../Loading';
-import useSocketContext from '../../hooks/useSocketContext';
 
 type Props = {
   profile: TProfileDefault;
@@ -21,7 +20,6 @@ function Chat({ profile, close }: Props) {
   const [message, setMessage] = useState<string>('');
 
   const auth = useAuthContext();
-  const soc = useSocketContext();
   const lastMessageRef = useRef<HTMLDivElement | null>(null);
 
   const messagesQuery = useQuery<TMessage[], Error>({
@@ -55,14 +53,14 @@ function Chat({ profile, close }: Props) {
   }
 
   useEffect(() => {
-    soc.socket?.on('receiveMessage', (m: TMessage, sender: string) => {
+    auth.socket?.on('receiveMessage', (m: TMessage, sender: string) => {
       if (sender === profile._id) {
         setMessages((prevState) => {
           return [...prevState, m];
         });
       }
     });
-  }, [soc, profile]);
+  }, [auth, profile]);
 
   useEffect(() => {
     setTimeout(() => {

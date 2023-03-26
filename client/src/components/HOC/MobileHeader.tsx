@@ -8,18 +8,23 @@ import Search from '../../assets/search.svg';
 import Messenger from '../../assets/messenger.svg';
 import MessengerPage from '../../pages/Mobile/Messenger';
 import SearchPage from '../../pages/Mobile/SearchPage';
+import TNotification from '../../types/SocketIo';
+
+type Page = 'home' | 'profile' | 'menu' | 'friends' | 'notifications';
 
 function MobileHeader() {
-  const [currentPage, setCurrentPage] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState<Page | null>(null);
   const [searchPage, setSearchPage] = useState<boolean>(false);
   const [messengerPage, setMessengerPage] = useState<boolean>(false);
 
   const auth = useAuthContext();
-  const pages = useRoute();
+  const pages = useRoute(true);
   const location = useLocation();
 
   useEffect(() => {
     const path = location.pathname.substring(1, location.pathname.length);
+
+    // if path is notification, user saw the notification, delete them.
 
     if (path === 'home') {
       setCurrentPage('home');
@@ -32,7 +37,16 @@ function MobileHeader() {
     } else {
       setCurrentPage(null);
     }
-  }, [location, auth]);
+  }, [location, auth, pages]);
+
+  useEffect(() => {
+    auth.socket?.on(
+      'notification',
+      ({ type, message, sender }: TNotification) => {
+        console.log(type, message, sender);
+      }
+    );
+  }, [auth]);
 
   if (searchPage) {
     return <SearchPage close={() => setSearchPage(false)} />;
