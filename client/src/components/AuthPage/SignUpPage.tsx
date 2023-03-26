@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 import { UserSignUp } from '../../types/UserSignUp';
 import useSignUpFormValidator from '../../hooks/useSignUpFormValidator';
-import { signUpUser, logInUser } from '../../api/auth';
 import useAuthContext from '../../hooks/useAuthContext';
 import CloseButton from '../../assets/x.svg';
 
@@ -26,7 +25,7 @@ function SignUpPage({ close }: { close: () => void }) {
     month: 0,
     year: 2023,
   });
-  const [error, setError] = useState<{ msg: string }[]>([]);
+  const [signUpErrors, setSignUpErrors] = useState<string | null>(null);
 
   const currentYear = new Date().getFullYear();
   const auth = useAuthContext();
@@ -90,12 +89,9 @@ function SignUpPage({ close }: { close: () => void }) {
     e.preventDefault();
     const isValid = validate();
     if (isValid) {
-      const signup = await signUpUser(userInfo);
-      if (signup.status === 'success') {
-        const login = await logInUser(userInfo.email, userInfo.password);
-        auth.dispatch({ type: 'LOGIN', payload: login.data });
-      } else {
-        setError(signup.errors);
+      const res = await auth.register(userInfo);
+      if (res.status === 'error' && res.message) {
+        setSignUpErrors(res.message);
       }
     }
   }
@@ -268,14 +264,7 @@ function SignUpPage({ close }: { close: () => void }) {
             />
           </form>
         </div>
-        {error &&
-          error.map((err) => {
-            return (
-              <p key={err.msg} className="text-center">
-                {err.msg}
-              </p>
-            );
-          })}
+        {signUpErrors && <p className="text-center">{signUpErrors}</p>}
       </div>
     </div>
   );

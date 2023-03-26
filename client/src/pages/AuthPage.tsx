@@ -1,6 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { logInUser } from '../api/auth';
 import useAuthContext from '../hooks/useAuthContext';
 import Loading from '../components/Loading';
 import FacebookLogo from '../assets/facebook-logo.svg';
@@ -11,20 +10,18 @@ function AuthPage() {
   const [signUpIsOpen, setSignUpIsOpen] = useState<boolean>(false);
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
-  const [errors, setErrors] = useState<{ msg: string }[]>([]);
+  const [errors, setErrors] = useState<string | null>(null);
 
   const navigate = useNavigate();
   const auth = useAuthContext();
 
   async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
-    setErrors([]);
+    setErrors(null);
     if (email && password) {
-      const res = await logInUser(email, password);
-      if (res.status === 'success') {
-        auth.dispatch({ type: 'LOGIN', payload: res.data });
-      } else {
-        setErrors(res.errors);
+      const res = await auth.logIn(email, password);
+      if (res.status === 'error' && res.message) {
+        setErrors(res.message);
       }
     }
   }
@@ -90,13 +87,11 @@ function AuthPage() {
               className="py-3 rounded transition-all bg-blue-500 hover:bg-blue-600 text-white font-bold cursor-pointer"
             />
           </form>
-          {errors.map((error) => {
-            return (
-              <div key={error.msg}>
-                <p>{error.msg}</p>
-              </div>
-            );
-          })}
+          {errors && (
+            <div>
+              <p className="text-center">{errors}</p>
+            </div>
+          )}
           <button
             type="button"
             className="w-fit self-center mt-5 hover:underline text-blue-400"

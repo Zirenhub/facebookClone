@@ -113,3 +113,24 @@ export type SendMessageRes = {
   errors?: ValidationError[] | null;
   message: string | null;
 };
+
+export type GetOnlineFrindsRes = {
+  status: 'success' | 'error';
+  data?: string[];
+  errors?: null;
+  message: string | null;
+};
+
+export type RegisterUserRes = {
+  status: 'success' | 'error';
+  data?: null;
+  errors?: ValidationError[] | null;
+  message: string | null;
+};
+
+export type LogInUserRes = {
+  status: 'success' | 'error';
+  data?: TProfile;
+  errors?: ValidationError[] | null;
+  message: string | null;
+};

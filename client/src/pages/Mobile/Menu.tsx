@@ -3,22 +3,10 @@ import Search from '../../assets/search.svg';
 import CogWheel from '../../assets/cog-wheel.svg';
 import Pfp from '../../assets/pfp-two.svg';
 import useAuthContext from '../../hooks/useAuthContext';
-import { logOutUser } from '../../api/auth';
-import useSocketContext from '../../hooks/useSocketContext';
 
 function MobileMenu() {
   const auth = useAuthContext();
-  const socket = useSocketContext();
   const navigate = useNavigate();
-
-  async function handleLogOut() {
-    const res = await logOutUser();
-    if (res.status === 'success') {
-      socket.socket?.disconnect();
-      socket.socket?.off();
-      auth.dispatch({ type: 'LOGOUT' });
-    }
-  }
 
   return (
     <div className="bg-gray-200 flex flex-col py-5 px-3 h-full">
@@ -92,7 +80,7 @@ function MobileMenu() {
         <button
           type="button"
           className="bg-gray-300 w-full rounded-md py-2 font-bold"
-          onClick={handleLogOut}
+          onClick={() => auth.logOut()}
         >
           Log out
         </button>

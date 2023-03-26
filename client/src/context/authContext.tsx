@@ -1,11 +1,15 @@
 import {
   createContext,
   ReactNode,
+  useCallback,
   useEffect,
   useMemo,
   useReducer,
 } from 'react';
+import { io, Socket } from 'socket.io-client';
+import { logInUser, logOutUser, signUpUser } from '../api/auth';
 import Loading from '../components/Loading';
+import { UserSignUp } from '../types/UserSignUp';
 
 type TUser = {
   __v: number;
@@ -20,21 +24,51 @@ type TUser = {
   createdAt: string;
   updatedAt: string;
 };
-interface AuthContextType {
-  user: TUser | null;
-  loading: boolean;
-  dispatch: React.Dispatch<TAction>;
-}
-
-const AuthContext = createContext<AuthContextType | null>(null);
 
 interface IState {
   user: TUser | null;
+  socket: Socket | null;
   loading: boolean;
+}
+interface AuthContextType extends IState {
+  dispatch: React.Dispatch<TAction>;
+  logOut: () => Promise<
+    | {
+        status: string;
+        message: null;
+      }
+    | {
+        status: string;
+        message: string;
+      }
+  >;
+  logIn: (
+    email: string,
+    password: string
+  ) => Promise<
+    | {
+        status: string;
+        message: null;
+      }
+    | {
+        status: string;
+        message: string;
+      }
+  >;
+  register: (userInfo: UserSignUp) => Promise<
+    | {
+        status: string;
+        message: null;
+      }
+    | {
+        status: string;
+        message: string;
+      }
+  >;
 }
 
 type TAction =
-  | { type: 'LOGIN'; payload: TUser }
+  | { type: 'LOGIN'; payload: { user: TUser; socket: Socket } }
   | { type: 'LOGOUT' }
   | { type: 'LOADING_FALSE' };
 
@@ -43,12 +77,19 @@ type Res = {
   data: TUser;
 };
 
+const AuthContext = createContext<AuthContextType | null>(null);
+
 function AuthReducer(state: IState, action: TAction) {
   switch (action.type) {
     case 'LOGIN':
-      return { ...state, user: action.payload };
+      return {
+        ...state,
+        user: action.payload.user,
+        socket: action.payload.socket,
+      };
     case 'LOGOUT':
-      return { ...state, user: null };
+      return { ...state, user: null, socket: null };
+
     case 'LOADING_FALSE':
       return { ...state, loading: false };
 
@@ -60,40 +101,97 @@ function AuthReducer(state: IState, action: TAction) {
 function AuthContextProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(AuthReducer, {
     user: null,
+    socket: null,
     loading: true,
   });
 
-  useEffect(() => {
-    async function init() {
-      async function checkLogged() {
-        const res = await fetch('/api/v1/auth/me');
-        const { data, status }: Res = await res.json();
-        if (status === 'success') {
-          dispatch({ type: 'LOGIN', payload: data });
-          return data.exp;
-        }
-        return null;
-      }
-      try {
-        const exp = await checkLogged();
-        if (exp) {
-          const expDate = new Date(exp * 1000);
-          const difference = expDate.getTime() - new Date().getTime();
+  function connect(id: string) {
+    const newSocket = io(`http://localhost:${__PORT__}`, {
+      auth: { id },
+      withCredentials: true,
+    });
+    return newSocket;
+  }
 
-          setTimeout(() => {
-            dispatch({ type: 'LOGOUT' });
-          }, difference);
-        }
-        dispatch({ type: 'LOADING_FALSE' });
-      } catch (err) {
-        console.log(err);
-      }
+  async function checkLogged() {
+    const res = await fetch('/api/v1/auth/me');
+    const { data, status }: Res = await res.json();
+    if (status === 'success') {
+      return data;
     }
+    return null;
+  }
 
-    init();
+  const init = useCallback(async () => {
+    const user = await checkLogged();
+    if (user) {
+      const socket = connect(user._id);
+      dispatch({ type: 'LOGIN', payload: { user, socket } });
+      const expDate = new Date(user.exp * 1000);
+      const difference = expDate.getTime() - new Date().getTime();
+
+      setTimeout(() => {
+        dispatch({ type: 'LOGOUT' });
+      }, difference);
+    }
+    dispatch({ type: 'LOADING_FALSE' });
+    return null;
   }, []);
 
-  const ProviderValue = useMemo(() => ({ ...state, dispatch }), [state]);
+  const logOut = useCallback(async () => {
+    try {
+      await logOutUser();
+      state.socket?.disconnect();
+      state.socket?.off();
+      dispatch({ type: 'LOGOUT' });
+      return { status: 'ok', message: null };
+    } catch (err) {
+      if (err instanceof Error) {
+        return { status: 'error', message: err.message };
+      }
+      return { status: 'error', message: null };
+    }
+  }, [state.socket]);
+
+  const logIn = useCallback(
+    async (email: string, password: string) => {
+      try {
+        await logInUser(email, password);
+        await init();
+        return { status: 'ok', message: null };
+      } catch (err) {
+        if (err instanceof Error) {
+          return { status: 'error', message: err.message };
+        }
+        return { status: 'error', message: null };
+      }
+    },
+    [init]
+  );
+
+  const register = useCallback(
+    async (userInfo: UserSignUp) => {
+      try {
+        await signUpUser(userInfo);
+        return await logIn(userInfo.email, userInfo.password);
+      } catch (err) {
+        if (err instanceof Error) {
+          return { status: 'error', message: err.message };
+        }
+        return { status: 'error', message: null };
+      }
+    },
+    [logIn]
+  );
+
+  useEffect(() => {
+    init();
+  }, [init]);
+
+  const ProviderValue = useMemo(
+    () => ({ ...state, dispatch, logOut, logIn, register }),
+    [state, logOut, logIn, register]
+  );
 
   if (state.loading) {
     return <Loading />;
