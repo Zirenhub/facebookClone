@@ -1,4 +1,4 @@
-import express, { Express } from 'express';
+import express, { Express, Response } from 'express';
 import mongoose from 'mongoose';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
@@ -13,7 +13,7 @@ import searchRoute from './routes/searchRoute';
 import timelineRoute from './routes/timelineRoute';
 import commentRoute from './routes/commentRoute';
 import messagesRoute from './routes/messagesRoute';
-import { jwtAuth } from './middleware/jwtAuth';
+import { IUserRequest, jwtAuth } from './middleware/jwtAuth';
 import getFriendsIds from './utils/getFriendsIds';
 
 dotenv.config();
@@ -74,22 +74,34 @@ io.on('connection', (socket) => {
     onlineUsers = onlineUsers.filter((onlineID) => onlineID !== id);
     console.log('user is offline', onlineUsers);
   });
-
-  socket.on('get-online-friends', async (callback) => {
-    callback = typeof callback == 'function' ? callback : () => {};
-    try {
-      const friends = await getFriendsIds(id);
-      const onlineFriends = onlineUsers.filter((onlineID) => {
-        return friends.some((friendID) => friendID === onlineID);
-      });
-      callback({ status: 'OK', data: onlineFriends });
-    } catch (err: any) {
-      callback({ status: 'ERROR', data: err.message });
-    }
-  });
 });
 
 app.use('/api/v1/messages', jwtAuth, messagesRoute(io));
+app.use(
+  '/api/v1/online-friends',
+  jwtAuth,
+  async (req: IUserRequest, res: Response) => {
+    try {
+      const id = req.user._id;
+      const friends = await getFriendsIds(id);
+      const onlineFriends = onlineUsers.filter((onlineID) => {
+        return friends.includes(onlineID);
+      });
+
+      return res.json({
+        status: 'success',
+        data: onlineFriends,
+        message: null,
+      });
+    } catch (err: any) {
+      res.status(500).json({
+        status: 'error',
+        errors: null,
+        message: err.message,
+      });
+    }
+  }
+);
 
 mongoose.connect(process.env.DB_URI!).then(() => {
   server.listen(port, () =>

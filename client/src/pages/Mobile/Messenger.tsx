@@ -1,32 +1,30 @@
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { getFriends } from '../../api/profile';
 import Close from '../../assets/x.svg';
 import Loading from '../../components/Loading';
 import { TProfileDefault } from '../../types/Profile';
 import Pfp from '../../assets/pfp-two.svg';
 import Chat from '../../components/Chat/Chat';
-import useSocketContext from '../../hooks/useSocketContext';
+import getOnlineFriends from '../../api/onlineFriends';
 
 function Messenger({ close }: { close: () => void }) {
   const [currentChat, setCurrentChat] = useState<TProfileDefault | null>(null);
+  const [friends, setFriends] = useState<TProfileDefault[] | null>(null);
   const [onlineFriends, setOnlineFriends] = useState<string[] | null>(null);
 
-  const soc = useSocketContext();
-
-  const { isLoading, isError, data, error } = useQuery<
-    TProfileDefault[],
+  const { isLoading, isError, error } = useQuery<
+    [TProfileDefault[], string[]],
     Error
   >({
     queryKey: ['friends'],
-    queryFn: () => getFriends(),
+    queryFn: () => Promise.all([getFriends(), getOnlineFriends()]),
+    onSuccess([f, online]) {
+      setFriends(f);
+      setOnlineFriends(online);
+    },
+    refetchOnWindowFocus: false,
   });
-
-  useEffect(() => {
-    soc.getOnlineFriends((friends) => {
-      setOnlineFriends(friends);
-    });
-  }, [soc]);
 
   if (isLoading) {
     <Loading />;
@@ -50,7 +48,7 @@ function Messenger({ close }: { close: () => void }) {
         <Close height="100%" width="100%" />
       </button>
       <div className="flex flex-col">
-        {data?.map((friend) => {
+        {friends?.map((friend) => {
           const isOnline = onlineFriends?.includes(friend._id);
 
           return (
