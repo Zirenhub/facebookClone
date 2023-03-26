@@ -5,7 +5,7 @@ import { AuthContext } from '../context/authContext';
 function ProtectedRoute({ children }: { children: JSX.Element }) {
   const context = useContext(AuthContext);
 
-  if (context && context.user) {
+  if (context && context.user && context.socket) {
     return children;
   }
 

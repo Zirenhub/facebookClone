@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 import CredentialsModel from '../models/credentials';
 import ProfileModel from '../models/profile';
 import { IUserRequest } from '../middleware/jwtAuth';
+import mongoose from 'mongoose';
 
 const currentYear = new Date().getFullYear();
 
@@ -20,56 +21,67 @@ export const login = [
     .isLength({ min: 8 })
     .withMessage('Password must be at least 8 characters long.'),
   async (req: Request, res: Response) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        status: 'error',
-        errors: errors.array(),
-        message: null,
-      });
-    }
-    const email: string = req.body.email;
-    const password: string = req.body.password;
-    const user = await CredentialsModel.findOne({ email });
-
-    if (!user) {
-      return res.status(403).json({
-        status: 'error',
-        errors: [{ msg: "User doesn't exist." }],
-        message: null,
-      });
-    }
-
-    const checkPassword = bcrypt.compareSync(password, user.password);
-    if (checkPassword) {
-      const profile = await ProfileModel.findById(user.profile);
-      if (!profile) {
-        return res.status(403).json({
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
           status: 'error',
-          errors: [{ msg: "Profile doesn't exist." }],
+          errors: errors.array(),
           message: null,
         });
       }
-      const token = jwt.sign(
-        profile.toObject(),
-        process.env.JWT_SECRET!,
-        {
-          expiresIn: '1h',
-        }
+
+      const { email, password } = req.body;
+      const user = await CredentialsModel.findOne({ email });
+
+      if (!user) {
+        return res.status(403).json({
+          status: 'error',
+          errors: null,
+          message: 'User not found.',
+        });
+      }
+
+      const checkPassword = bcrypt.compareSync(
+        password,
+        user.password
       );
-      res.cookie('token', token, {
-        httpOnly: true,
-      });
-      return res.json({
-        status: 'success',
-        data: profile.toObject(),
-        message: null,
-      });
-    } else {
-      res.status(403).json({
+
+      if (checkPassword) {
+        const profile = await ProfileModel.findById(user.profile);
+        if (!profile) {
+          return res.status(403).json({
+            status: 'error',
+            errors: null,
+            message: 'Profile not found.',
+          });
+        }
+        const token = jwt.sign(
+          profile.toObject(),
+          process.env.JWT_SECRET!,
+          {
+            expiresIn: '1h',
+          }
+        );
+        res.cookie('token', token, {
+          httpOnly: true,
+        });
+        return res.json({
+          status: 'success',
+          data: profile.toObject(),
+          message: null,
+        });
+      }
+      return res.status(403).json({
         status: 'error',
-        errors: [{ msg: 'Wrong password' }],
-        message: null,
+        errors: null,
+        message: 'Wrong password.',
+      });
+    } catch (err: any) {
+      res.status(500).json({
+        status: 'error',
+        errors: null,
+        message: err.message,
       });
     }
   },
@@ -84,10 +96,11 @@ export const signup = [
   body('firstName').notEmpty().trim(),
   body('lastName').notEmpty().trim(),
   body('email')
-    .isEmail()
-    .normalizeEmail()
     .trim()
     .escape()
+    .isEmail()
+    .withMessage('Wrong email format.')
+    .normalizeEmail()
     .custom(async (value) => {
       return CredentialsModel.exists({ email: value }).then(
         (user) => {
@@ -145,49 +158,57 @@ export const signup = [
     }),
 
   async (req: Request, res: Response) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        status: 'error',
-        errors: errors.array(),
-        message: null,
-      });
-    }
-    const firstName: string = req.body.firstName;
-    const lastName: string = req.body.lastName;
-    const email: string = req.body.email;
-    const password: string = req.body.password;
-    const birthday: Date = req.body.birthday;
-    const gender: string = req.body.gender;
-    const customGender: string = req.body.customGender;
-
-    function assignGender() {
-      return gender === 'custom' ? customGender : gender;
-    }
-
-    const newProfile = new ProfileModel({
-      firstName,
-      lastName,
-      birthday,
-      gender: assignGender(),
-    });
-    const newUser = new CredentialsModel({
-      email,
-      password,
-      profile: newProfile._id,
-    });
-
     try {
-      await newProfile.save();
-      await newUser.save();
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          status: 'error',
+          errors: errors.array(),
+          message: null,
+        });
+      }
+      const {
+        firstName,
+        lastName,
+        email,
+        password,
+        gender,
+        customGender,
+      } = req.body.firstName;
+      const birthday: Date = req.body.birthday;
+
+      function assignGender() {
+        return gender === 'custom' ? customGender : gender;
+      }
+
+      const newProfile = new ProfileModel({
+        firstName,
+        lastName,
+        birthday,
+        gender: assignGender(),
+      });
+      const newUser = new CredentialsModel({
+        email,
+        password,
+        profile: newProfile._id,
+      });
+
+      const session = await mongoose.startSession();
+      session.startTransaction();
+
+      await newProfile.save({ session });
+      await newUser.save({ session });
+
+      await session.commitTransaction();
+
       res
         .status(201)
         .json({ status: 'success', data: null, message: null });
-    } catch (err) {
-      res.status(400).json({
+    } catch (err: any) {
+      res.status(500).json({
         status: 'error',
-        errors: [err],
-        message: 'Something went wrong.',
+        errors: null,
+        message: err.message,
       });
     }
   },

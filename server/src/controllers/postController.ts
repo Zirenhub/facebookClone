@@ -323,33 +323,6 @@ export const getPostComments = async (
       parent: { $exists: false },
     }).populate('author');
 
-    // const commentIds: { [key: string]: ModifiedComment } = {};
-
-    // comments.forEach((comment) => {
-    //   commentIds[comment._id.toString()] = {
-    //     ...comment.toObject(),
-    //     children: [],
-    //   };
-    // });
-
-    // comments.forEach((comment) => {
-    //   if (comment.parent) {
-    //     const parentID = comment.parent.toString();
-
-    //     commentIds[parentID].children.push(comment.toObject());
-    //   }
-    // });
-
-    // for (const comment in commentIds) {
-    //   if (commentIds[comment].parent) {
-    //     delete commentIds[comment];
-    //   }
-    // }
-
-    // const updatedComments = Object.keys(commentIds).map(
-    //   (key) => commentIds[key]
-    // );
-
     return res.json({
       status: 'success',
       data: comments,

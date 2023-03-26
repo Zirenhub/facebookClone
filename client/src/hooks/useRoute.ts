@@ -9,9 +9,7 @@ import Watch from '../assets/watch.svg';
 import Groups from '../assets/groups.svg';
 import Menu from '../assets/menu-bars.svg';
 
-function useRoute() {
-  const isMobile = window.innerWidth <= 500;
-
+function useRoute(mobile: boolean) {
   const auth = useAuthContext();
   const navigate = useNavigate();
 
@@ -44,7 +42,7 @@ function useRoute() {
   const watch = { name: 'watch', svg: Watch, link: () => navigate('/watch') };
   const menu = { name: 'menu', svg: Menu, link: () => navigate('/menu') };
 
-  return isMobile
+  return mobile
     ? [home, friends, watch, profile, notifications, menu]
     : [home, friends, watch, marketplace, groups];
 }

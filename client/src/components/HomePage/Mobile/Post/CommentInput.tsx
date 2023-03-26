@@ -15,9 +15,7 @@ function CommentInput({ sendReply, replyingTo }: Props) {
   function handleSendReply() {
     if (comment) {
       sendReply.mutate(comment);
-      if (sendReply.isSuccess) {
-        setComment('');
-      }
+      setComment('');
     }
   }
 

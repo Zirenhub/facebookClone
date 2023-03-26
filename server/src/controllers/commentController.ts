@@ -111,28 +111,24 @@ export const replyToComment = [
       }
 
       const { postID, comment } = req.body;
-      const parentComment = await CommentModel.findById(
-        req.params.id
+
+      await CommentModel.updateOne(
+        { _id: req.params.id },
+        {
+          $inc: {
+            replies: +1,
+          },
+        }
       );
-      if (!parentComment) {
-        return res.status(400).json({
-          status: 'error',
-          errors: null,
-          message: 'Parent comment was not found.',
-        });
-      }
 
       const newComment = await new CommentModel({
         author: req.user._id,
         post: postID,
-        parent: parentComment._id,
+        parent: req.params.id,
         content: comment,
       }).populate('author');
 
       await newComment.save();
-
-      parentComment.replies += 1;
-      await parentComment.save();
 
       return res.json({
         status: 'success',

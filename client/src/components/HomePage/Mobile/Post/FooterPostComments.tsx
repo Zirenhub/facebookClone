@@ -13,7 +13,7 @@ type Props = {
 
 function PostComments({ post, close }: Props) {
   const displayHeight = window.innerHeight;
-  const heightRef = useRef<HTMLDivElement>(null);
+  const heightRef = useRef<HTMLDivElement | null>(null);
 
   function handleMove(e: React.TouchEvent) {
     if (heightRef.current) {
