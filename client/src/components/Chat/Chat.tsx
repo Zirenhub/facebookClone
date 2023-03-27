@@ -27,6 +27,7 @@ function Chat({ profile, close }: Props) {
     queryFn: () => {
       return getMessages(profile._id);
     },
+    refetchOnWindowFocus: false,
     onSuccess(data) {
       setMessages(data);
     },
@@ -118,7 +119,7 @@ function Chat({ profile, close }: Props) {
             onChange={handleMessage}
             value={message}
           />
-          <button className="h-8 w-8" type="button">
+          <button className="h-8 w-8" type="submit">
             <Send
               height="100%"
               width="100%"
