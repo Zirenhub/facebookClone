@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, useOutletContext } from 'react-router-dom';
 import useAuthContext from '../../hooks/useAuthContext';
 import useRoute from '../../hooks/useRoute';
 import facebookLogo from '../../assets/facebook-logo.png';
@@ -9,6 +9,7 @@ import Messenger from '../../assets/messenger.svg';
 import MessengerPage from '../../pages/Mobile/Messenger';
 import SearchPage from '../../pages/Mobile/SearchPage';
 import TNotification from '../../types/SocketIo';
+import NotificationPopup from './NotificationPopup';
 
 type Page = 'home' | 'profile' | 'menu' | 'friends' | 'notifications';
 
@@ -16,6 +17,8 @@ function MobileHeader() {
   const [currentPage, setCurrentPage] = useState<Page | null>(null);
   const [searchPage, setSearchPage] = useState<boolean>(false);
   const [messengerPage, setMessengerPage] = useState<boolean>(false);
+  const [notifications, setNotifications] = useState<TNotification[]>([]);
+  const [latestNotif, setLatestNotif] = useState<TNotification | null>(null);
 
   const auth = useAuthContext();
   const pages = useRoute(true);
@@ -24,29 +27,24 @@ function MobileHeader() {
   useEffect(() => {
     const path = location.pathname.substring(1, location.pathname.length);
 
-    // if path is notification, user saw the notification, delete them.
-
-    if (path === 'home') {
-      setCurrentPage('home');
-    } else if (path === auth.user?._id) {
-      setCurrentPage('profile');
-    } else if (path === 'menu') {
-      setCurrentPage('menu');
-    } else if (path === 'friends') {
-      setCurrentPage('friends');
-    } else {
+    const pageNames = Object.values(pages).map((p) => p.name);
+    if (!pageNames.includes(path as Page)) {
       setCurrentPage(null);
+    } else {
+      setCurrentPage(path as Page);
     }
   }, [location, auth, pages]);
 
   useEffect(() => {
-    auth.socket?.on(
-      'notification',
-      ({ type, message, sender }: TNotification) => {
-        console.log(type, message, sender);
-      }
-    );
-  }, [auth]);
+    auth.socket?.on('notification', (notif: TNotification) => {
+      setLatestNotif(notif);
+      setNotifications([...notifications, notif]);
+
+      setTimeout(() => {
+        setLatestNotif(null);
+      }, 7000);
+    });
+  }, [auth, notifications]);
 
   if (searchPage) {
     return <SearchPage close={() => setSearchPage(false)} />;
@@ -59,6 +57,7 @@ function MobileHeader() {
   return (
     <>
       <header className="max-h-24 px-3 py-2 border-b-2 border-slate-400">
+        {latestNotif && <NotificationPopup notification={latestNotif} />}
         <div className="flex">
           <div className="h-8">
             <img
@@ -107,10 +106,24 @@ function MobileHeader() {
         </div>
       </header>
       <main className="grow">
-        <Outlet />
+        <Outlet
+          context={{
+            notifications,
+            clearNotifications: () => setNotifications([]),
+          }}
+        />
       </main>
     </>
   );
 }
 
-export default MobileHeader;
+type OutletContextType = {
+  notifications: TNotification[];
+  clearNotifications: () => void;
+};
+
+function useNotifications() {
+  return useOutletContext<OutletContextType>();
+}
+
+export { MobileHeader, useNotifications };
