@@ -41,6 +41,11 @@ export const postMessage = (io: Server) => [
         newMessage.toObject(),
         req.user._id
       );
+      io.to(receiver).emit('notification', {
+        type: 'message',
+        message: newMessage.message,
+        sender: req.user.fullName,
+      });
 
       return res.json({
         status: 'success',
