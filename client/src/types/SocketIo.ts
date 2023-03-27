@@ -1,6 +1,7 @@
-type GetOnlineFriends = {
-  status: 'OK' | 'ERROR';
-  data: string[] | string;
+type TNotification = {
+  type: 'message' | 'post' | 'comment' | 'reaction';
+  message: string;
+  sender: string;
 };
 
-export default GetOnlineFriends;
+export default TNotification;
