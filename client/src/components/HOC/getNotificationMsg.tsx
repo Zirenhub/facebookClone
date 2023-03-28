@@ -1,6 +1,6 @@
 import TNotification from '../../types/SocketIo';
 
-function NotificationPopup({ notification }: { notification: TNotification }) {
+function NotificationMsg({ notification }: { notification: TNotification }) {
   function getType(type: 'comment' | 'reaction' | 'message' | 'post') {
     if (type === 'comment') {
       return 'commented';
@@ -14,17 +14,17 @@ function NotificationPopup({ notification }: { notification: TNotification }) {
     if (type === 'post') {
       return 'posted';
     }
-    return 'Something went wrong';
+    return '...';
   }
 
   return (
-    <div className="absolute text-center z-50 top-10 p-3 bg-gray-200 rounded-full w-full left-2/4 -translate-x-2/4">
-      <p>
+    <>
+      <p className="font-bold">
         {notification.sender} {getType(notification.type)}
       </p>
       <p>{notification.message}</p>
-    </div>
+    </>
   );
 }
 
-export default NotificationPopup;
+export default NotificationMsg;
