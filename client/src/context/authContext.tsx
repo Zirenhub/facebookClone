@@ -70,7 +70,8 @@ interface AuthContextType extends IState {
 type TAction =
   | { type: 'LOGIN'; payload: { user: TUser; socket: Socket } }
   | { type: 'LOGOUT' }
-  | { type: 'LOADING_FALSE' };
+  | { type: 'LOADING_FALSE' }
+  | { type: 'LOADING_TRUE' };
 
 type Res = {
   status: 'success' | 'error';
@@ -89,9 +90,10 @@ function AuthReducer(state: IState, action: TAction) {
       };
     case 'LOGOUT':
       return { ...state, user: null, socket: null };
-
     case 'LOADING_FALSE':
       return { ...state, loading: false };
+    case 'LOADING_TRUE':
+      return { ...state, Loading: true };
 
     default:
       return state;
@@ -114,28 +116,35 @@ function AuthContextProvider({ children }: { children: ReactNode }) {
   }
 
   async function checkLogged() {
-    const res = await fetch('/api/v1/auth/me');
-    const { data, status }: Res = await res.json();
-    if (status === 'success') {
-      return data;
+    try {
+      const res = await fetch('/api/v1/auth/me');
+      const { data, status }: Res = await res.json();
+      if (status === 'success') {
+        return data;
+      }
+      return null;
+    } catch (err) {
+      if (err instanceof Error) {
+        console.log(err.message);
+      }
+      return null;
     }
-    return null;
   }
 
   const init = useCallback(async () => {
     const user = await checkLogged();
     if (user) {
       const socket = connect(user._id);
-      dispatch({ type: 'LOGIN', payload: { user, socket } });
       const expDate = new Date(user.exp * 1000);
       const difference = expDate.getTime() - new Date().getTime();
 
       setTimeout(() => {
         dispatch({ type: 'LOGOUT' });
       }, difference);
+      dispatch({ type: 'LOGIN', payload: { user, socket } });
+      return true;
     }
-    dispatch({ type: 'LOADING_FALSE' });
-    return null;
+    return false;
   }, []);
 
   const logOut = useCallback(async () => {
@@ -156,9 +165,13 @@ function AuthContextProvider({ children }: { children: ReactNode }) {
   const logIn = useCallback(
     async (email: string, password: string) => {
       try {
+        dispatch({ type: 'LOADING_TRUE' });
         await logInUser(email, password);
-        await init();
-        return { status: 'ok', message: null };
+        const isLoggedIn = await init();
+        dispatch({ type: 'LOADING_FALSE' });
+        return isLoggedIn
+          ? { status: 'ok', message: null }
+          : { status: 'error', message: null };
       } catch (err) {
         if (err instanceof Error) {
           return { status: 'error', message: err.message };
@@ -185,8 +198,29 @@ function AuthContextProvider({ children }: { children: ReactNode }) {
   );
 
   useEffect(() => {
-    init();
-  }, [init]);
+    let socket: Socket | null = null;
+
+    async function checkSession() {
+      const user = await checkLogged();
+      if (user) {
+        socket = connect(user._id);
+        const expDate = new Date(user.exp * 1000);
+        const difference = expDate.getTime() - new Date().getTime();
+
+        setTimeout(() => {
+          dispatch({ type: 'LOGOUT' });
+        }, difference);
+        dispatch({ type: 'LOGIN', payload: { user, socket } });
+      }
+      dispatch({ type: 'LOADING_FALSE' });
+    }
+
+    checkSession();
+    return () => {
+      socket?.off();
+      socket?.disconnect();
+    };
+  }, []);
 
   const ProviderValue = useMemo(
     () => ({ ...state, dispatch, logOut, logIn, register }),
