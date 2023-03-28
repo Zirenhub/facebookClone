@@ -1,6 +1,6 @@
 /* eslint-disable no-nested-ternary */
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import Loading from '../../components/Loading';
 import MobileWritePost from '../../components/HomePage/Mobile/WritePost';
 import MobileAddStory from '../../components/HomePage/Mobile/AddStory';
@@ -44,30 +44,21 @@ function HomePage() {
     }
   }, [data, isFetching, setInitialPosts, status]);
 
-  useEffect(() => {
-    const container = document.body;
-
-    function handleScroll() {
-      const isAtBottom =
-        container.scrollTop + container.clientHeight >= container.scrollHeight;
-      if (isAtBottom && hasNextPage && !isFetchingNextPage) {
-        fetchNextPage();
-      }
+  function handleScroll(e: React.SyntheticEvent) {
+    const target = e.target as HTMLDivElement;
+    const currentScroll = target.scrollHeight - Math.ceil(target.scrollTop);
+    const isAtBottom = currentScroll - 100 <= target.clientHeight;
+    if (isAtBottom && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
     }
-
-    container.addEventListener('scroll', handleScroll);
-
-    return () => {
-      container.removeEventListener('scroll', handleScroll);
-    };
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+  }
 
   if (status === 'loading') {
     return <Loading />;
   }
 
   return (
-    <div className="p-2 h-full overflow-auto" id="homepage">
+    <div className="p-2 h-full overflow-auto" onScroll={handleScroll}>
       <MobileWritePost mutationCreatePost={mutationCreatePost} />
       <MobileAddStory />
       {posts
