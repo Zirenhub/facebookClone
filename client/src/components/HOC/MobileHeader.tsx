@@ -9,7 +9,7 @@ import Messenger from '../../assets/messenger.svg';
 import MessengerPage from '../../pages/Mobile/Messenger';
 import SearchPage from '../../pages/Mobile/SearchPage';
 import TNotification from '../../types/SocketIo';
-import NotificationPopup from './NotificationPopup';
+import NotificationMsg from './getNotificationMsg';
 
 type Page = 'home' | 'profile' | 'menu' | 'friends' | 'notifications';
 
@@ -28,22 +28,30 @@ function MobileHeader() {
     const path = location.pathname.substring(1, location.pathname.length);
 
     const pageNames = Object.values(pages).map((p) => p.name);
-    if (!pageNames.includes(path as Page)) {
-      setCurrentPage(null);
-    } else {
+    if (path === auth.user?._id) {
+      setCurrentPage('profile');
+    } else if (pageNames.includes(path as Page)) {
       setCurrentPage(path as Page);
+    } else {
+      setCurrentPage(null);
     }
   }, [location, auth, pages]);
 
   useEffect(() => {
-    auth.socket?.on('notification', (notif: TNotification) => {
+    function addNotification(notif: TNotification) {
       setLatestNotif(notif);
       setNotifications([...notifications, notif]);
 
       setTimeout(() => {
         setLatestNotif(null);
       }, 7000);
-    });
+    }
+
+    auth.socket?.on('notification', addNotification);
+
+    return () => {
+      auth.socket?.off('notification', addNotification);
+    };
   }, [auth, notifications]);
 
   if (searchPage) {
@@ -56,8 +64,12 @@ function MobileHeader() {
 
   return (
     <>
-      <header className="max-h-24 px-3 py-2 border-b-2 border-slate-400">
-        {latestNotif && <NotificationPopup notification={latestNotif} />}
+      <header className="max-h-24 px-3 py-2 border-b-2 border-slate-400 bg-white">
+        {latestNotif && (
+          <div className="absolute text-center z-50 top-10 p-3 bg-gray-100 rounded-full w-full left-2/4 -translate-x-2/4">
+            <NotificationMsg notification={latestNotif} />
+          </div>
+        )}
         <div className="flex">
           <div className="h-8">
             <img
@@ -91,7 +103,7 @@ function MobileHeader() {
             return (
               <button
                 type="button"
-                className="h-8 w-8"
+                className="h-8 w-8 relative"
                 key={page.name}
                 onClick={page.link}
               >
@@ -100,16 +112,23 @@ function MobileHeader() {
                   width="100%"
                   height="100%"
                 />
+                {page.name === 'notifications' && notifications.length > 0 && (
+                  <div className="h-5 w-5 flex justify-center items-center absolute top-0 right-0 text-white p-2 bg-red-500 rounded-full">
+                    <p>{notifications.length}</p>
+                  </div>
+                )}
               </button>
             );
           })}
         </div>
       </header>
-      <main className="grow">
+      <main className="overflow-auto grow">
         <Outlet
           context={{
             notifications,
-            clearNotifications: () => setNotifications([]),
+            clearNotifications: () => {
+              if (notifications.length) setNotifications([]);
+            },
           }}
         />
       </main>
