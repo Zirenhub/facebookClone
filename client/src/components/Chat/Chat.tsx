@@ -54,20 +54,26 @@ function Chat({ profile, close }: Props) {
   }
 
   useEffect(() => {
-    auth.socket?.on('receiveMessage', (m: TMessage, sender: string) => {
+    function addNewMessage(m: TMessage, sender: string) {
       if (sender === profile._id) {
         setMessages((prevState) => {
           return [...prevState, m];
         });
       }
-    });
+    }
+
+    auth.socket?.on('receiveMessage', addNewMessage);
+
+    return () => {
+      auth.socket?.off('receiveMessage', addNewMessage);
+    };
   }, [auth, profile]);
 
   useEffect(() => {
     setTimeout(() => {
       lastMessageRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, 550);
-  }, [lastMessageRef]);
+  }, [lastMessageRef, messages]);
 
   if (messagesQuery.isLoading) {
     return <Loading />;
