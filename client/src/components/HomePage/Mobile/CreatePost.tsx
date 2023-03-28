@@ -82,6 +82,7 @@ function CreatePost({ mutationCreatePost, close }: Props) {
             onClick={() => {
               if (canSendPost) {
                 mutationCreatePost.mutate([post, postType]);
+                close();
               }
             }}
             className={`${
