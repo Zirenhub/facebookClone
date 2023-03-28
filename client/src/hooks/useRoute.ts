@@ -38,13 +38,25 @@ function useRoute(mobile: boolean) {
     svg: Groups,
     link: () => navigate('/groups'),
   };
-  const home = { name: 'home', svg: Home, link: () => navigate('/home') };
-  const watch = { name: 'watch', svg: Watch, link: () => navigate('/watch') };
-  const menu = { name: 'menu', svg: Menu, link: () => navigate('/menu') };
+  const home = {
+    name: 'home',
+    svg: Home,
+    link: () => navigate('/home'),
+  };
+  const watch = {
+    name: 'watch',
+    svg: Watch,
+    link: () => navigate('/watch'),
+  };
+  const menu = {
+    name: 'menu',
+    svg: Menu,
+    link: () => navigate('/menu'),
+  };
 
   return mobile
-    ? [home, friends, watch, profile, notifications, menu]
-    : [home, friends, watch, marketplace, groups];
+    ? [home, friends, groups, profile, notifications, menu]
+    : [home, friends, watch, marketplace];
 }
 
 export default useRoute;
