@@ -10,6 +10,8 @@ import MobileHomePage from '../pages/Mobile/HomePage';
 import Menu from '../pages/Mobile/Menu';
 import Friends from '../pages/Mobile/Friends';
 import Notifications from '../pages/Mobile/Notifications';
+import Groups from '../pages/Mobile/Groups';
+import GroupChat from '../pages/Mobile/GroupChat';
 
 const router = createBrowserRouter([
   {
@@ -38,6 +40,10 @@ const router = createBrowserRouter([
       {
         path: '/notifications',
         element: <Notifications />,
+      },
+      {
+        path: '/groups',
+        element: <Groups />,
       },
     ],
     errorElement: <ErrorPage />,
