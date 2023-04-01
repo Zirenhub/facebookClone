@@ -1,9 +1,18 @@
 /* eslint-disable react/no-array-index-key */
+import { useEffect } from 'react';
 import NotificationMsg from '../../components/HOC/getNotificationMsg';
-import { useNotifications } from '../../components/HOC/MobileHeader';
+import { useHeader } from '../../components/HOC/MobileHeader';
 
 function Notifications() {
-  const { notifications, clearNotifications } = useNotifications();
+  const { notifications, clearNotifications, setPage } = useHeader();
+
+  useEffect(() => {
+    setPage('notifications');
+
+    return () => {
+      setPage(null);
+    };
+  }, [setPage]);
 
   return (
     <div className="flex flex-col h-full text-center">

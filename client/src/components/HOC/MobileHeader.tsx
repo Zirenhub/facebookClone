@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Outlet, useLocation, useOutletContext } from 'react-router-dom';
+import { Outlet, useOutletContext } from 'react-router-dom';
 import useAuthContext from '../../hooks/useAuthContext';
 import useRoute from '../../hooks/useRoute';
 import facebookLogo from '../../assets/facebook-logo.png';
@@ -11,7 +11,13 @@ import SearchPage from '../../pages/Mobile/SearchPage';
 import TNotification from '../../types/SocketIo';
 import NotificationMsg from './getNotificationMsg';
 
-type Page = 'home' | 'profile' | 'menu' | 'friends' | 'notifications';
+type Page =
+  | 'home'
+  | 'profile'
+  | 'menu'
+  | 'friends'
+  | 'notifications'
+  | 'groups';
 
 function MobileHeader() {
   const [currentPage, setCurrentPage] = useState<Page | null>(null);
@@ -22,20 +28,6 @@ function MobileHeader() {
 
   const auth = useAuthContext();
   const pages = useRoute(true);
-  const location = useLocation();
-
-  useEffect(() => {
-    const path = location.pathname.substring(1, location.pathname.length);
-
-    const pageNames = Object.values(pages).map((p) => p.name);
-    if (path === auth.user?._id) {
-      setCurrentPage('profile');
-    } else if (pageNames.includes(path as Page)) {
-      setCurrentPage(path as Page);
-    } else {
-      setCurrentPage(null);
-    }
-  }, [location, auth, pages]);
 
   useEffect(() => {
     function addNotification(notif: TNotification) {
@@ -129,6 +121,9 @@ function MobileHeader() {
             clearNotifications: () => {
               if (notifications.length) setNotifications([]);
             },
+            setPage: (page: Page | null) => {
+              setCurrentPage(page);
+            },
           }}
         />
       </main>
@@ -139,10 +134,11 @@ function MobileHeader() {
 type OutletContextType = {
   notifications: TNotification[];
   clearNotifications: () => void;
+  setPage: (page: Page | null) => void;
 };
 
-function useNotifications() {
+function useHeader() {
   return useOutletContext<OutletContextType>();
 }
 
-export { MobileHeader, useNotifications };
+export { MobileHeader, useHeader };

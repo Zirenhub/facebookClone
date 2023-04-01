@@ -1,6 +1,6 @@
 /* eslint-disable no-nested-ternary */
 import { useInfiniteQuery } from '@tanstack/react-query';
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import Loading from '../../components/Loading';
 import MobileWritePost from '../../components/HomePage/Mobile/WritePost';
 import MobileAddStory from '../../components/HomePage/Mobile/AddStory';
@@ -8,9 +8,11 @@ import { getTimeline } from '../../api/post';
 import SingularPost from '../../components/HomePage/Mobile/SingularPost';
 import useAuthContext from '../../hooks/useAuthContext';
 import usePosts from '../../hooks/usePosts';
+import { useHeader } from '../../components/HOC/MobileHeader';
 
 function HomePage() {
   const auth = useAuthContext();
+  const { setPage } = useHeader();
 
   const {
     data,
@@ -43,6 +45,13 @@ function HomePage() {
       setInitialPosts(allPosts);
     }
   }, [data, isFetching, setInitialPosts, status]);
+
+  useEffect(() => {
+    setPage('home');
+    return () => {
+      setPage(null);
+    };
+  }, [setPage]);
 
   function handleScroll(e: React.SyntheticEvent) {
     const target = e.target as HTMLDivElement;
