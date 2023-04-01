@@ -1,4 +1,6 @@
-type TMessage = {
+import { TProfileDefault } from './Profile';
+
+export type TMessage = {
   __v: string;
   _id: string;
   createdAt: string;
@@ -8,4 +10,12 @@ type TMessage = {
   message: string;
 };
 
-export default TMessage;
+export type TGroupMessage = {
+  __v: string;
+  _id: string;
+  createdAt: string;
+  updatedAt: string;
+  sender: TProfileDefault;
+  receiver: string;
+  message: string;
+};

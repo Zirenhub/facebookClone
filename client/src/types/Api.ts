@@ -1,4 +1,5 @@
-import TMessage from './Message';
+import { TGroup } from './Group';
+import { TGroupMessage, TMessage } from './Message';
 import { ReactionTypes, TComment, TDBPost } from './Post';
 import { TProfile, TProfileWithoutFullName } from './Profile';
 import { DefaultReq, TRequest } from './Request';
@@ -132,5 +133,33 @@ export type LogInUserRes = {
   status: 'success' | 'error';
   data?: TProfile;
   errors?: ValidationError[] | null;
+  message: string | null;
+};
+
+export type CreateGroupRes = {
+  status: 'success' | 'error';
+  data?: TGroup;
+  errors?: ValidationError[] | null;
+  message: string | null;
+};
+
+export type GetGroupsRes = {
+  status: 'success' | 'error';
+  data?: TGroup[];
+  errors?: null;
+  message: string | null;
+};
+
+export type SendGroupMessageRes = {
+  status: 'success' | 'error';
+  data?: null;
+  errors?: ValidationError[] | null;
+  message: string | null;
+};
+
+export type GetGroupMessagesRes = {
+  status: 'success' | 'error';
+  data?: TGroupMessage[];
+  errors?: null;
   message: string | null;
 };
