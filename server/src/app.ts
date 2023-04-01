@@ -50,7 +50,6 @@ app.use('/api/v1/timeline', jwtAuth, timelineRoute);
 app.use('/api/v1/comment', jwtAuth, commentRoute);
 
 let onlineUsers: string[] = [];
-
 io.on('connection', (socket) => {
   // for some reason can't get token from socket initialization
   const id = socket.handshake.auth.id;
@@ -65,13 +64,23 @@ io.on('connection', (socket) => {
 
   console.log('a user connected', onlineUsers);
 
+  socket.on('joinGroup', (groupID) => {
+    socket.join(groupID);
+  });
+
+  socket.on('leaveGroup', (groupID) => {
+    socket.leave(groupID);
+  });
+
   socket.on('disconnect', () => {
     onlineUsers = onlineUsers.filter((onlineID) => onlineID !== id);
+    socket.leave(id);
     console.log('user disconnected', onlineUsers);
   });
 
   socket.on('offline', () => {
     onlineUsers = onlineUsers.filter((onlineID) => onlineID !== id);
+    socket.leave(id);
     console.log('user is offline', onlineUsers);
   });
 });
