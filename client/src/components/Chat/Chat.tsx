@@ -1,14 +1,14 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { TProfileDefault } from '../../types/Profile';
 import Back from '../../assets/back.svg';
 import Pfp from '../../assets/pfp-two.svg';
-import Send from '../../assets/send.svg';
 import useAuthContext from '../../hooks/useAuthContext';
-import TMessage from '../../types/Message';
-import { sendMessage, getMessages } from '../../api/message';
-import Message from './Message';
+import { TMessage } from '../../types/Message';
+import { sendPrivateMessage, getPrivateMessages } from '../../api/messages';
 import Loading from '../Loading';
+import ChatFooter from './ChatFooter';
+import ChatMessages from './ChatMessages';
 
 type Props = {
   profile: TProfileDefault;
@@ -17,16 +17,12 @@ type Props = {
 
 function Chat({ profile, close }: Props) {
   const [messages, setMessages] = useState<TMessage[]>([]);
-  const [message, setMessage] = useState<string>('');
 
   const auth = useAuthContext();
-  const lastMessageRef = useRef<HTMLDivElement | null>(null);
 
   const messagesQuery = useQuery<TMessage[], Error>({
     queryKey: ['chat', profile._id],
-    queryFn: () => {
-      return getMessages(profile._id);
-    },
+    queryFn: () => getPrivateMessages(profile._id),
     refetchOnWindowFocus: false,
     onSuccess(data) {
       setMessages(data);
@@ -34,24 +30,16 @@ function Chat({ profile, close }: Props) {
   });
 
   const handleSend = useMutation({
-    mutationFn: () => {
+    mutationFn: (message: string) => {
       if (message) {
-        return sendMessage(profile._id, message);
+        return sendPrivateMessage(profile._id, message);
       }
-      return Promise.resolve(null);
+      return Promise.reject(new Error("Message can't be empty"));
     },
     onSuccess(successData) {
-      if (successData) {
-        setMessages([...messages, successData]);
-        setMessage('');
-      }
+      setMessages([...messages, successData]);
     },
   });
-
-  function handleMessage(e: React.SyntheticEvent) {
-    const target = e.target as HTMLInputElement;
-    setMessage(target.value);
-  }
 
   useEffect(() => {
     function addNewMessage(m: TMessage, sender: string) {
@@ -68,12 +56,6 @@ function Chat({ profile, close }: Props) {
       auth.socket?.off('receiveMessage', addNewMessage);
     };
   }, [auth, profile]);
-
-  useEffect(() => {
-    setTimeout(() => {
-      lastMessageRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 550);
-  }, [lastMessageRef, messages]);
 
   if (messagesQuery.isLoading) {
     return <Loading />;
@@ -96,44 +78,8 @@ function Chat({ profile, close }: Props) {
           <p className="font-bold text-xl">{profile.fullName}</p>
         </div>
       </div>
-      <div className="grow flex flex-col p-3">
-        {messages.map((m, i) => {
-          const isMyMessage = m.sender === auth.user?._id;
-          return (
-            <div
-              key={m._id}
-              className={`flex flex-col ${isMyMessage ? 'ml-auto' : 'mr-auto'}`}
-              ref={messages.length - 1 === i ? lastMessageRef : null}
-            >
-              <Message message={m} isMyMessage={isMyMessage} />
-            </div>
-          );
-        })}
-      </div>
-      <div className="p-2 sticky bottom-0 bg-white">
-        <form
-          onSubmit={(e: React.SyntheticEvent) => {
-            e.preventDefault();
-            handleSend.mutate();
-          }}
-          className="flex items-center"
-        >
-          <input
-            type="text"
-            autoComplete="off"
-            className="bg-gray-200 p-2 rounded-full grow"
-            onChange={handleMessage}
-            value={message}
-          />
-          <button className="h-8 w-8" type="submit">
-            <Send
-              height="100%"
-              width="100%"
-              fill={message ? 'rgb(96 165 250)' : 'rgb(209 213 219)'}
-            />
-          </button>
-        </form>
-      </div>
+      <ChatMessages messages={messages} userID={auth.user?._id} />
+      <ChatFooter send={handleSend} />
     </div>
   );
 }
