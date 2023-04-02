@@ -7,6 +7,31 @@ import GroupModel from '../models/group';
 import GroupMessageModel from '../models/groupMessage';
 import getFriendsIds from '../utils/getFriendsIds';
 
+type TUser = {
+  __v: number;
+  _id: string;
+  firstName: string;
+  lastName: string;
+  fullName: string;
+  gender: string;
+  birthday: string;
+  exp?: number;
+  ait?: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+function getUpdatedUser(user: TUser) {
+  const userCopy = { ...user };
+  if (userCopy.exp) {
+    delete userCopy.exp;
+  }
+  if (userCopy.ait) {
+    delete userCopy.ait;
+  }
+  return userCopy;
+}
+
 export const postMessage = (io: Server) => [
   body('message')
     .trim()
@@ -38,12 +63,14 @@ export const postMessage = (io: Server) => [
       });
 
       await newMessage.save();
+      const updatedUser = getUpdatedUser(req.user)
 
-      io.to(receiver).emit(
-        'receiveMessage',
-        newMessage.toObject(),
-        req.user._id
-      );
+      io.to(receiver).emit('receiveMessage', {
+        message: {
+          ...newMessage.toObject(),
+          sender: updatedUser,
+        },
+      });
       io.to(receiver).emit('notification', {
         type: 'message',
         message: newMessage.message,
@@ -80,7 +107,7 @@ export async function getMessages(req: IUserRequest, res: Response) {
           receiver: req.user._id,
         },
       ],
-    });
+    }).populate('sender');
 
     return res.json({
       status: 'success',
@@ -204,32 +231,37 @@ export const sendGroupMessage = (io: Server) => [
         });
       }
 
-      const isMemeber = group.invited.find(
-        (i) => i.toString() === req.user._id
-      );
+      if (group.owner.toString() !== req.user._id) {
+        const isMemeber = group.invited.find(
+          (i) => i.toString() === req.user._id
+        );
 
-      if (!isMemeber && group.owner.toString() !== req.user._id) {
-        return res.status(401).json({
-          status: 'error',
-          errors: null,
-          message: 'Unauthorized.',
-        });
+        if (!isMemeber) {
+          return res.status(401).json({
+            status: 'error',
+            errors: null,
+            message: 'Unauthorized.',
+          });
+        }
       }
+
       const message = new GroupMessageModel({
         sender: req.user._id,
         receiver: group._id,
         message: messageContent,
       });
 
+      const savedMessage = await message.save();
+
+      const updatedUser = getUpdatedUser(req.user);
+
       io.to(group._id.toString()).emit('groupMessage', {
         message: {
-          ...message.toObject(),
-          sender: req.user,
+          ...savedMessage.toObject(),
+          sender: updatedUser,
         },
-        sender: req.user.fullName,
       });
 
-      message.save();
       // data is null since everyone in the group will get the message using socketio.
       return res.json({
         status: 'success',
@@ -256,6 +288,28 @@ export async function getGroupMessages(
     const messages = await GroupMessageModel.find({
       receiver: id,
     }).populate('sender');
+
+    // const updatedMessages = await Promise.all(
+    //   messages.map(async (m) => {
+    //     let updatedSender = {
+    //       _id: req.user._id,
+    //       fullName: req.user.fullName,
+    //     };
+    //     const { sender } = m.toObject();
+    //     if (sender !== req.user._id) {
+    //       const messageOwner =
+    //         await ProfileModel.findById<IDBProfile>(sender);
+    //       if (!messageOwner) {
+    //         throw new Error('Message owner not found');
+    //       }
+    //       updatedSender = {
+    //         _id: messageOwner._id,
+    //         fullName: messageOwner.fullName,
+    //       };
+    //     }
+    //     return { ...m.toObject(), sender: updatedSender };
+    //   })
+    // );
 
     return res.json({
       status: 'success',

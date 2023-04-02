@@ -21,7 +21,7 @@ function getFinal(
     const errorsString = errors.map((e) => e.msg).join('\n');
     throw new Error(errorsString);
   }
-  throw new Error('Something went wrong');
+  throw new Error('Something went wrong, unexpected return');
 }
 
 export default getFinal;

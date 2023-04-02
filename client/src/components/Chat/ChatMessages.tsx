@@ -1,6 +1,6 @@
 import moment from 'moment';
 import { useEffect } from 'react';
-import TMessage from '../../types/Message';
+import { TMessage } from '../../types/Message';
 
 type Props = {
   messages: TMessage[];
@@ -18,7 +18,7 @@ function ChatMessages({ userID, messages }: Props) {
     <div className="grow flex flex-col p-3" id="chatMessages">
       {messages.map((m) => {
         const ago = moment(m.createdAt).fromNow();
-        const isMyMessage = m.sender === userID;
+        const isMyMessage = m.sender._id === userID;
 
         return (
           <div

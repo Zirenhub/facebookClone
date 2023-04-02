@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
-import { IGroupMessage } from '../interfaces/IGroupMessage';
+import { IMessage } from '../interfaces/IMessage';
 
 const Schema = mongoose.Schema;
 
-const GroupMessageSchema = new Schema<IGroupMessage>(
+const GroupMessageSchema = new Schema<IMessage>(
   {
     sender: {
       type: Schema.Types.ObjectId,
@@ -25,7 +25,15 @@ const GroupMessageSchema = new Schema<IGroupMessage>(
   { timestamps: true }
 );
 
-const GroupMessageModel = mongoose.model<IGroupMessage>(
+GroupMessageSchema.set('toObject', {
+  virtuals: true,
+});
+
+GroupMessageSchema.set('toJSON', {
+  virtuals: true,
+});
+
+const GroupMessageModel = mongoose.model<IMessage>(
   'GroupMessage',
   GroupMessageSchema
 );

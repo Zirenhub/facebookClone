@@ -34,7 +34,7 @@ function WritePost({ mutationCreatePost }: Props) {
       <div className="grow px-3">
         <button
           type="button"
-          className="px-5 py-2 min-w-full rounded-full border-2 border-gray-300 text-start"
+          className="px-5 py-2 min-w-full rounded-full border-2 border-gray-300 text-start text-dimBlack"
           onClick={() => setOpenCreatePost(true)}
         >
           What&apos;s on your mind?

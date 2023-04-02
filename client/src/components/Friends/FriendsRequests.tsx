@@ -27,7 +27,7 @@ function FriendsRequests() {
       return rejectRequest(reqID);
     },
   });
-
+  // fix this later, switch to onSuccess
   if (acceptRequestMutation.isSuccess || rejectRequestMutation.isSuccess) {
     refetch();
   }

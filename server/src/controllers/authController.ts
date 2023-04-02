@@ -66,6 +66,7 @@ export const login = [
         res.cookie('token', token, {
           httpOnly: true,
         });
+
         return res.json({
           status: 'success',
           data: profile.toObject(),

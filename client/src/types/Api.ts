@@ -1,5 +1,5 @@
 import { TGroup } from './Group';
-import { TGroupMessage, TMessage } from './Message';
+import { TMessage } from './Message';
 import { ReactionTypes, TComment, TDBPost } from './Post';
 import { TProfile, TProfileWithoutFullName } from './Profile';
 import { DefaultReq, TRequest } from './Request';
@@ -159,7 +159,7 @@ export type SendGroupMessageRes = {
 
 export type GetGroupMessagesRes = {
   status: 'success' | 'error';
-  data?: TGroupMessage[];
+  data?: TMessage[];
   errors?: null;
   message: string | null;
 };

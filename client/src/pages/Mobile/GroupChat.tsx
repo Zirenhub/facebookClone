@@ -5,7 +5,7 @@ import Back from '../../assets/back.svg';
 import useAuthContext from '../../hooks/useAuthContext';
 import ChatFooter from '../../components/Chat/ChatFooter';
 import { getGroupMessages, sendGroupMessage } from '../../api/messages';
-import { TGroupMessage, TMessage } from '../../types/Message';
+import { TMessage } from '../../types/Message';
 import ChatMessages from '../../components/Chat/ChatMessages';
 import stringShortener from '../../utils/stringShortener';
 import Loading from '../../components/Loading';
@@ -16,14 +16,13 @@ type Props = {
 };
 
 function GroupChat({ group, close }: Props) {
-  const [messages, setMessages] = useState<TGroupMessage[]>([]);
+  const [messages, setMessages] = useState<TMessage[]>([]);
 
-  const { isLoading, isError, error } = useQuery<TGroupMessage[], Error>({
+  const { isLoading, isError, error } = useQuery<TMessage[], Error>({
     queryKey: ['chat', group._id],
     queryFn: () => getGroupMessages(group._id),
     refetchOnWindowFocus: false,
     onSuccess(successData) {
-      console.log(successData);
       setMessages(successData);
     },
   });
@@ -40,13 +39,7 @@ function GroupChat({ group, close }: Props) {
   });
 
   useEffect(() => {
-    type SocketMessage = {
-      message: TGroupMessage;
-      sender: string;
-    };
-
-    function addMessage({ message, sender }: SocketMessage) {
-      console.log(message);
+    function addMessage({ message }: { message: TMessage }) {
       setMessages((prevState) => {
         return [...prevState, message];
       });

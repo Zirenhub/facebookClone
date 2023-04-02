@@ -32,9 +32,33 @@ ${this.lastName[0].toUpperCase()}${this.lastName.substring(1, this.lastName.leng
 `;
 });
 
-ProfileSchema.set('toObject', { virtuals: true });
-ProfileSchema.set('toJSON', { virtuals: true });
+ProfileSchema.set('toObject', {
+  virtuals: true,
+  transform: function (doc, ret) {
+    if (ret.id) {
+      delete ret.id;
+    }
+    return ret;
+  },
+  versionKey: false,
+  getters: true,
+});
 
-const ProfileModel = mongoose.model<IProfile>('Profile', ProfileSchema);
+ProfileSchema.set('toJSON', {
+  virtuals: true,
+  transform: function (doc, ret) {
+    if (ret.id) {
+      delete ret.id;
+    }
+    return ret;
+  },
+  versionKey: false,
+  getters: true,
+});
+
+const ProfileModel = mongoose.model<IProfile>(
+  'Profile',
+  ProfileSchema
+);
 
 export default ProfileModel;

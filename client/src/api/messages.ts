@@ -7,7 +7,7 @@ import {
   SendMessageRes,
 } from '../types/Api';
 import { TGroup } from '../types/Group';
-import { TGroupMessage, TMessage } from '../types/Message';
+import { TMessage } from '../types/Message';
 import getFinal from './getError';
 
 export async function getPrivateMessages(
@@ -69,9 +69,7 @@ export async function sendGroupMessage(
   return getFinal(status, data, errors, message);
 }
 
-export async function getGroupMessages(
-  groupID: string
-): Promise<TGroupMessage[]> {
+export async function getGroupMessages(groupID: string): Promise<TMessage[]> {
   const res = await fetch(`/api/v1/messages/group/${groupID}`);
   const { status, data, errors, message }: GetGroupMessagesRes =
     await res.json();
