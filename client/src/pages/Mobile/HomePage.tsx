@@ -38,10 +38,8 @@ function HomePage() {
   } = usePosts();
 
   useEffect(() => {
-    if (status === 'success' && !isFetching) {
-      const allPosts = data.pages.reduce((acc, page) => {
-        return acc.concat(page.posts as []);
-      }, []);
+    if (status === 'success' && !isFetching && data) {
+      const allPosts = data.pages.flatMap((post) => post.posts);
       setInitialPosts(allPosts);
     }
   }, [data, isFetching, setInitialPosts, status]);
@@ -70,24 +68,19 @@ function HomePage() {
     <div className="p-2 h-full overflow-auto" onScroll={handleScroll}>
       <MobileWritePost mutationCreatePost={mutationCreatePost} />
       <MobileAddStory />
-      {posts
-        .sort(
-          (a, b) =>
-            new Date(b.createdAt).valueOf() - new Date(a.createdAt).valueOf()
-        )
-        .map((post) => {
-          const isAuthor = post.author._id === auth.user?._id;
+      {posts.map((post) => {
+        const isAuthor = post.author._id === auth.user?._id;
 
-          return (
-            <div key={post._id} className="mt-2 border-b-4 border-slate-400">
-              <SingularPost
-                post={post}
-                deletePost={isAuthor ? mutationDeletePost : undefined}
-                reactPost={mutationReactPost}
-              />
-            </div>
-          );
-        })}
+        return (
+          <div key={post._id} className="mt-2 border-b-4 border-slate-400">
+            <SingularPost
+              post={post}
+              deletePost={isAuthor ? mutationDeletePost : undefined}
+              reactPost={mutationReactPost}
+            />
+          </div>
+        );
+      })}
       {status === 'error' && error instanceof Error && <p>{error.message}</p>}
       <p>
         {isFetchingNextPage && 'Loading more...'}
