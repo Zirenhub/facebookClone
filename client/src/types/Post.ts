@@ -44,7 +44,7 @@ export type TDBPost = {
   __v: string;
   _id: string;
   author: PopulatedAuthor;
-  audience: string;
+  audience: 'public' | 'friends';
   content: string;
   image?: string;
   background?: string | null;
