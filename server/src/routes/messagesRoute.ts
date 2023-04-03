@@ -12,8 +12,8 @@ import {
 const messagesRoute = (io: Server) => {
   const router = express.Router();
 
-  router.get('/privte/:id', getMessages);
-  router.post('/private', postMessage(io));
+  router.get('/private/:id', getMessages);
+  router.post('/private/:id', postMessage(io));
 
   router.get('/group', getGroups);
   router.get('/group/:id', getGroupMessages);

@@ -56,6 +56,7 @@ io.on('connection', (socket) => {
   if (!id) {
     socket.disconnect();
   }
+  // this room is used for notifications
   socket.join(id);
 
   if (!onlineUsers.some((onlineID) => onlineID === id)) {
@@ -64,12 +65,22 @@ io.on('connection', (socket) => {
 
   console.log('a user connected', onlineUsers);
 
+  // these rooms are used for gorups
   socket.on('joinGroup', (groupID) => {
     socket.join(groupID);
   });
 
   socket.on('leaveGroup', (groupID) => {
     socket.leave(groupID);
+  });
+
+  // these rooms are used for private chats
+  socket.on('joinChat', (chatID) => {
+    socket.join(chatID);
+  });
+
+  socket.on('leaveChat', (chatID) => {
+    socket.leave(chatID);
   });
 
   socket.on('disconnect', () => {

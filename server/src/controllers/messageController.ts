@@ -16,7 +16,7 @@ type TUser = {
   gender: string;
   birthday: string;
   exp?: number;
-  ait?: number;
+  iat?: number;
   createdAt: string;
   updatedAt: string;
 };
@@ -26,8 +26,8 @@ function getUpdatedUser(user: TUser) {
   if (userCopy.exp) {
     delete userCopy.exp;
   }
-  if (userCopy.ait) {
-    delete userCopy.ait;
+  if (userCopy.iat) {
+    delete userCopy.iat;
   }
   return userCopy;
 }
@@ -54,24 +54,27 @@ export const postMessage = (io: Server) => [
         });
       }
 
-      const { receiver, message } = req.body;
+      const { id } = req.params;
+      const { message } = req.body;
 
       const newMessage = new MessageModel({
         sender: req.user._id,
-        receiver,
+        receiver: id,
         message,
       });
 
+      const updatedUser = getUpdatedUser(req.user);
       await newMessage.save();
-      const updatedUser = getUpdatedUser(req.user)
 
-      io.to(receiver).emit('receiveMessage', {
+      const roomID = [req.user._id, id].sort().join('_');
+
+      io.to(roomID).emit('receiveMessage', {
         message: {
           ...newMessage.toObject(),
           sender: updatedUser,
         },
       });
-      io.to(receiver).emit('notification', {
+      io.to(id).emit('notification', {
         type: 'message',
         message: newMessage.message,
         sender: req.user.fullName,
@@ -79,7 +82,7 @@ export const postMessage = (io: Server) => [
 
       return res.json({
         status: 'success',
-        data: newMessage,
+        data: null,
         message: null,
       });
     } catch (err: any) {
@@ -94,7 +97,9 @@ export const postMessage = (io: Server) => [
 
 export async function getMessages(req: IUserRequest, res: Response) {
   try {
-    const id = req.params.id;
+    const cursor = parseInt(req.query.cursor as string) || 0;
+    const limit = 10;
+    const { id } = req.params;
 
     const messages = await MessageModel.find({
       $or: [
@@ -107,11 +112,21 @@ export async function getMessages(req: IUserRequest, res: Response) {
           receiver: req.user._id,
         },
       ],
-    }).populate('sender');
+    })
+      .sort({ createdAt: -1 })
+      .skip(cursor)
+      .limit(limit)
+      .populate('sender');
+
+    let nextCursor: number | null = cursor + messages.length;
+
+    if (messages.length < limit) {
+      nextCursor = null;
+    }
 
     return res.json({
       status: 'success',
-      data: messages,
+      data: { messages, nextCursor },
       message: null,
     });
   } catch (err: any) {
@@ -201,7 +216,7 @@ export async function getGroups(req: IUserRequest, res: Response) {
 }
 
 export const sendGroupMessage = (io: Server) => [
-  body('messageContent')
+  body('message')
     .trim()
     .escape()
     .isLength({ min: 1, max: 255 })
@@ -219,7 +234,7 @@ export const sendGroupMessage = (io: Server) => [
       }
 
       const { id } = req.params;
-      const { messageContent } = req.body;
+      const { message } = req.body;
 
       const group = await GroupModel.findById(id);
 
@@ -245,13 +260,13 @@ export const sendGroupMessage = (io: Server) => [
         }
       }
 
-      const message = new GroupMessageModel({
+      const newMessage = new GroupMessageModel({
         sender: req.user._id,
         receiver: group._id,
-        message: messageContent,
+        message: message,
       });
 
-      const savedMessage = await message.save();
+      const savedMessage = await newMessage.save();
 
       const updatedUser = getUpdatedUser(req.user);
 
@@ -283,11 +298,23 @@ export async function getGroupMessages(
   res: Response
 ) {
   try {
+    const cursor = parseInt(req.query.cursor as string) || 0;
+    const limit = 10;
     const { id } = req.params;
 
     const messages = await GroupMessageModel.find({
       receiver: id,
-    }).populate('sender');
+    })
+      .sort({ createdAt: -1 })
+      .skip(cursor)
+      .limit(limit)
+      .populate('sender');
+
+    let nextCursor: number | null = cursor + messages.length;
+
+    if (messages.length < limit) {
+      nextCursor = null;
+    }
 
     // const updatedMessages = await Promise.all(
     //   messages.map(async (m) => {
@@ -313,7 +340,7 @@ export async function getGroupMessages(
 
     return res.json({
       status: 'success',
-      data: messages,
+      data: { messages, nextCursor },
       message: null,
     });
   } catch (err: any) {

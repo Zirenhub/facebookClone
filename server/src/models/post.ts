@@ -12,6 +12,7 @@ const PostSchema = new Schema<IPost>(
     },
     audience: {
       type: String,
+      enum: ['friends', 'public'],
       required: true,
     },
     content: {

@@ -3,7 +3,7 @@ import { IReaction } from './IReaction';
 
 export interface IPost {
   author: Types.ObjectId;
-  audience: string;
+  audience: 'friends' | 'public';
   content: string;
   background: string;
   image: string;
