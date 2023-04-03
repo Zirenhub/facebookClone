@@ -101,20 +101,6 @@ export type GetPostCommentsRes = {
   message: string | null;
 };
 
-export type GetMessagesRes = {
-  status: 'success' | 'error';
-  data?: TMessage[];
-  errors?: null;
-  message: string | null;
-};
-
-export type SendMessageRes = {
-  status: 'success' | 'error';
-  data?: TMessage;
-  errors?: ValidationError[] | null;
-  message: string | null;
-};
-
 export type GetOnlineFrindsRes = {
   status: 'success' | 'error';
   data?: string[];
@@ -150,16 +136,16 @@ export type GetGroupsRes = {
   message: string | null;
 };
 
-export type SendGroupMessageRes = {
+export type PostMessageRes = {
   status: 'success' | 'error';
   data?: null;
   errors?: ValidationError[] | null;
   message: string | null;
 };
 
-export type GetGroupMessagesRes = {
+export type GetMessagesRes = {
   status: 'success' | 'error';
-  data?: TMessage[];
+  data?: { messages: TMessage[]; nextCursor: number | null };
   errors?: null;
   message: string | null;
 };

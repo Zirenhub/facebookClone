@@ -1,14 +1,13 @@
-import { useEffect, useState } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { TProfileDefault } from '../../types/Profile';
 import Back from '../../assets/back.svg';
 import Pfp from '../../assets/pfp-two.svg';
 import useAuthContext from '../../hooks/useAuthContext';
 import { TMessage } from '../../types/Message';
-import { sendPrivateMessage, getPrivateMessages } from '../../api/messages';
 import Loading from '../Loading';
 import ChatFooter from './ChatFooter';
 import ChatMessages from './ChatMessages';
+import useMessages from '../../hooks/useMessages';
 
 type Props = {
   profile: TProfileDefault;
@@ -16,53 +15,39 @@ type Props = {
 };
 
 function Chat({ profile, close }: Props) {
-  const [messages, setMessages] = useState<TMessage[]>([]);
-
   const auth = useAuthContext();
 
-  const messagesQuery = useQuery<TMessage[], Error>({
-    queryKey: ['chat', profile._id],
-    queryFn: () => getPrivateMessages(profile._id),
-    refetchOnWindowFocus: false,
-    onSuccess(data) {
-      setMessages(data);
-    },
-  });
-
-  const handleSend = useMutation({
-    mutationFn: (message: string) => {
-      if (message) {
-        return sendPrivateMessage(profile._id, message);
-      }
-      return Promise.reject(new Error("Message can't be empty"));
-    },
-    onSuccess(successData) {
-      setMessages([...messages, successData]);
-    },
-  });
+  const {
+    handleLoadPrevious,
+    messages,
+    handleSend,
+    error,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    status,
+    setMessages,
+  } = useMessages('private', profile._id);
 
   useEffect(() => {
-    function addNewMessage(m: TMessage, sender: string) {
-      if (sender === profile._id) {
-        setMessages((prevState) => {
-          return [...prevState, m];
-        });
-      }
+    function addNewMessage({ message }: { message: TMessage }) {
+      setMessages((prevState) => {
+        return [...prevState, message];
+      });
     }
+    const privateRoom = [auth.user?._id, profile._id].sort().join('_');
 
+    auth.socket?.emit('joinChat', privateRoom);
     auth.socket?.on('receiveMessage', addNewMessage);
 
     return () => {
       auth.socket?.off('receiveMessage', addNewMessage);
+      auth.socket?.emit('leaveChat', privateRoom);
     };
-  }, [auth, profile]);
+  }, [auth, profile, setMessages]);
 
-  if (messagesQuery.isLoading) {
+  if (status === 'loading') {
     return <Loading />;
-  }
-
-  if (messagesQuery.isError) {
-    return <p className="text-center">{messagesQuery.error.message}</p>;
   }
 
   return (
@@ -78,7 +63,17 @@ function Chat({ profile, close }: Props) {
           <p className="font-bold text-xl">{profile.fullName}</p>
         </div>
       </div>
-      <ChatMessages messages={messages} userID={auth.user?._id} />
+      {status === 'error' && error instanceof Error && <p>{error.message}</p>}
+      <ChatMessages
+        messages={messages}
+        userID={auth.user?._id}
+        queryStatus={{
+          hasNextPage,
+          isFetchingNextPage,
+          isFetching,
+          handleLoadPrevious,
+        }}
+      />
       <ChatFooter send={handleSend} />
     </div>
   );
