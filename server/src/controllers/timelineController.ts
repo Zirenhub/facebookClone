@@ -13,7 +13,11 @@ export const getTimeline = async (
 
     const friends = await getFriendsIds(req.user._id);
     const posts = await PostModel.find({
-      $or: [{ author: { $in: friends } }, { author: req.user._id }],
+      $or: [
+        { author: { $in: friends } },
+        { author: req.user._id },
+        { audience: 'public' },
+      ],
     })
       .sort({ createdAt: -1 })
       .skip(cursor)
