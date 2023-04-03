@@ -4,6 +4,7 @@ import moment from 'moment';
 import { UseMutationResult } from '@tanstack/react-query';
 import { TDBPost } from '../../../../types/Post';
 import Pfp from '../../../../assets/pfp-two.svg';
+import stringShortener from '../../../../utils/stringShortener';
 
 type Props = {
   post: TDBPost;
@@ -26,34 +27,42 @@ function PostHeader({ post, deletePost }: Props) {
   }, [post]);
 
   return (
-    <div className="flex justify-between relative">
+    <div className="flex relative">
       <div
         onClick={navigateProfile}
         onKeyDown={navigateProfile}
         role="button"
         tabIndex={0}
-        className="flex gap-3"
+        className="flex gap-3 grow"
       >
         <div className="w-12 h-12">
           <Pfp height="100%" width="100%" />
         </div>
-        <div className="flex flex-col">
-          <p className="font-bold">{post.author.fullName}</p>
-          <p>{postDate}</p>
+        <div className="flex grow items-center justify-between gap-2">
+          <div className="flex flex-col">
+            <p className="font-bold">
+              {stringShortener(post.author.fullName, 15)}
+            </p>
+            <p>{postDate}</p>
+          </div>
+          {post.audience === 'public' && (
+            <p className="ml-auto text-dimGray">Public</p>
+          )}
+          {deletePost && (
+            <button
+              type="button"
+              onClick={(e: React.SyntheticEvent) => {
+                e.stopPropagation();
+                setSettingsMenu(!settingsMenu);
+              }}
+              className="text-3xl h-fit"
+            >
+              &#8943;
+            </button>
+          )}
         </div>
       </div>
-      {deletePost && (
-        <button
-          type="button"
-          onClick={(e: React.SyntheticEvent) => {
-            e.stopPropagation();
-            setSettingsMenu(!settingsMenu);
-          }}
-          className="text-3xl h-fit"
-        >
-          ...
-        </button>
-      )}
+
       {settingsMenu && (
         <div className="bg-white rounded-md border-2 px-3 py-2 absolute right-2 top-12 z-10 flex flex-col">
           <button
