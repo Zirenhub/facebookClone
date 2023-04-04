@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Outlet, useOutletContext } from 'react-router-dom';
-import useAuthContext from '../../hooks/useAuthContext';
 import useRoute from '../../hooks/useRoute';
 import facebookLogo from '../../assets/facebook-logo.png';
 import Plus from '../../assets/plus.svg';
@@ -11,40 +10,12 @@ import SearchPage from '../../pages/Mobile/SearchPage';
 import TNotification from '../../types/SocketIo';
 import NotificationMsg from './getNotificationMsg';
 
-type Page =
-  | 'home'
-  | 'profile'
-  | 'menu'
-  | 'friends'
-  | 'notifications'
-  | 'groups';
-
 function MobileHeader() {
-  const [currentPage, setCurrentPage] = useState<Page | null>(null);
   const [searchPage, setSearchPage] = useState<boolean>(false);
   const [messengerPage, setMessengerPage] = useState<boolean>(false);
-  const [notifications, setNotifications] = useState<TNotification[]>([]);
-  const [latestNotif, setLatestNotif] = useState<TNotification | null>(null);
 
-  const auth = useAuthContext();
-  const pages = useRoute(true);
-
-  useEffect(() => {
-    function addNotification(notif: TNotification) {
-      setLatestNotif(notif);
-      setNotifications([...notifications, notif]);
-
-      setTimeout(() => {
-        setLatestNotif(null);
-      }, 7000);
-    }
-
-    auth.socket?.on('notification', addNotification);
-
-    return () => {
-      auth.socket?.off('notification', addNotification);
-    };
-  }, [auth, notifications]);
+  const { pages, notifications, latestNotif, currentPage, setNotifications } =
+    useRoute(true);
 
   if (searchPage) {
     return <SearchPage close={() => setSearchPage(false)} />;
@@ -119,10 +90,7 @@ function MobileHeader() {
           context={{
             notifications,
             clearNotifications: () => {
-              if (notifications.length) setNotifications([]);
-            },
-            setPage: (page: Page | null) => {
-              setCurrentPage(page);
+              if (notifications.length > 0) setNotifications([]);
             },
           }}
         />
@@ -134,7 +102,6 @@ function MobileHeader() {
 type OutletContextType = {
   notifications: TNotification[];
   clearNotifications: () => void;
-  setPage: (page: Page | null) => void;
 };
 
 function useHeader() {
