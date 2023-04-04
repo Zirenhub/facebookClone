@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { getGroups } from '../../api/messages';
 import CreateGroupModal from '../../components/Groups/CreateGroupModal';
 import GroupOverview from '../../components/Groups/GroupOverview';
-import { useHeader } from '../../components/HOC/MobileHeader';
 import Loading from '../../components/Loading';
 import useAuthContext from '../../hooks/useAuthContext';
 import { TGroup } from '../../types/Group';
@@ -22,7 +21,6 @@ function Groups() {
     invitedGroups: [],
   });
   const auth = useAuthContext();
-  const { setPage } = useHeader();
 
   const { isLoading, isError, error } = useQuery<TGroup[], Error>({
     queryKey: ['groups'],
@@ -45,14 +43,6 @@ function Groups() {
       );
       setGroups(allGroups);
     },
-  });
-
-  useEffect(() => {
-    setPage('groups');
-
-    return () => {
-      setPage(null);
-    };
   });
 
   if (openGroup) {

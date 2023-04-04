@@ -1,20 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import FriendsAccepted from '../../components/Friends/FriendsAccepted';
 import FriendsRequests from '../../components/Friends/FriendsRequests';
 import Search from '../../assets/search.svg';
-import { useHeader } from '../../components/HOC/MobileHeader';
 
 function Friends() {
   const [currentPage, setCurrentPage] = useState<string>('Requests');
-  const { setPage } = useHeader();
-
-  useEffect(() => {
-    setPage('friends');
-
-    return () => {
-      setPage(null);
-    };
-  }, [setPage]);
 
   return (
     <div className="p-2">

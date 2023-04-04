@@ -1,23 +1,12 @@
 import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
 import Search from '../../assets/search.svg';
 import CogWheel from '../../assets/cog-wheel.svg';
 import Pfp from '../../assets/pfp-two.svg';
 import useAuthContext from '../../hooks/useAuthContext';
-import { useHeader } from '../../components/HOC/MobileHeader';
 
 function MobileMenu() {
   const auth = useAuthContext();
   const navigate = useNavigate();
-  const { setPage } = useHeader();
-
-  useEffect(() => {
-    setPage('menu');
-
-    return () => {
-      setPage(null);
-    };
-  }, [setPage]);
 
   return (
     <div className="bg-gray-200 flex flex-col py-5 px-3 h-full">
