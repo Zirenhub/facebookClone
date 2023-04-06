@@ -1,30 +1,11 @@
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-import { TProfileWithoutFullName } from '../../types/Profile';
 import BackButton from '../../assets/back.svg';
 import Pfp from '../../assets/pfp-two.svg';
+import useSearch from '../../hooks/useSearch';
 
 function SearchPage({ close }: { close: () => void }) {
-  const [searchResults, setSearchResults] = useState<
-    TProfileWithoutFullName[] | null
-  >(null);
-
+  const { searchResults, handleSearch, error } = useSearch();
   const navigate = useNavigate();
-
-  async function handleSearch(e: React.SyntheticEvent) {
-    const target = e.target as HTMLInputElement;
-    if (target.value) {
-      const res = await fetch(`/api/v1/search/profile/${target.value}`, {
-        method: 'POST',
-      });
-      const resData = await res.json();
-      if (resData.status === 'success') {
-        setSearchResults(resData.data);
-      }
-    } else {
-      setSearchResults(null);
-    }
-  }
 
   return (
     <div className="p-2">
@@ -36,12 +17,16 @@ function SearchPage({ close }: { close: () => void }) {
           <input
             type="text"
             placeholder="Search"
-            onInput={handleSearch}
+            onInput={(e: React.SyntheticEvent) => {
+              const target = e.target as HTMLInputElement;
+              handleSearch(target.value);
+            }}
             className="bg-gray-200 rounded-full h-full w-full pl-4"
           />
         </div>
       </header>
       <div className="flex flex-col gap-4">
+        {error && <p>{error}</p>}
         {searchResults &&
           searchResults.map((result) => {
             return (
@@ -57,9 +42,7 @@ function SearchPage({ close }: { close: () => void }) {
                 <div className="h-12 w-12">
                   <Pfp height="100%" width="100%" />
                 </div>
-                <p className="font-bold">
-                  {result.firstName} {result.lastName}
-                </p>
+                <p className="font-bold">{result.fullName}</p>
               </button>
             );
           })}
