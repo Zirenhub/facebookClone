@@ -1,7 +1,7 @@
 import { TGroup } from './Group';
 import { TMessage } from './Message';
 import { ReactionTypes, TComment, TDBPost } from './Post';
-import { TProfile, TProfileWithoutFullName } from './Profile';
+import { TProfile, TProfileDefault, TProfileWithoutFullName } from './Profile';
 import { DefaultReq, TRequest } from './Request';
 
 export type ValidationError = {
@@ -146,6 +146,13 @@ export type PostMessageRes = {
 export type GetMessagesRes = {
   status: 'success' | 'error';
   data?: { messages: TMessage[]; nextCursor: number | null };
+  errors?: null;
+  message: string | null;
+};
+
+export type GetSearchRes = {
+  status: 'success' | 'error';
+  data?: TProfileDefault[];
   errors?: null;
   message: string | null;
 };

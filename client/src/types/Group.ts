@@ -7,3 +7,8 @@ export type TGroup = {
   createdAt: string;
   updatedAt: string;
 };
+
+export type TGroups = {
+  myGroups: TGroup[];
+  invitedGroups: TGroup[];
+};
