@@ -5,6 +5,7 @@ import ErrorPage from '../pages/ErrorPage';
 
 import ProtectedRoute from '../components/ProtectedRoute';
 import DesktopHeader from '../components/HOC/DesktopHeader';
+import HomePage from '../pages/Desktop/HomePage';
 
 const router = createBrowserRouter([
   {
@@ -16,7 +17,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: '/home',
-        element: <div>Desktop homepage here</div>,
+        element: <HomePage />,
       },
       {
         path: '/:id',
