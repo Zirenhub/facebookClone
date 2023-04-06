@@ -1,15 +1,31 @@
 import { Outlet } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import useRoute from '../../hooks/useRoute';
-import FLogo from '../../assets/f-logo.svg';
 import Messenger from '../../assets/messenger.svg';
 import Menu from '../../assets/menu.svg';
 import Pfp from '../../assets/pfp-two.svg';
 import Bell from '../../assets/bell.svg';
+
 import DesktopMenu from '../../pages/Desktop/Menu';
+import DesktopSearch from './DesktopSearch';
 
 function Header() {
   const [menu, setMenu] = useState<boolean>(false);
+  const [search, setSearch] = useState<boolean>(false);
+
+  const mainRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function closePopups() {
+      setSearch(false);
+      setMenu(false);
+    }
+    const { current } = mainRef;
+    current?.addEventListener('click', closePopups);
+    return () => {
+      current?.removeEventListener('click', closePopups);
+    };
+  }, []);
 
   const { pages, notifications, latestNotif, currentPage, setNotifications } =
     useRoute(false);
@@ -18,15 +34,7 @@ function Header() {
     <>
       <header className="grid grid-cols-3 bg-white px-3 max-h-20 shadow-md relative">
         <div className="flex items-center h-full gap-3 py-2">
-          <div className="h-full w-10">
-            <FLogo height="100%" width="100%" />
-          </div>
-          <div className="grow">
-            <input
-              placeholder="Search Facebook"
-              className="p-2 bg-gray-100 rounded-full w-[64px] md:w-auto"
-            />
-          </div>
+          <DesktopSearch isOpen={!!search} setSearch={setSearch} />
         </div>
         <div className="flex justify-between items-center">
           {pages.map((page) => {
@@ -72,7 +80,7 @@ function Header() {
         </div>
         {menu && <DesktopMenu />}
       </header>
-      <main className="overflow-auto grow">
+      <main className="overflow-auto grow" ref={mainRef}>
         <Outlet
           context={{
             notifications,
