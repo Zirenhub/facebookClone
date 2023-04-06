@@ -11,7 +11,12 @@ type TFormData = {
   invited: string[];
 };
 
-function CreateGroupModal({ close }: { close: () => void }) {
+type Props = {
+  isMobile: boolean;
+  close: () => void;
+};
+
+function CreateGroupModal({ isMobile, close }: Props) {
   const [formData, setFormData] = useState<TFormData>({
     groupName: '',
     invited: [],
@@ -67,7 +72,11 @@ function CreateGroupModal({ close }: { close: () => void }) {
 
   return (
     <form
-      className="p-3 bg-gray-200 rounded-md m-4 flex flex-col gap-5"
+      className={`${
+        !isMobile
+          ? 'absolute top-2/4 left-2/4 -translate-x-2/4 -translate-y-2/4 min-w-[380px] min-h-[380px] bg-white'
+          : 'bg-gray-200'
+      } p-3  rounded-md m-4 flex flex-col justify-center gap-5`}
       onSubmit={handleSubmit}
     >
       <label className="sr-only" htmlFor="groupName">
@@ -84,23 +93,33 @@ function CreateGroupModal({ close }: { close: () => void }) {
         }}
         className="py-1 px-3 rounded-lg w-full font-bold border-2 border-gray-300"
       />
-      <div className="flex gap-3 overflow-auto">
-        {data?.map((f) => {
-          return (
-            <div key={f._id}>
-              <InviteFriendCard
-                friend={f}
-                handleInvite={() => handleInvite(f._id)}
-                handleRemove={() => handleRemove(f._id)}
-                isInvited={formData.invited.includes(f._id)}
-              />
-            </div>
-          );
-        })}
+      <div className="flex flex-col p-2 border-2">
+        <p className="text-lg">Invited</p>
+        <p className="flex gap-3 overflow-scroll">
+          {formData.invited.map((inv) => {
+            // dispaly invited profiles, rn im storing only id's as invited
+            return <div />;
+          })}
+        </p>
+        <p className="text-lg">Invite</p>
+        <div className="flex gap-3 overflow-scroll">
+          {data?.map((f) => {
+            return (
+              <div key={f._id}>
+                <InviteFriendCard
+                  friend={f}
+                  handleInvite={() => handleInvite(f._id)}
+                  handleRemove={() => handleRemove(f._id)}
+                  isInvited={formData.invited.includes(f._id)}
+                />
+              </div>
+            );
+          })}
+        </div>
       </div>
       <button
         type="submit"
-        className="bg-green-500 text-white rounded-full w-full py-1 font-bold"
+        className="bg-green-500 text-white rounded-lg w-full py-1 font-bold"
       >
         Create Group
       </button>
