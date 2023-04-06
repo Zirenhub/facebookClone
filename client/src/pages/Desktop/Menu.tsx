@@ -1,29 +1,42 @@
 import { useState } from 'react';
-import { menuButtons, createButtons, TSectionButtons } from './menuSections';
+import { v4 as uuidv4 } from 'uuid';
+import useBookmars from '../../hooks/useBookmars';
+import { TSectionButtons } from '../../types/Desktop';
 
 /* eslint-disable react/no-array-index-key */
 function DesktopMenu() {
   const [menuSearch, setMenuSearch] = useState<string | null>(null);
+  const { menuBookmarks, menuCreate } = useBookmars();
 
-  function socialButton(b: { name: string; _id: string; description: string }) {
-    return (
-      <div
-        key={b._id}
-        className="flex flex-col hover:bg-gray-100 transition-all rounded-lg"
-      >
-        <button type="button" className="text-start p-2">
-          {b.name}
-          <p className="text-dimGray">{b.description}</p>
-        </button>
-      </div>
-    );
+  function socialButton(buttons: TSectionButtons[]) {
+    return buttons.map((x) => {
+      return (
+        <section key={x._id}>
+          <p className="font-bold">{x.section}</p>
+          {x.buttons.map((b) => {
+            return (
+              <div
+                key={b._id}
+                className="flex flex-col hover:bg-gray-100 transition-all rounded-lg"
+              >
+                <button type="button" className="text-start p-2">
+                  {b.name}
+                  <p className="text-dimGray">{b.description}</p>
+                </button>
+              </div>
+            );
+          })}
+        </section>
+      );
+    });
   }
 
   function getMenuButtons() {
+    let bookmarks = menuBookmarks;
     if (menuSearch) {
       const lowerSearch = menuSearch.toLocaleLowerCase();
       const matchingButtons: TSectionButtons[] = [];
-      menuButtons.forEach((s) => {
+      bookmarks.forEach((s) => {
         const matching = s.buttons.filter((b) =>
           b.name.toLocaleLowerCase().includes(lowerSearch)
         );
@@ -34,7 +47,7 @@ function DesktopMenu() {
           if (index === -1) {
             matchingButtons.push({
               section: s.section,
-              _id: `id${Math.random().toString(16).slice(2)}`,
+              _id: uuidv4(),
               buttons: matching,
             });
           } else {
@@ -42,23 +55,9 @@ function DesktopMenu() {
           }
         }
       });
-      return matchingButtons.map((x) => {
-        return (
-          <section key={x._id}>
-            <p className="font-bold">{x.section}</p>
-            {x.buttons.map((b) => socialButton(b))}
-          </section>
-        );
-      });
+      bookmarks = matchingButtons;
     }
-    return menuButtons.map((x) => {
-      return (
-        <section key={x._id}>
-          <p className="font-bold">{x.section}</p>
-          {x.buttons.map((b) => socialButton(b))}
-        </section>
-      );
-    });
+    return socialButton(bookmarks);
   }
 
   return (
@@ -83,7 +82,7 @@ function DesktopMenu() {
         <div className="flex flex-col p-3 shadow-sm bg-white rounded-lg">
           <h2 className="font-bold">Create</h2>
           <div className="flex flex-col gap-2">
-            {createButtons.map((b) => {
+            {menuCreate.map((b) => {
               return (
                 <>
                   <button
@@ -91,9 +90,9 @@ function DesktopMenu() {
                     key={b._id}
                     className="text-start p-2 hover:bg-gray-100 transition-all rounded-lg"
                   >
-                    {b.name}
+                    {b.section}
                   </button>
-                  {b.name === 'Life Event' && (
+                  {b.section === 'Life Event' && (
                     <div className="bg-gray-100 h-1" />
                   )}
                 </>
