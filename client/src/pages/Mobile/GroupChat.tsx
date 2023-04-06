@@ -51,13 +51,13 @@ function GroupChat({ group, close }: Props) {
 
   return (
     <div className="flex flex-col h-full relative">
-      <header className="p-3 bg-gray-100 shadow-md sticky top-0 flex items-center justify-between">
+      <header className="p-3 bg-gray-100 shadow-md sticky top-0 w-full flex items-center justify-between">
         <div className="flex flex-col">
           <button type="button" className="h-6 w-6" onClick={close}>
             <Back height="100%" width="100%" fill="gray" />
           </button>
           <p className="font-bold text-xl grow text-center">
-            {stringShortener(group.name, 10, 10)}
+            {stringShortener(group.name, 10)}
           </p>
         </div>
         <button type="button" className="max-w-[150px] text-dimGray">
