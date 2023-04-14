@@ -8,42 +8,33 @@ function HomePageBookmarks() {
   const auth = useAuthContext();
   const { homepageBookmarks } = useBookmarks();
 
-  type ButtonProps = {
-    text: string;
-    onClick?: () => void;
-  };
-
-  function button({ text, onClick }: ButtonProps) {
-    return (
-      <div className="flex items-center">
-        <button
-          type="button"
-          onClick={onClick}
-          className="p-3 w-full rounded-lg text-start text-lg hover:bg-gray-200 transition-all"
-        >
-          {text}
-        </button>
-      </div>
-    );
-  }
+  const liClass =
+    'p-3 w-full rounded-lg hover:bg-gray-200 transition-all flex gap-3 items-center';
 
   return (
-    <div className="flex flex-col overflow-y-scroll pr-3 w-[280px]">
-      {button({ text: auth.user?.fullName || '' })}
-      <ul>
-        {homepageBookmarks
-          .slice(0, expanded ? homepageBookmarks.length : 11)
-          .map((s) => {
-            return <li key={s._id}>{button({ text: s.section })}</li>;
-          })}
-      </ul>
-      <div>
-        {button({
-          text: expanded ? 'See less' : 'See more',
-          onClick: () => setExpanded(!expanded),
+    <ul className="flex flex-col overflow-y-scroll pr-3 w-[280px]">
+      <li className={liClass}>
+        <Pfp height="34px" width="34px" />
+        <button type="button">{auth.user?.fullName}</button>
+      </li>
+      {homepageBookmarks
+        .slice(0, expanded ? homepageBookmarks.length : 11)
+        .map((s) => {
+          return (
+            <li key={s._id} className={liClass}>
+              <s.svg height="34px" width="34px" />
+              <button type="button" className="text-start text-lg">
+                {s.section}
+              </button>
+            </li>
+          );
         })}
-      </div>
-    </div>
+      <li className={liClass}>
+        <button type="button" onClick={() => setExpanded(!expanded)}>
+          {expanded ? 'See less' : 'See more'}
+        </button>
+      </li>
+    </ul>
   );
 }
 export default HomePageBookmarks;
