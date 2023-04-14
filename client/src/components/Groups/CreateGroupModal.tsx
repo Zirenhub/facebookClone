@@ -8,7 +8,7 @@ import InviteFriendCard from './InviteFriendCard';
 
 type TFormData = {
   groupName: string;
-  invited: string[];
+  invited: TProfileDefault[];
 };
 
 type Props = {
@@ -48,7 +48,8 @@ function CreateGroupModal({ isMobile, close }: Props) {
     e.preventDefault();
     if (formData.groupName) {
       try {
-        await createGroup(formData);
+        const ids = formData.invited.map((x) => x._id);
+        await createGroup({ groupName: formData.groupName, invited: ids });
         close();
       } catch (err) {
         if (err instanceof Error) {
@@ -58,15 +59,15 @@ function CreateGroupModal({ isMobile, close }: Props) {
     }
   }
 
-  function handleInvite(friendID: string) {
+  function handleInvite(friend: TProfileDefault) {
     setFormData({
       ...formData,
-      invited: [...formData.invited, friendID],
+      invited: [...formData.invited, friend],
     });
   }
 
-  function handleRemove(friendID: string) {
-    const updatedInvites = formData.invited.filter((x) => x !== friendID);
+  function handleRemove(friend: TProfileDefault) {
+    const updatedInvites = formData.invited.filter((x) => x._id !== friend._id);
     setFormData({ ...formData, invited: updatedInvites });
   }
 
@@ -79,6 +80,15 @@ function CreateGroupModal({ isMobile, close }: Props) {
       } p-3  rounded-md m-4 flex flex-col justify-center gap-5`}
       onSubmit={handleSubmit}
     >
+      {!isMobile && (
+        <button
+          type="button"
+          onClick={close}
+          className="text-dimBlack ml-auto text-lg"
+        >
+          &#120;
+        </button>
+      )}
       <label className="sr-only" htmlFor="groupName">
         Group Name
       </label>
@@ -94,13 +104,20 @@ function CreateGroupModal({ isMobile, close }: Props) {
         className="py-1 px-3 rounded-lg w-full font-bold border-2 border-gray-300"
       />
       <div className="flex flex-col p-2 border-2">
-        <p className="text-lg">Invited</p>
-        <p className="flex gap-3 overflow-scroll">
-          {formData.invited.map((inv) => {
-            // dispaly invited profiles, rn im storing only id's as invited
-            return <div />;
-          })}
-        </p>
+        {formData.invited.length > 0 && (
+          <div>
+            <p className="text-lg">Invited</p>
+            <div className="flex gap-3 overflow-scroll">
+              {formData.invited.map((inv) => {
+                return (
+                  <div key={inv._id} className="bg-gray-100 rounded-md p-2">
+                    <p>{inv.fullName}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
         <p className="text-lg">Invite</p>
         <div className="flex gap-3 overflow-scroll">
           {data?.map((f) => {
@@ -108,9 +125,9 @@ function CreateGroupModal({ isMobile, close }: Props) {
               <div key={f._id}>
                 <InviteFriendCard
                   friend={f}
-                  handleInvite={() => handleInvite(f._id)}
-                  handleRemove={() => handleRemove(f._id)}
-                  isInvited={formData.invited.includes(f._id)}
+                  handleInvite={() => handleInvite(f)}
+                  handleRemove={() => handleRemove(f)}
+                  isInvited={formData.invited.some((x) => x._id === f._id)}
                 />
               </div>
             );
