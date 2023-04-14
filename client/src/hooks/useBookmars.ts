@@ -1,29 +1,48 @@
 import { v4 as uuidv4 } from 'uuid';
 import { TSection, TSectionButtons } from '../types/Desktop';
+import friendsSVG from '../assets/find-friends.svg';
+import liveSVG from '../assets/live.svg';
+import feedsSVG from '../assets/feeds.svg';
+import groupsSVG from '../assets/groups.svg';
+import marketplaceSVG from '../assets/marketplace.svg';
+import watchSVG from '../assets/watch.svg';
+import memoriesSVG from '../assets/memories.svg';
+import savedSVG from '../assets/saved.svg';
+import pagesSVG from '../assets/pages.svg';
+import eventsSVG from '../assets/events.svg';
+import adCenterSVG from '../assets/ads.svg';
+import adsMangerSVG from '../assets/chart.svg';
+import climateSVG from '../assets/earth.svg';
+import crisisSVG from '../assets/alert.svg';
+import heartSVG from '../assets/heart.svg';
+import gamingVideoSVG from '../assets/gaming.svg';
+import messengerSVG from '../assets/messenger.svg';
+import ordersSVG from '../assets/orders.svg';
+import playGamesSVG from '../assets/play-games.svg';
+import recentSVG from '../assets/recent.svg';
 
 function useBookmars() {
-  const homepageBookmarks: TSection[] = [
-    { section: 'Find friends', _id: uuidv4() },
-    { section: 'Live videos', _id: uuidv4() },
-    { section: 'Feeds', _id: uuidv4() },
-    { section: 'Groups', _id: uuidv4() },
-    { section: 'Marketplace', _id: uuidv4() },
-    { section: 'Watch', _id: uuidv4() },
-    { section: 'Memories', _id: uuidv4() },
-    { section: 'Saved', _id: uuidv4() },
-    { section: 'Pages', _id: uuidv4() },
-    { section: 'Reels', _id: uuidv4() },
-    { section: 'Ad Center', _id: uuidv4() },
-    { section: 'Ads Manager', _id: uuidv4() },
-    { section: 'Climate Science Center', _id: uuidv4() },
-    { section: 'Crisis response', _id: uuidv4() },
-    { section: 'Events', _id: uuidv4() },
-    { section: 'Fundraisers', _id: uuidv4() },
-    { section: 'Gaming Video', _id: uuidv4() },
-    { section: 'Messenger', _id: uuidv4() },
-    { section: 'Orders and payments', _id: uuidv4() },
-    { section: 'Play Games', _id: uuidv4() },
-    { section: 'Recent ad activity', _id: uuidv4() },
+  const homepageBookmarks = [
+    { section: 'Find friends', _id: uuidv4(), svg: friendsSVG },
+    { section: 'Live videos', _id: uuidv4(), svg: liveSVG },
+    { section: 'Feeds', _id: uuidv4(), svg: feedsSVG },
+    { section: 'Groups', _id: uuidv4(), svg: groupsSVG },
+    { section: 'Marketplace', _id: uuidv4(), svg: marketplaceSVG },
+    { section: 'Watch', _id: uuidv4(), svg: watchSVG },
+    { section: 'Memories', _id: uuidv4(), svg: memoriesSVG },
+    { section: 'Saved', _id: uuidv4(), svg: savedSVG },
+    { section: 'Pages', _id: uuidv4(), svg: pagesSVG },
+    { section: 'Events', _id: uuidv4(), svg: eventsSVG },
+    { section: 'Ad Center', _id: uuidv4(), svg: adCenterSVG },
+    { section: 'Ads Manager', _id: uuidv4(), svg: adsMangerSVG },
+    { section: 'Climate Science Center', _id: uuidv4(), svg: climateSVG },
+    { section: 'Crisis response', _id: uuidv4(), svg: crisisSVG },
+    { section: 'Fundraisers', _id: uuidv4(), svg: heartSVG },
+    { section: 'Gaming Video', _id: uuidv4(), svg: gamingVideoSVG },
+    { section: 'Messenger', _id: uuidv4(), svg: messengerSVG },
+    { section: 'Orders and payments', _id: uuidv4(), svg: ordersSVG },
+    { section: 'Play Games', _id: uuidv4(), svg: playGamesSVG },
+    { section: 'Recent ad activity', _id: uuidv4(), svg: recentSVG },
   ];
 
   const menuBookmarks: TSectionButtons[] = [
