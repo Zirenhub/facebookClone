@@ -1,64 +1,39 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
-import { getProfilePosts } from '../../../api/profile';
+import { useState } from 'react';
 import Pfp from '../../../assets/pfp-two.svg';
 import Pictures from '../../../assets/pictures.svg';
-import usePosts from '../../../hooks/usePosts';
-import CreatePostModal from '../../HomePage/Mobile/CreatePost';
+import CreatePostModal from '../../HomePage/CreatePost';
 import SingularPost from '../../HomePage/Mobile/SingularPost';
+import { ModifiedPost, ReactionTypes, TPost } from '../../../types/Post';
 
-function OwnProfilePosts({ id }: { id: string }) {
+type Props = {
+  posts: ModifiedPost[];
+  mutationCreatePost: {
+    isLoading: boolean;
+    isError: boolean;
+    error: unknown;
+    createPost: (post: TPost, postType: 'default' | 'image') => void;
+  };
+  mutationReactPost: {
+    isLoading: boolean;
+    isError: boolean;
+    error: unknown;
+    reactPost: (postId: string, r: ReactionTypes | null) => void;
+  };
+  mutationDeletePost: {
+    isLoading: boolean;
+    isError: boolean;
+    error: unknown;
+    deletePost: (postId: string) => void;
+  };
+};
+
+function OwnProfilePosts({
+  posts,
+  mutationCreatePost,
+  mutationReactPost,
+  mutationDeletePost,
+}: Props) {
   const [openCreatePost, setOpenCreatePost] = useState<boolean>(false);
-
-  const {
-    data,
-    error,
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-    isFetchingNextPage,
-    status,
-  } = useInfiniteQuery({
-    queryKey: ['posts', id],
-    queryFn: ({ pageParam = 0 }) => getProfilePosts(id, pageParam),
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
-    refetchOnWindowFocus: false,
-  });
-
-  const {
-    mutationCreatePost,
-    mutationDeletePost,
-    mutationReactPost,
-    posts,
-    setInitialPosts,
-  } = usePosts();
-
-  useEffect(() => {
-    if (status === 'success' && !isFetching) {
-      const allPosts = data.pages.reduce((acc, page) => {
-        return acc.concat(page.posts as []);
-      }, []);
-      setInitialPosts(allPosts);
-    }
-  }, [data, isFetching, setInitialPosts, status]);
-
-  useEffect(() => {
-    const container = document.body;
-
-    function handleScroll() {
-      const isAtBottom =
-        container.scrollTop + container.clientHeight >= container.scrollHeight;
-      if (isAtBottom && hasNextPage && !isFetchingNextPage) {
-        fetchNextPage();
-      }
-    }
-
-    container.addEventListener('scroll', handleScroll);
-
-    return () => {
-      container.removeEventListener('scroll', handleScroll);
-    };
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   if (openCreatePost) {
     return (
@@ -110,10 +85,6 @@ function OwnProfilePosts({ id }: { id: string }) {
           </div>
         </div>
       </div>
-      {status === 'loading' && <p className="text-center">Loading...</p>}
-      {status === 'error' && error instanceof Error && (
-        <p className="text-center">{error.message}</p>
-      )}
       {posts
         .sort(
           (a, b) =>
@@ -124,8 +95,8 @@ function OwnProfilePosts({ id }: { id: string }) {
             <div key={post._id} className="mt-2 border-b-4 border-slate-400">
               <SingularPost
                 post={post}
-                deletePost={mutationDeletePost}
-                reactPost={mutationReactPost}
+                mutationDeletePost={mutationDeletePost}
+                mutationReactPost={mutationReactPost}
               />
             </div>
           );

@@ -3,7 +3,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import Loading from '../Loading';
 import { TRequest } from '../../types/Request';
 import Pfp from '../../assets/pfp-two.svg';
-import { acceptRequest, rejectRequest, getRequests } from '../../api/profile';
+import { profileRequest, getRequests } from '../../api/profile';
 
 function FriendsRequests() {
   const navigate = useNavigate();
@@ -18,13 +18,13 @@ function FriendsRequests() {
 
   const acceptRequestMutation = useMutation({
     mutationFn: (reqID: string) => {
-      return acceptRequest(reqID);
+      return profileRequest(reqID, 'accept');
     },
   });
 
   const rejectRequestMutation = useMutation({
     mutationFn: (reqID: string) => {
-      return rejectRequest(reqID);
+      return profileRequest(reqID, 'reject');
     },
   });
   // fix this later, switch to onSuccess

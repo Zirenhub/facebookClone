@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { UseMutationResult } from '@tanstack/react-query';
 import { ModifiedPost, ReactionTypes } from '../../../types/Post';
 import PostFooter from './Post/PostFooter';
 import PostHeader from './Post/PostHeader';
@@ -12,16 +11,21 @@ import FullPostComments from './Post/FullPostComments';
 
 type Props = {
   post: ModifiedPost;
-  deletePost?: UseMutationResult<any, unknown, string, unknown>;
-  reactPost: UseMutationResult<
-    any,
-    unknown,
-    [string, ReactionTypes | null],
-    unknown
-  >;
+  mutationDeletePost?: {
+    isLoading: boolean;
+    isError: boolean;
+    error: unknown;
+    deletePost: (postId: string) => void;
+  };
+  mutationReactPost: {
+    isLoading: boolean;
+    isError: boolean;
+    error: unknown;
+    reactPost: (postId: string, r: ReactionTypes | null) => void;
+  };
 };
 
-function SingularPost({ post, deletePost, reactPost }: Props) {
+function SingularPost({ post, mutationDeletePost, mutationReactPost }: Props) {
   const [openPost, setOpenPost] = useState<boolean>(false);
   const [commentsOpen, setCommentsOpen] = useState<boolean>(false);
 
@@ -42,9 +46,9 @@ function SingularPost({ post, deletePost, reactPost }: Props) {
           </button>
         </header>
         <div className="flex flex-col mt-3 grow">
-          <PostHeader post={post} deletePost={deletePost} />
+          <PostHeader post={post} mutationDeletePost={mutationDeletePost} />
           <PostStyle post={post} />
-          <PostFooter post={post} reactPost={reactPost} />
+          <PostFooter post={post} mutationReactPost={mutationReactPost} />
           <PostReactions reactionsDetail={post.reactionsDetails} />
           <FullPostComments postID={post._id} />
         </div>
@@ -66,13 +70,13 @@ function SingularPost({ post, deletePost, reactPost }: Props) {
         tabIndex={0}
         className="relative"
       >
-        <PostHeader post={post} deletePost={deletePost} />
+        <PostHeader post={post} mutationDeletePost={mutationDeletePost} />
       </div>
       <PostStyle post={post} />
       <PostReactions reactionsDetail={post.reactionsDetails} />
       <PostFooter
         post={post}
-        reactPost={reactPost}
+        mutationReactPost={mutationReactPost}
         setCommentsOpen={() => setCommentsOpen(true)}
       />
       {commentsOpen && (
@@ -83,7 +87,7 @@ function SingularPost({ post, deletePost, reactPost }: Props) {
 }
 
 SingularPost.defaultProps = {
-  deletePost: undefined,
+  mutationDeletePost: undefined,
 };
 
 export default SingularPost;

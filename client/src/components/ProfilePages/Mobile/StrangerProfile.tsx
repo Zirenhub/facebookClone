@@ -1,155 +1,70 @@
-import { useInfiniteQuery, useMutation } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import {
-  acceptRequest,
-  getProfilePosts,
-  rejectRequest,
-  sendRequest,
-} from '../../../api/profile';
-import useAuthContext from '../../../hooks/useAuthContext';
-import usePosts from '../../../hooks/usePosts';
 import { TProfile, TProfileFriend } from '../../../types/Profile';
 import SingularPost from '../../HomePage/Mobile/SingularPost';
 import Popup from '../../Popup';
 import ProfileHeader from './ProfileHeader';
+import { ModifiedPost, ReactionTypes } from '../../../types/Post';
+import useAuthContext from '../../../hooks/useAuthContext';
 
 type TPages = 'Posts' | 'About' | 'Photos' | 'Videos' | 'Mentions';
 
-function StangerProfile({ profileData }: { profileData: TProfile }) {
+type Props = {
+  profileProps: {
+    profile: TProfile;
+    requestMutation: () => void;
+    friendStatus: TProfileFriend | null;
+  };
+  postsProps: {
+    posts: ModifiedPost[];
+    mutationReactPost: {
+      isLoading: boolean;
+      isError: boolean;
+      error: unknown;
+      reactPost: (postId: string, r: ReactionTypes | null) => void;
+    };
+  };
+};
+
+function StangerProfile({ profileProps, postsProps }: Props) {
   const [currentPage, setCurrentPage] = useState<TPages>('Posts');
-  const [friendStatus, setFriendStatus] = useState<TProfileFriend | null>(null);
   const [requestError, setRequestError] = useState<string | null>(null);
 
-  const pages: readonly ['Posts', 'About', 'Photos', 'Videos', 'Mentions'] = [
-    'Posts',
-    'About',
-    'Photos',
-    'Videos',
-    'Mentions',
-  ];
   const auth = useAuthContext();
-
-  const {
-    data,
-    error,
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-    isFetchingNextPage,
-    status,
-  } = useInfiniteQuery({
-    queryKey: ['posts', profileData._id],
-    queryFn: ({ pageParam = 0 }) => getProfilePosts(profileData._id, pageParam),
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
-    refetchOnWindowFocus: false,
-  });
-
-  const { mutationReactPost, posts, setInitialPosts } = usePosts();
-
-  useEffect(() => {
-    if (status === 'success' && !isFetching) {
-      const allPosts = data.pages.reduce((acc, page) => {
-        return acc.concat(page.posts as []);
-      }, []);
-      setInitialPosts(allPosts);
-    }
-  }, [data, isFetching, setInitialPosts, status]);
-
-  useEffect(() => {
-    const container = document.body;
-
-    function handleScroll() {
-      const isAtBottom =
-        container.scrollTop + container.clientHeight >= container.scrollHeight;
-      if (isAtBottom && hasNextPage && !isFetchingNextPage) {
-        fetchNextPage();
-      }
-    }
-
-    container.addEventListener('scroll', handleScroll);
-
-    return () => {
-      container.removeEventListener('scroll', handleScroll);
-    };
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
-
-  const requestMutation = useMutation({
-    mutationFn: (fStatus: 'send' | 'accept' | 'cancel') => {
-      if (fStatus === 'send') {
-        return sendRequest(profileData._id);
-      }
-      if (fStatus === 'accept' && friendStatus) {
-        return acceptRequest(friendStatus._id);
-      }
-      if (fStatus === 'cancel' && friendStatus) {
-        return rejectRequest(friendStatus._id);
-      }
-      return Promise.resolve(null);
-    },
-    onSuccess(successData) {
-      setFriendStatus(successData);
-    },
-    onError(errorData: Error) {
-      setRequestError(errorData.message);
-    },
-  });
-
-  useEffect(() => {
-    setFriendStatus(profileData.friendStatus);
-  }, [profileData]);
+  const pages: TPages[] = ['Posts', 'About', 'Photos', 'Videos', 'Mentions'];
 
   function getRequestButton() {
+    const { friendStatus } = profileProps;
+    const btnProps = {
+      class: 'bg-blue-500',
+      text: 'Add friend',
+    };
     if (friendStatus) {
-      if (friendStatus.status === 'Accepted') {
-        return (
-          <button
-            type="button"
-            className="bg-red-500 text-white font-bold py-1 rounded-md grow"
-            onClick={() => requestMutation.mutate('cancel')}
-          >
-            Unfriend
-          </button>
-        );
+      const { status, friend } = friendStatus;
+      if (status === 'Accepted') {
+        btnProps.text = 'Unfriend';
+        btnProps.class = 'bg-red-500';
+      } else if (status === 'Pending' && friend === auth.user?._id) {
+        btnProps.class = 'bg-red-500';
+        btnProps.text = 'Cancel Request';
+      } else {
+        btnProps.class = 'bg-green-500';
+        btnProps.text = 'Accept Friend Request';
       }
-      if (
-        friendStatus.status === 'Pending' &&
-        friendStatus.friend === auth.user?._id
-      ) {
-        return (
-          <button
-            type="button"
-            className="bg-red-500 text-white font-bold py-1 rounded-md grow"
-            onClick={() => requestMutation.mutate('cancel')}
-          >
-            Cancel Request
-          </button>
-        );
-      }
-
-      return (
-        <button
-          type="button"
-          className="bg-green-500 text-white font-bold py-1 rounded-md grow"
-          onClick={() => requestMutation.mutate('accept')}
-        >
-          Accept Friend Request
-        </button>
-      );
     }
     return (
       <button
         type="button"
-        className="bg-blue-500 text-white font-bold py-1 rounded-md grow"
-        onClick={() => requestMutation.mutate('send')}
+        onClick={() => profileProps.requestMutation()}
+        className={`${btnProps.class} text-white font-bold py-1 rounded-md grow`}
       >
-        Add Friend
+        {btnProps.text}
       </button>
     );
   }
 
   return (
     <div>
-      <ProfileHeader fullName={profileData.fullName} />
+      <ProfileHeader fullName={profileProps.profile.fullName} />
       {requestError && (
         <Popup msg={requestError} close={() => setRequestError(null)} />
       )}
@@ -179,9 +94,9 @@ function StangerProfile({ profileData }: { profileData: TProfile }) {
           );
         })}
       </div>
-      {currentPage === 'Posts' && posts && (
+      {currentPage === 'Posts' && postsProps.posts && (
         <div className="p-2">
-          {posts
+          {postsProps.posts
             .sort(
               (a, b) =>
                 new Date(b.createdAt).valueOf() -
@@ -193,13 +108,16 @@ function StangerProfile({ profileData }: { profileData: TProfile }) {
                   key={post._id}
                   className="mt-2 border-b-4 border-slate-400"
                 >
-                  <SingularPost post={post} reactPost={mutationReactPost} />
+                  <SingularPost
+                    post={post}
+                    mutationReactPost={postsProps.mutationReactPost}
+                  />
                 </div>
               );
             })}
         </div>
       )}
-      {status === 'loading' && <p className="text-center">Loading...</p>}
+      {/* {status === 'loading' && <p className="text-center">Loading...</p>} */}
     </div>
   );
 }

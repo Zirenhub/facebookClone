@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useLongPress, LongPressDetectEvents } from 'use-long-press';
-import { UseMutationResult } from '@tanstack/react-query';
 import { ModifiedPost, ReactionTypes } from '../../../../types/Post';
 import LaughingReaction from '../../../../assets/laughing-reaction.gif';
 import HeartReaction from '../../../../assets/heart-reaction.gif';
@@ -12,22 +11,22 @@ import Share from '../../../../assets/share.svg';
 
 type Props = {
   post: ModifiedPost;
-  reactPost: UseMutationResult<
-    any,
-    unknown,
-    [string, ReactionTypes | null],
-    unknown
-  >;
+  mutationReactPost: {
+    isLoading: boolean;
+    isError: boolean;
+    error: unknown;
+    reactPost: (postId: string, r: ReactionTypes | null) => void;
+  };
   setCommentsOpen?: () => void;
 };
 
-function PostFooter({ post, reactPost, setCommentsOpen }: Props) {
+function PostFooter({ post, mutationReactPost, setCommentsOpen }: Props) {
   const [reactionsMenu, setReactionsMenu] = useState<boolean>(false);
 
   const reaction = post.reactionsDetails.myReaction;
 
   function handleReaction(r: ReactionTypes) {
-    reactPost.mutate([post._id, r]);
+    mutationReactPost.reactPost(post._id, r);
   }
 
   const bind = useLongPress(
@@ -38,9 +37,9 @@ function PostFooter({ post, reactPost, setCommentsOpen }: Props) {
       onCancel: () => {
         if (setReactionsMenu) setReactionsMenu(false);
         if (post.reactionsDetails.myReaction) {
-          reactPost.mutate([post._id, null]);
+          mutationReactPost.reactPost(post._id, null);
         } else {
-          reactPost.mutate([post._id, 'like']);
+          mutationReactPost.reactPost(post._id, 'like');
         }
       },
       threshold: 700,
@@ -49,57 +48,46 @@ function PostFooter({ post, reactPost, setCommentsOpen }: Props) {
     }
   );
   // handle error
-  if (reactPost.isError) {
-    console.log(reactPost.error);
+  if (mutationReactPost.isError) {
+    console.log(mutationReactPost.error);
   }
-  function getReactionButton() {
-    function getReactionDisplay() {
-      if (reaction === 'heart') {
-        return (
-          <>
-            <img
-              src={HeartReaction}
-              alt="heart reaction"
-              className="max-h-full"
-            />
-            <p className="text-red-500">Love</p>
-          </>
-        );
-      }
-      if (reaction === 'laugh') {
-        return (
-          <>
-            <img
-              src={LaughingReaction}
-              alt="laughing reaction"
-              className="max-h-full"
-            />
-            <p className="text-orange-500">Haha</p>
-          </>
-        );
-      }
+
+  function getReactionDisplay() {
+    if (reaction === 'heart') {
       return (
         <>
-          <div className="w-10">
-            <Like
-              height="30px"
-              width="30px"
-              fill={`${reaction ? '#3b82f6' : 'none'}`}
-            />
-          </div>
-          <p className={`${reaction ? 'text-blue-500' : ''}`}>Like</p>
+          <img
+            src={HeartReaction}
+            alt="heart reaction"
+            className="max-h-full"
+          />
+          <p className="text-red-500">Love</p>
         </>
       );
     }
-
+    if (reaction === 'laugh') {
+      return (
+        <>
+          <img
+            src={LaughingReaction}
+            alt="laughing reaction"
+            className="max-h-full"
+          />
+          <p className="text-orange-500">Haha</p>
+        </>
+      );
+    }
     return (
-      <button
-        type="button"
-        {...bind()}
-        className="flex items-center h-full w-16"
-      >
-        {getReactionDisplay()}
-      </button>
+      <>
+        <div className="w-10">
+          <Like
+            height="30px"
+            width="30px"
+            fill={`${reaction ? '#3b82f6' : 'none'}`}
+          />
+        </div>
+        <p className={`${reaction ? 'text-blue-500' : ''}`}>Like</p>
+      </>
     );
   }
 
@@ -107,15 +95,12 @@ function PostFooter({ post, reactPost, setCommentsOpen }: Props) {
     function closeReactions() {
       setReactionsMenu(false);
     }
-
     const mainEl = document.querySelector('main');
     mainEl?.addEventListener('click', closeReactions);
-
     // on mobile after a long tap on reaction button, prevent context menu popup.
     window.oncontextmenu = (e) => {
       e.preventDefault();
     };
-
     return () => {
       mainEl?.removeEventListener('click', closeReactions);
     };
@@ -148,7 +133,13 @@ function PostFooter({ post, reactPost, setCommentsOpen }: Props) {
           </button>
         </div>
       )}
-      {getReactionButton()}
+      <button
+        type="button"
+        {...bind()}
+        className="flex items-center h-full w-16"
+      >
+        {getReactionDisplay()}
+      </button>
       <button
         type="button"
         onClick={setCommentsOpen}

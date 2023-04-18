@@ -1,7 +1,7 @@
-import { TDBPost } from '../../../../types/Post';
+import { ModifiedPost } from '../../../../types/Post';
 import postBackgrounds from './PostBackgrounds';
 
-function PostStyle({ post }: { post: TDBPost }) {
+function PostStyle({ post }: { post: ModifiedPost }) {
   if (post.image) {
     return (
       <div>

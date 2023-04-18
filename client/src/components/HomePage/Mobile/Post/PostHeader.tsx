@@ -1,17 +1,21 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import moment from 'moment';
-import { UseMutationResult } from '@tanstack/react-query';
-import { TDBPost } from '../../../../types/Post';
+import { ModifiedPost } from '../../../../types/Post';
 import Pfp from '../../../../assets/pfp-two.svg';
 import stringShortener from '../../../../utils/stringShortener';
 
 type Props = {
-  post: TDBPost;
-  deletePost?: UseMutationResult<any, unknown, string, unknown>;
+  post: ModifiedPost;
+  mutationDeletePost?: {
+    isLoading: boolean;
+    isError: boolean;
+    error: unknown;
+    deletePost: (postId: string) => void;
+  };
 };
 
-function PostHeader({ post, deletePost }: Props) {
+function PostHeader({ post, mutationDeletePost }: Props) {
   const [postDate, setPostDate] = useState<string | null>(null);
   const [settingsMenu, setSettingsMenu] = useState<boolean>(false);
 
@@ -48,7 +52,7 @@ function PostHeader({ post, deletePost }: Props) {
           {post.audience === 'public' && (
             <p className="ml-auto text-dimGray">Public</p>
           )}
-          {deletePost && (
+          {mutationDeletePost && (
             <button
               type="button"
               onClick={(e: React.SyntheticEvent) => {
@@ -69,7 +73,7 @@ function PostHeader({ post, deletePost }: Props) {
             type="button"
             onClick={(e: React.SyntheticEvent) => {
               e.stopPropagation();
-              if (deletePost) deletePost.mutate(post._id);
+              if (mutationDeletePost) mutationDeletePost.deletePost(post._id);
             }}
             className="border-b-2"
           >
@@ -83,7 +87,7 @@ function PostHeader({ post, deletePost }: Props) {
 }
 
 PostHeader.defaultProps = {
-  deletePost: undefined,
+  mutationDeletePost: undefined,
 };
 
 export default PostHeader;

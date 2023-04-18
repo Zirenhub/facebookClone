@@ -5,8 +5,10 @@ export type TProfileFriend = {
   updatedAt: string;
   friend: string;
   profile: string;
-  status: string;
+  status: 'Accepted' | 'Pending';
 };
+
+export type TFriendStatus = 'request' | 'accept' | 'reject';
 
 export type TProfile = {
   __v: string;

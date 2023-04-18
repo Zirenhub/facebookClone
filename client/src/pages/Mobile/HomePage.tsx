@@ -1,46 +1,35 @@
 /* eslint-disable no-nested-ternary */
-import { useInfiniteQuery } from '@tanstack/react-query';
-import React, { useEffect } from 'react';
+import { useState } from 'react';
 import Loading from '../../components/Loading';
 import MobileWritePost from '../../components/HomePage/Mobile/WritePost';
 import MobileAddStory from '../../components/HomePage/Mobile/AddStory';
-import { getTimeline } from '../../api/post';
 import SingularPost from '../../components/HomePage/Mobile/SingularPost';
 import useAuthContext from '../../hooks/useAuthContext';
 import usePosts from '../../hooks/usePosts';
+import CreatePostModal from '../../components/HomePage/CreatePost';
 
 function HomePage() {
-  const auth = useAuthContext();
+  const [openCreatePost, setOpenCreatePost] = useState<boolean>(false);
 
-  const {
-    data,
-    error,
-    fetchNextPage,
-    hasNextPage,
-    isFetching,
-    isFetchingNextPage,
-    status,
-  } = useInfiniteQuery({
-    queryKey: ['posts', 'timeline'],
-    queryFn: getTimeline,
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
-    refetchOnWindowFocus: false,
-  });
+  const auth = useAuthContext();
 
   const {
     mutationCreatePost,
     mutationDeletePost,
     mutationReactPost,
     posts,
-    setInitialPosts,
-  } = usePosts();
+    hasNextPage,
+    isFetchingNextPage,
+    isFetching,
+    error,
+    status,
+    fetchNextPage,
+  } = usePosts({ postsType: 'timeline', handleScroll: false });
+  // timline does not need second parameter "id"
 
-  useEffect(() => {
-    if (status === 'success' && !isFetching && data) {
-      const allPosts = data.pages.flatMap((post) => post.posts);
-      setInitialPosts(allPosts);
-    }
-  }, [data, isFetching, setInitialPosts, status]);
+  if (status === 'loading') {
+    return <Loading />;
+  }
 
   function handleScroll(e: React.SyntheticEvent) {
     const target = e.target as HTMLDivElement;
@@ -51,13 +40,16 @@ function HomePage() {
     }
   }
 
-  if (status === 'loading') {
-    return <Loading />;
-  }
-
   return (
     <div className="p-2 h-full overflow-auto" onScroll={handleScroll}>
-      <MobileWritePost mutationCreatePost={mutationCreatePost} />
+      {openCreatePost && (
+        <CreatePostModal
+          isMobile
+          mutationCreatePost={mutationCreatePost}
+          close={() => setOpenCreatePost(false)}
+        />
+      )}
+      <MobileWritePost openCreatePostModal={() => setOpenCreatePost(true)} />
       <MobileAddStory />
       {posts.map((post) => {
         const isAuthor = post.author._id === auth.user?._id;
@@ -66,13 +58,13 @@ function HomePage() {
           <div key={post._id} className="mt-2 border-b-4 border-slate-400">
             <SingularPost
               post={post}
-              deletePost={isAuthor ? mutationDeletePost : undefined}
-              reactPost={mutationReactPost}
+              mutationDeletePost={isAuthor ? mutationDeletePost : undefined}
+              mutationReactPost={mutationReactPost}
             />
           </div>
         );
       })}
-      {status === 'error' && error instanceof Error && <p>{error.message}</p>}
+      {error && <p>{error}</p>}
       <p>
         {isFetchingNextPage && 'Loading more...'}
         {hasNextPage && 'Load More'}

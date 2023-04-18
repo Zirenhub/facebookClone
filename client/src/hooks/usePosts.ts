@@ -1,28 +1,70 @@
-import { useMutation } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import {
   deletePost,
+  getTimeline,
   postDefault,
   postImage,
   postReact,
   removePostReact,
 } from '../api/post';
 import createReactionDetails from '../utils/createReactionDetails';
-import { ModifiedPost, ReactionTypes, TDBPost, TPost } from '../types/Post';
+import { ModifiedPost, ReactionTypes, TPost } from '../types/Post';
 import useAuthContext from './useAuthContext';
+import { getProfilePosts } from '../api/profile';
 
-function usePosts() {
-  const [initialPosts, setInitialPosts] = useState<TDBPost[]>([]);
+type Props = {
+  postsType: 'timeline' | 'profile';
+  id?: string;
+  handleScroll: boolean;
+};
+
+function usePosts({ postsType, id, handleScroll }: Props) {
+  const [queryProps, setQueryProps] = useState({
+    queryFn: getTimeline,
+    queryKey: 'timeline',
+  });
   const [posts, setPosts] = useState<ModifiedPost[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   const auth = useAuthContext();
 
   useEffect(() => {
-    const modifiedPosts = initialPosts.map((post) => {
-      return createReactionDetails(post, auth.user?._id);
-    });
-    setPosts(modifiedPosts);
-  }, [initialPosts, auth]);
+    if (postsType === 'profile') {
+      if (id) {
+        setQueryProps({
+          queryFn: ({ pageParam = 0 }) => getProfilePosts(id, pageParam),
+          queryKey: id,
+        });
+      } else {
+        setError('ID was not provided.');
+      }
+    }
+  }, [postsType, id]);
+
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    status,
+  } = useInfiniteQuery({
+    queryKey: ['posts', queryProps.queryKey],
+    queryFn: queryProps.queryFn,
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
+    refetchOnWindowFocus: false,
+  });
+
+  useEffect(() => {
+    if (status === 'success' && !isFetching && data) {
+      const allPosts = data.pages.flatMap((post) => post.posts);
+      const modifiedPosts = allPosts.map((post) => {
+        return createReactionDetails(post, auth.user?._id);
+      });
+      setPosts(modifiedPosts);
+    }
+  }, [data, isFetching, status, auth.user]);
 
   const mutationCreatePost = useMutation({
     mutationFn: ([post, postType]: [TPost, 'default' | 'image']) => {
@@ -32,8 +74,8 @@ function usePosts() {
       }
       return postDefault(content, background, audience);
     },
-    onSuccess(data, variables, context) {
-      setPosts([...posts, createReactionDetails(data)]);
+    onSuccess(successData) {
+      setPosts([...posts, createReactionDetails(successData)]);
     },
   });
 
@@ -129,12 +171,51 @@ function usePosts() {
     },
   });
 
+  useEffect(() => {
+    const container = document.body;
+    function handleScrollFn() {
+      const isAtBottom =
+        container.scrollTop + container.clientHeight >= container.scrollHeight;
+      if (isAtBottom && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+    }
+    if (handleScroll) {
+      container.addEventListener('scroll', handleScrollFn);
+    }
+    return () => {
+      container.removeEventListener('scroll', handleScrollFn);
+    };
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage, handleScroll]);
+
   return {
-    mutationCreatePost,
-    mutationDeletePost,
-    mutationReactPost,
+    mutationCreatePost: {
+      isLoading: mutationCreatePost.isLoading,
+      isError: mutationCreatePost.isError,
+      error: mutationCreatePost.error,
+      createPost: (post: TPost, postType: 'default' | 'image') =>
+        mutationCreatePost.mutate([post, postType]),
+    },
+    mutationDeletePost: {
+      isLoading: mutationDeletePost.isLoading,
+      isError: mutationDeletePost.isError,
+      error: mutationDeletePost.error,
+      deletePost: (postId: string) => mutationDeletePost.mutate(postId),
+    },
+    mutationReactPost: {
+      isLoading: mutationReactPost.isLoading,
+      isError: mutationReactPost.isError,
+      error: mutationReactPost.error,
+      reactPost: (postId: string, r: ReactionTypes | null) =>
+        mutationReactPost.mutate([postId, r]),
+    },
     posts,
-    setInitialPosts,
+    error,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetching,
+    status,
+    fetchNextPage,
   };
 }
 

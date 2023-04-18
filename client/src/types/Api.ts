@@ -1,8 +1,8 @@
 import { TGroup } from './Group';
 import { TMessage } from './Message';
 import { ReactionTypes, TComment, TDBPost } from './Post';
-import { TProfile, TProfileDefault, TProfileWithoutFullName } from './Profile';
-import { DefaultReq, TRequest } from './Request';
+import { TProfile, TProfileDefault, TProfileFriend } from './Profile';
+import { TRequest } from './Request';
 
 export type ValidationError = {
   location: string;
@@ -61,7 +61,7 @@ export type GetProfileRes = {
 
 export type SendRequestRes = {
   status: 'success' | 'error';
-  data?: DefaultReq;
+  data?: TProfileFriend;
   errors?: null;
   message: string | null;
 };
@@ -75,7 +75,7 @@ export type GetRequestsRes = {
 
 export type GetFriendsRes = {
   status: 'success' | 'error';
-  data?: TProfileWithoutFullName[];
+  data?: TProfileDefault[];
   errors?: null;
   message: string | null;
 };
