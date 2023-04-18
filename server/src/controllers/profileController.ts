@@ -245,7 +245,7 @@ export const rejectRequest = async (
     // if the user is not owner of the request, or is not the receiver of the request throw error.
     if (
       req.user._id !== request.profile.toString() &&
-      req.user.id !== request.friend.toString()
+      req.user._id !== request.friend.toString()
     ) {
       return res.status(403).json({
         status: 'error',
