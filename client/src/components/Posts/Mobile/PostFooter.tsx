@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useLongPress, LongPressDetectEvents } from 'use-long-press';
-import { ModifiedPost, ReactionTypes } from '../../../../types/Post';
-import LaughingReaction from '../../../../assets/laughing-reaction.gif';
-import HeartReaction from '../../../../assets/heart-reaction.gif';
-import LikeReaction from '../../../../assets/like-reaction.gif';
-import Like from '../../../../assets/like.svg';
-import Comment from '../../../../assets/comment.svg';
-import Share from '../../../../assets/share.svg';
+import { ModifiedPost, ReactionTypes } from '../../../types/Post';
+import LaughingReaction from '../../../assets/laughing-reaction.gif';
+import HeartReaction from '../../../assets/heart-reaction.gif';
+import LikeReaction from '../../../assets/like-reaction.gif';
+import Like from '../../../assets/like.svg';
+import Comment from '../../../assets/comment.svg';
+import Share from '../../../assets/share.svg';
 /* eslint react/jsx-props-no-spreading: 0 */
 
 type Props = {

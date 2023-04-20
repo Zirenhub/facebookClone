@@ -1,13 +1,13 @@
 import { useEffect } from 'react';
-import { TGroup } from '../../types/Group';
-import Back from '../../assets/back.svg';
-import useAuthContext from '../../hooks/useAuthContext';
-import ChatFooter from '../../components/Chat/ChatFooter';
-import { TMessage } from '../../types/Message';
-import ChatMessages from '../../components/Chat/ChatMessages';
-import stringShortener from '../../utils/stringShortener';
-import Loading from '../../components/Loading';
-import useMessages from '../../hooks/useMessages';
+import { TGroup } from '../../../types/Group';
+import Back from '../../../assets/back.svg';
+import useAuthContext from '../../../hooks/useAuthContext';
+import ChatFooter from '../../Chat/ChatFooter';
+import { TMessage } from '../../../types/Message';
+import ChatMessages from '../../Chat/ChatMessages';
+import stringShortener from '../../../utils/stringShortener';
+import Loading from '../../Loading';
+import useMessages from '../../../hooks/useMessages';
 
 type Props = {
   group: TGroup;

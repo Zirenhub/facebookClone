@@ -1,31 +1,19 @@
 import TextareaAutosize from 'react-textarea-autosize';
-import { TPost } from '../../../../types/Post';
+import { TPost } from '../../types/Post';
 
 type Props = {
   post: TPost;
-  setPost: React.Dispatch<React.SetStateAction<TPost>>;
+  handlePostContent: (e: React.SyntheticEvent<Element, Event>) => void;
+  handleImageChange: (e: React.SyntheticEvent<Element, Event>) => void;
 };
 
-function ImagePost({ post, setPost }: Props) {
-  function handlePostContent(e: React.SyntheticEvent) {
-    const target = e.target as HTMLTextAreaElement;
-    const content = target.value;
-    setPost({ ...post, content });
-  }
-
-  function handleImageChange(e: React.SyntheticEvent) {
-    const target = e.target as HTMLInputElement;
-    if (target.files) {
-      setPost({ ...post, image: target.files[0] });
-    }
-  }
-
+function ImagePost({ post, handlePostContent, handleImageChange }: Props) {
   return (
     <>
       <TextareaAutosize
         className="font-bold outline-none resize-none placeholder:text-gray-600 w-full"
         placeholder="Say something about this image."
-        maxLength={450}
+        maxLength={post.maxLength}
         value={post.content}
         onChange={(e) => handlePostContent(e)}
       />

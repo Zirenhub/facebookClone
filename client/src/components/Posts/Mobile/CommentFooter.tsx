@@ -1,10 +1,10 @@
 import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import useAuthContext from '../../../../hooks/useAuthContext';
-import Like from '../../../../assets/like.svg';
-import { TComment } from '../../../../types/Post';
-import { likeComment, unlikeComment } from '../../../../api/post';
+import useAuthContext from '../../../hooks/useAuthContext';
+import Like from '../../../assets/like.svg';
+import { TComment } from '../../../types/Post';
+import { likeComment, unlikeComment } from '../../../api/post';
 
 type Props = {
   comment: TComment;

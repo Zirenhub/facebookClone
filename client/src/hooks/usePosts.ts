@@ -67,9 +67,9 @@ function usePosts({ postsType, id, handleScroll }: Props) {
   }, [data, isFetching, status, auth.user]);
 
   const mutationCreatePost = useMutation({
-    mutationFn: ([post, postType]: [TPost, 'default' | 'image']) => {
-      const { content, image, background, audience } = post;
-      if (postType === 'image' && image) {
+    mutationFn: (post: TPost) => {
+      const { content, image, background, audience, type } = post;
+      if (type === 'image' && image) {
         return postImage(content, image, audience);
       }
       return postDefault(content, background, audience);
@@ -193,8 +193,7 @@ function usePosts({ postsType, id, handleScroll }: Props) {
       isLoading: mutationCreatePost.isLoading,
       isError: mutationCreatePost.isError,
       error: mutationCreatePost.error,
-      createPost: (post: TPost, postType: 'default' | 'image') =>
-        mutationCreatePost.mutate([post, postType]),
+      createPost: (post: TPost) => mutationCreatePost.mutate(post),
     },
     mutationDeletePost: {
       isLoading: mutationDeletePost.isLoading,

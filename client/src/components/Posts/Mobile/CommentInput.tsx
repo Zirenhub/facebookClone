@@ -1,7 +1,7 @@
 import { UseMutationResult } from '@tanstack/react-query';
 import React, { useState } from 'react';
-import { TComment } from '../../../../types/Post';
-import Send from '../../../../assets/send.svg';
+import { TComment } from '../../../types/Post';
+import Send from '../../../assets/send.svg';
 
 type Props = {
   sendReply: UseMutationResult<TComment, unknown, string, unknown>;

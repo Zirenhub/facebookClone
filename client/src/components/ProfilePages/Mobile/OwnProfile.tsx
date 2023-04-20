@@ -13,7 +13,7 @@ type Props = {
       isLoading: boolean;
       isError: boolean;
       error: unknown;
-      createPost: (post: TPost, postType: 'default' | 'image') => void;
+      createPost: (post: TPost) => void;
     };
     mutationReactPost: {
       isLoading: boolean;

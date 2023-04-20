@@ -1,7 +1,7 @@
 import { UseMutationResult } from '@tanstack/react-query';
 import { useCallback, useState } from 'react';
-import Pfp from '../../../../assets/pfp-two.svg';
-import { NestedComment, TComment } from '../../../../types/Post';
+import Pfp from '../../../assets/pfp-two.svg';
+import { NestedComment, TComment } from '../../../types/Post';
 import CommentFooter from './CommentFooter';
 
 type Props = {

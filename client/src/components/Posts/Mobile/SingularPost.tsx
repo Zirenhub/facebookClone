@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { ModifiedPost, ReactionTypes } from '../../../types/Post';
-import PostFooter from './Post/PostFooter';
-import PostHeader from './Post/PostHeader';
-import PostStyle from './Post/PostStyle';
+import PostFooter from './PostFooter';
+import PostHeader from './PostHeader';
+import PostStyle from './PostStyle';
 import Back from '../../../assets/back.svg';
 import Search from '../../../assets/search.svg';
-import PostReactions from './Post/PostReactions';
-import FooterPostComments from './Post/FooterPostComments';
-import FullPostComments from './Post/FullPostComments';
+import PostReactions from './PostReactions';
+import FooterPostComments from './FooterPostComments';
+import FullPostComments from './FullPostComments';
 
 type Props = {
   post: ModifiedPost;

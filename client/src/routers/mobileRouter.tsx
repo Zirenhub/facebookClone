@@ -6,7 +6,7 @@ import ErrorPage from '../pages/ErrorPage';
 import ProtectedRoute from '../components/ProtectedRoute';
 import { MobileHeader } from '../components/HOC/MobileHeader';
 
-import MobileHomePage from '../pages/Mobile/HomePage';
+import MobileHomePage from '../pages/Mobile/Homepage/HomePage';
 import Menu from '../pages/Mobile/Menu';
 import Friends from '../pages/Mobile/Friends';
 import Notifications from '../pages/Mobile/Notifications';

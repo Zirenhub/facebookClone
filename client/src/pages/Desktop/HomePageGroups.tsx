@@ -2,7 +2,6 @@ import { useState } from 'react';
 import DisplayGroups from '../../components/Groups/DisplayGroups';
 import useGroups from '../../hooks/useGroups';
 import { TGroup } from '../../types/Group';
-import GroupChat from '../Mobile/GroupChat';
 import CreateGroupModal from '../../components/Groups/CreateGroupModal';
 
 function HomePageGroups() {
@@ -11,7 +10,7 @@ function HomePageGroups() {
     useGroups();
 
   if (openGroup) {
-    return <GroupChat group={openGroup} close={() => setOpenGroup(null)} />;
+    // todo
   }
 
   return (

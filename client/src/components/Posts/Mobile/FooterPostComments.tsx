@@ -1,7 +1,7 @@
 import { useRef } from 'react';
-import useComments from '../../../../hooks/useComments';
-import { ModifiedPost } from '../../../../types/Post';
-import Loading from '../../../Loading';
+import useComments from '../../../hooks/useComments';
+import { ModifiedPost } from '../../../types/Post';
+import Loading from '../../Loading';
 import CommentInput from './CommentInput';
 import PostReactions from './PostReactions';
 import SingleComment from './SingleComment';

@@ -12,7 +12,7 @@ function HomePageBookmarks() {
     'p-3 w-full rounded-lg hover:bg-gray-200 transition-all flex gap-3 items-center';
 
   return (
-    <ul className="flex flex-col overflow-y-scroll pr-3 w-[280px]">
+    <ul className="flex flex-col overflow-y-scroll pr-3 w-[280px] text-dimBlack">
       <li className={liClass}>
         <Pfp height="34px" width="34px" />
         <button type="button">{auth.user?.fullName}</button>

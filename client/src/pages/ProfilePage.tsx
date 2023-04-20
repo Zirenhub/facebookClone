@@ -1,3 +1,5 @@
+/* eslint-disable react/jsx-no-useless-fragment */
+/* eslint-disable no-nested-ternary */
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import { useCallback, useEffect, useState } from 'react';
@@ -90,33 +92,35 @@ function ProfilePage({ isMobile }: { isMobile: boolean }) {
     );
   }
 
-  if (data._id === auth.user?._id) {
-    return isMobile ? (
-      <OwnProfile
-        profile={data}
-        postsProps={{
-          posts,
-          mutationCreatePost,
-          mutationReactPost,
-          mutationDeletePost,
-        }}
-      />
-    ) : (
-      <p>Desktop Profile</p>
-    );
-  }
+  const isCurrentUser = data._id === auth.user?._id;
 
-  return isMobile ? (
-    <StrangerProfile
-      profileProps={{
-        profile: data,
-        requestMutation: () => requestMutation.mutate(),
-        friendStatus: relationshipStatus.status,
-      }}
-      postsProps={{ posts, mutationReactPost }}
-    />
-  ) : (
-    <p>Desktop Profile</p>
+  return (
+    <>
+      {isMobile ? (
+        isCurrentUser ? (
+          <OwnProfile
+            profile={data}
+            postsProps={{
+              posts,
+              mutationCreatePost,
+              mutationReactPost,
+              mutationDeletePost,
+            }}
+          />
+        ) : (
+          <StrangerProfile
+            profileProps={{
+              profile: data,
+              requestMutation: () => requestMutation.mutate(),
+              friendStatus: relationshipStatus.status,
+            }}
+            postsProps={{ posts, mutationReactPost }}
+          />
+        )
+      ) : (
+        <p>Desktop Profile</p>
+      )}
+    </>
   );
 }
 

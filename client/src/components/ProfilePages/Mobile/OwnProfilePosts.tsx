@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import Pfp from '../../../assets/pfp-two.svg';
 import Pictures from '../../../assets/pictures.svg';
-import CreatePostModal from '../../HomePage/CreatePost';
-import SingularPost from '../../HomePage/Mobile/SingularPost';
+import CreatePostModal from '../../Posts/CreatePost';
+import SingularPost from '../../Posts/Mobile/SingularPost';
 import { ModifiedPost, ReactionTypes, TPost } from '../../../types/Post';
 
 type Props = {
@@ -11,7 +11,7 @@ type Props = {
     isLoading: boolean;
     isError: boolean;
     error: unknown;
-    createPost: (post: TPost, postType: 'default' | 'image') => void;
+    createPost: (post: TPost) => void;
   };
   mutationReactPost: {
     isLoading: boolean;
@@ -38,6 +38,7 @@ function OwnProfilePosts({
   if (openCreatePost) {
     return (
       <CreatePostModal
+        isMobile
         close={() => setOpenCreatePost(false)}
         mutationCreatePost={mutationCreatePost}
       />

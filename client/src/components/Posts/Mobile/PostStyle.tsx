@@ -1,5 +1,5 @@
-import { ModifiedPost } from '../../../../types/Post';
-import postBackgrounds from './PostBackgrounds';
+import { ModifiedPost } from '../../../types/Post';
+import postBackgrounds from '../PostBackgrounds';
 
 function PostStyle({ post }: { post: ModifiedPost }) {
   if (post.image) {

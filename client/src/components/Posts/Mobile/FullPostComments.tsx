@@ -1,5 +1,5 @@
-import useComments from '../../../../hooks/useComments';
-import Loading from '../../../Loading';
+import useComments from '../../../hooks/useComments';
+import Loading from '../../Loading';
 import CommentInput from './CommentInput';
 
 import SingleComment from './SingleComment';

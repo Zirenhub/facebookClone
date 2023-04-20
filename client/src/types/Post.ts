@@ -1,13 +1,17 @@
+export type TPostBackgrounds =
+  | 'post-bg-one'
+  | 'post-bg-two'
+  | 'post-bg-three'
+  | 'post-bg-four'
+  | null;
+
 export type TPost = {
   content: string;
-  background:
-    | 'post-bg-one'
-    | 'post-bg-two'
-    | 'post-bg-three'
-    | 'post-bg-four'
-    | null;
+  background: TPostBackgrounds;
   image: File | null;
   audience: 'friends' | 'public';
+  type: 'default' | 'image';
+  maxLength: number;
 };
 
 export type ReactionTypes = 'like' | 'laugh' | 'heart';
