@@ -4,7 +4,7 @@ import Loading from '../../components/Loading';
 import useGroups from '../../hooks/useGroups';
 import DisplayGroups from '../../components/Groups/DisplayGroups';
 import { TGroup } from '../../types/Group';
-import GroupChat from '../../components/Groups/Mobile/GroupChat';
+import GroupChat from '../../components/Groups/GroupChat';
 
 function Groups() {
   const [createGroupModal, setCreateGroupModal] = useState<boolean>(false);

@@ -2,9 +2,11 @@ import { useInfiniteQuery, useMutation } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { getMessages, postMessage } from '../api/messages';
 import { TMessage } from '../types/Message';
+import useAuthContext from './useAuthContext';
 
 function useMessages(query: 'private' | 'group', id: string) {
   const [messages, setMessages] = useState<TMessage[]>([]);
+  const auth = useAuthContext();
 
   const {
     error,
@@ -48,6 +50,22 @@ function useMessages(query: 'private' | 'group', id: string) {
       setMessages(allMessages);
     }
   }, [data, isFetching, status]);
+
+  useEffect(() => {
+    function addMessage({ message }: { message: TMessage }) {
+      setMessages((prevState) => {
+        return [...prevState, message];
+      });
+    }
+
+    auth.socket?.emit('joinGroup', id);
+    auth.socket?.on('groupMessage', addMessage);
+
+    return () => {
+      auth.socket?.off('groupMessage', addMessage);
+      auth.socket?.emit('leaveGroup', id);
+    };
+  }, [auth, id]);
 
   return {
     handleLoadPrevious,

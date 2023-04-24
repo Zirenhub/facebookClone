@@ -1,17 +1,15 @@
 import { useState } from 'react';
 import DisplayGroups from '../../components/Groups/DisplayGroups';
-import useGroups from '../../hooks/useGroups';
-import { TGroup } from '../../types/Group';
+import { TGroup, TGroups } from '../../types/Group';
 import CreateGroupModal from '../../components/Groups/CreateGroupModal';
 
-function HomePageGroups() {
-  const [createGroupModal, setCreateGroupModal] = useState(false);
-  const { groups, setOpenGroup, openGroup, isLoading, isError, error } =
-    useGroups();
+type Props = {
+  groups: TGroups;
+  setOpenGroup: React.Dispatch<React.SetStateAction<TGroup | null>>;
+};
 
-  if (openGroup) {
-    // todo
-  }
+function HomePageGroups({ groups, setOpenGroup }: Props) {
+  const [createGroupModal, setCreateGroupModal] = useState(false);
 
   return (
     <div className="flex flex-col overflow-y-scroll w-[280px]">
@@ -24,7 +22,7 @@ function HomePageGroups() {
       <button
         type="button"
         onClick={() => setCreateGroupModal(true)}
-        className="bg-gray-200 text-start font-bold text-md rounded-lg p-2"
+        className="bg-gray-200 text-start font-bold text-md rounded-lg p-2 hover:bg-gray-300 transition-all"
       >
         Create Group
       </button>
