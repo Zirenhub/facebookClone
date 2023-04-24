@@ -16,10 +16,9 @@ import { getProfilePosts } from '../api/profile';
 type Props = {
   postsType: 'timeline' | 'profile';
   id?: string;
-  handleScroll: boolean;
 };
 
-function usePosts({ postsType, id, handleScroll }: Props) {
+function usePosts({ postsType, id }: Props) {
   const [queryProps, setQueryProps] = useState({
     queryFn: getTimeline,
     queryKey: 'timeline',
@@ -171,22 +170,14 @@ function usePosts({ postsType, id, handleScroll }: Props) {
     },
   });
 
-  useEffect(() => {
-    const container = document.body;
-    function handleScrollFn() {
-      const isAtBottom =
-        container.scrollTop + container.clientHeight >= container.scrollHeight;
-      if (isAtBottom && hasNextPage && !isFetchingNextPage) {
-        fetchNextPage();
-      }
+  function handleScroll(e: React.SyntheticEvent | Event) {
+    const target = e.target as HTMLDivElement;
+    const currentScroll = target.scrollHeight - Math.ceil(target.scrollTop);
+    const isAtBottom = currentScroll - 100 <= target.clientHeight;
+    if (isAtBottom && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
     }
-    if (handleScroll) {
-      container.addEventListener('scroll', handleScrollFn);
-    }
-    return () => {
-      container.removeEventListener('scroll', handleScrollFn);
-    };
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage, handleScroll]);
+  }
 
   return {
     mutationCreatePost: {
@@ -214,6 +205,7 @@ function usePosts({ postsType, id, handleScroll }: Props) {
     isFetchingNextPage,
     isFetching,
     status,
+    handleScroll,
     fetchNextPage,
   };
 }

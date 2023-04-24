@@ -24,20 +24,12 @@ function HomePage() {
     error,
     status,
     fetchNextPage,
-  } = usePosts({ postsType: 'timeline', handleScroll: false });
+    handleScroll,
+  } = usePosts({ postsType: 'timeline' });
   // timline does not need second parameter "id"
 
   if (status === 'loading') {
     return <Loading />;
-  }
-
-  function handleScroll(e: React.SyntheticEvent) {
-    const target = e.target as HTMLDivElement;
-    const currentScroll = target.scrollHeight - Math.ceil(target.scrollTop);
-    const isAtBottom = currentScroll - 100 <= target.clientHeight;
-    if (isAtBottom && hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
-    }
   }
 
   return (

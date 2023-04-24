@@ -76,8 +76,22 @@ function ProfilePage({ isMobile }: { isMobile: boolean }) {
     }
   }, [checkStatus, data, isLoading, isError]);
 
-  const { posts, mutationReactPost, mutationCreatePost, mutationDeletePost } =
-    usePosts({ postsType: 'profile', id, handleScroll: true });
+  const {
+    posts,
+    mutationReactPost,
+    mutationCreatePost,
+    mutationDeletePost,
+    handleScroll,
+  } = usePosts({ postsType: 'profile', id });
+
+  useEffect(() => {
+    const container = document.querySelector('main');
+    const handleScrollFn = (e: Event) => handleScroll(e);
+    container?.addEventListener('scroll', handleScrollFn);
+    return () => {
+      container?.removeEventListener('scroll', handleScrollFn);
+    };
+  }, [handleScroll]);
 
   if (isLoading) {
     return <Loading />;
