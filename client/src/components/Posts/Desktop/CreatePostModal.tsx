@@ -2,6 +2,8 @@ import Pfp from '../../../assets/pfp-two.svg';
 import useAuthContext from '../../../hooks/useAuthContext';
 import { TPost, TPostBackgrounds } from '../../../types/Post';
 import CreateDefaultPost from '../CreateDefaultPost';
+import CreateImagePost from '../CreateImagePost';
+import Image from '../../../assets/pictures.svg';
 
 type Props = {
   post: TPost;
@@ -14,11 +16,28 @@ type Props = {
     handlePostBackground: (bg: TPostBackgrounds) => void;
     handlePostContent: (e: React.SyntheticEvent) => void;
     handleImageChange: (e: React.SyntheticEvent) => void;
+    handleRemoveImage: () => void;
   };
 };
 
 function CreatePostModal({ post, close, canSendPost, handlePostProps }: Props) {
+  const {
+    handlePostBackground,
+    handlePostContent,
+    handleImageChange,
+    handleRemoveImage,
+    setPostType,
+  } = handlePostProps;
+
   const auth = useAuthContext();
+
+  function changePostType() {
+    if (post.type === 'default') {
+      setPostType('image');
+    } else {
+      setPostType('default');
+    }
+  }
 
   return (
     <div className="absolute top-0 left-0 bottom-0 right-0 bg-gray-200/70 z-30 flex justify-center items-center">
@@ -49,17 +68,35 @@ function CreatePostModal({ post, close, canSendPost, handlePostProps }: Props) {
             </select>
           </div>
         </div>
-        <CreateDefaultPost
-          post={post}
-          handlePostBackground={handlePostProps.handlePostBackground}
-          handlePostContent={handlePostProps.handlePostContent}
-        />
-        <button
-          type="button"
-          className="font-bold border rounded-md py-2 text-start px-4"
-        >
-          Add to your post
-        </button>
+        {post.type === 'default' ? (
+          <CreateDefaultPost
+            post={post}
+            handlePostBackground={handlePostBackground}
+            handlePostContent={handlePostContent}
+          />
+        ) : (
+          <CreateImagePost
+            post={post}
+            handleImageChange={handleImageChange}
+            handleRemoveImage={handleRemoveImage}
+            handlePostContent={handlePostContent}
+          />
+        )}
+        <div className="font-bold flex justify-between items-center border rounded-md py-2 text-start px-4">
+          <p>Add to your post</p>
+          <button
+            type="button"
+            className="h-auto w-8 relative"
+            onClick={changePostType}
+          >
+            <Image height="100%" width="100%" fill="rgb(34, 197, 94)" />
+            {post.type === 'image' && (
+              <span className="text-red-500 absolute -top-2 right-0">
+                &#10006;
+              </span>
+            )}
+          </button>
+        </div>
         <button
           type="button"
           disabled={!canSendPost}

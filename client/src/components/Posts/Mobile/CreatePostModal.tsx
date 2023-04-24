@@ -17,10 +17,21 @@ type Props = {
     handlePostBackground: (bg: TPostBackgrounds) => void;
     handlePostContent: (e: React.SyntheticEvent) => void;
     handleImageChange: (e: React.SyntheticEvent) => void;
+    handleRemoveImage: () => void;
   };
 };
 
 function CreatePostModal({ post, close, canSendPost, handlePostProps }: Props) {
+  const {
+    handleRemoveImage,
+    setPostType,
+    submitPost,
+    handlePostAudience,
+    handlePostBackground,
+    handleImageChange,
+    handlePostContent,
+  } = handlePostProps;
+
   const auth = useAuthContext();
 
   return (
@@ -28,10 +39,7 @@ function CreatePostModal({ post, close, canSendPost, handlePostProps }: Props) {
       <header className="flex justify-between p-3 border-b-2">
         <div className="flex gap-2 items-center">
           {post.type === 'image' ? (
-            <button
-              type="button"
-              onClick={() => handlePostProps.setPostType('default')}
-            >
+            <button type="button" onClick={() => setPostType('default')}>
               <Back />
             </button>
           ) : (
@@ -44,7 +52,7 @@ function CreatePostModal({ post, close, canSendPost, handlePostProps }: Props) {
         <div>
           <button
             type="button"
-            onClick={handlePostProps.submitPost}
+            onClick={submitPost}
             className={`${
               canSendPost
                 ? 'bg-blue-600 text-white'
@@ -64,7 +72,7 @@ function CreatePostModal({ post, close, canSendPost, handlePostProps }: Props) {
             <p>{auth.user?.fullName}</p>
             <select
               value={post.audience}
-              onChange={handlePostProps.handlePostAudience}
+              onChange={handlePostAudience}
               className="bg-white font-bold border-2 rounded-md px-2 py-1"
             >
               <option value="public">Public</option>
@@ -77,13 +85,13 @@ function CreatePostModal({ post, close, canSendPost, handlePostProps }: Props) {
             <>
               <CreateDefaultPost
                 post={post}
-                handlePostBackground={handlePostProps.handlePostBackground}
-                handlePostContent={handlePostProps.handlePostContent}
+                handlePostBackground={handlePostBackground}
+                handlePostContent={handlePostContent}
               />
               <div className="pt-2">
                 <button
                   type="button"
-                  onClick={() => handlePostProps.setPostType('image')}
+                  onClick={() => setPostType('image')}
                   className="bg-gray-200 rounded-md px-2 py-1"
                 >
                   Add image
@@ -94,8 +102,9 @@ function CreatePostModal({ post, close, canSendPost, handlePostProps }: Props) {
           {post.type === 'image' && (
             <CreateImagePost
               post={post}
-              handlePostContent={handlePostProps.handlePostContent}
-              handleImageChange={handlePostProps.handleImageChange}
+              handleRemoveImage={handleRemoveImage}
+              handlePostContent={handlePostContent}
+              handleImageChange={handleImageChange}
             />
           )}
         </div>

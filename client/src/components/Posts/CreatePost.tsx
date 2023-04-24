@@ -65,6 +65,10 @@ function CreatePost({ mutationCreatePost, close, isMobile }: Props) {
     }
   };
 
+  const handleRemoveImage = () => {
+    setPost({ ...post, image: null });
+  };
+
   const submitPost = () => {
     if (canSendPost) {
       mutationCreatePost.createPost(post);
@@ -108,6 +112,7 @@ function CreatePost({ mutationCreatePost, close, isMobile }: Props) {
             handlePostBackground,
             handlePostContent,
             handleImageChange,
+            handleRemoveImage,
           }}
         />
       ) : (
@@ -123,6 +128,7 @@ function CreatePost({ mutationCreatePost, close, isMobile }: Props) {
             handlePostBackground,
             handlePostContent,
             handleImageChange,
+            handleRemoveImage,
           }}
         />
       )}
