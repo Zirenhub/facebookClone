@@ -106,7 +106,7 @@ function CreateGroupModal({ isMobile, close }: Props) {
       <div className="flex flex-col p-2 border-2">
         {formData.invited.length > 0 && (
           <div>
-            <p className="text-lg">Invited</p>
+            <p className="text-lg">Invited friends</p>
             <div className="flex gap-3 overflow-scroll">
               {formData.invited.map((inv) => {
                 return (
@@ -118,7 +118,7 @@ function CreateGroupModal({ isMobile, close }: Props) {
             </div>
           </div>
         )}
-        <p className="text-lg">Invite</p>
+        <p className="text-lg">Your friends</p>
         <div className="flex gap-3 overflow-scroll">
           {data?.map((f) => {
             return (
