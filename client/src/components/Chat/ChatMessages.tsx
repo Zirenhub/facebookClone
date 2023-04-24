@@ -30,7 +30,7 @@ function ChatMessages({ userID, messages, queryStatus }: Props) {
   }, [messages, lastMessage]);
 
   return (
-    <div className="grow flex flex-col p-3" id="chatMessages">
+    <div className="grow flex flex-col p-3 overflow-scroll" id="chatMessages">
       {queryStatus.hasNextPage && (
         <button
           type="button"
