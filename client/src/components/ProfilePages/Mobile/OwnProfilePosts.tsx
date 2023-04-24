@@ -4,6 +4,7 @@ import Pictures from '../../../assets/pictures.svg';
 import CreatePostModal from '../../Posts/CreatePost';
 import SingularPost from '../../Posts/Mobile/SingularPost';
 import { ModifiedPost, ReactionTypes, TPost } from '../../../types/Post';
+import WritePost from '../../HomePage/Mobile/WritePost';
 
 type Props = {
   posts: ModifiedPost[];
@@ -70,21 +71,7 @@ function OwnProfilePosts({
       </div>
       <div className="flex flex-col">
         <p className="font-bold">Posts</p>
-        <div className="flex gap-2">
-          <div className="h-10 w-10">
-            <Pfp height="100%" width="100%" />
-          </div>
-          <button
-            type="button"
-            className="rounded-full p-2 border-2 grow"
-            onClick={() => setOpenCreatePost(true)}
-          >
-            What&apos;s on your mind?
-          </button>
-          <div className="h-10 w-10">
-            <Pictures height="100%" width="100%" />
-          </div>
-        </div>
+        <WritePost openCreatePostModal={() => setOpenCreatePost(true)} />
       </div>
       {posts
         .sort(
