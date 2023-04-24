@@ -9,7 +9,7 @@ function WritePost({
   const auth = useAuthContext();
 
   return (
-    <div className="flex">
+    <div className="flex gap-2">
       <div className="w-12">
         <Pfp height="100%" width="100%" fill="gray" />
       </div>

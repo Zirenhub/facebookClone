@@ -1,7 +1,6 @@
 /* eslint-disable react/no-array-index-key */
 import { useState } from 'react';
 import Pfp from '../../assets/pfp-one.svg';
-import useAuthContext from '../../hooks/useAuthContext';
 import CreatePost from '../../components/Posts/CreatePost';
 import usePosts from '../../hooks/usePosts';
 import WritePost from '../../components/HomePage/Desktop/WritePost';
@@ -12,7 +11,7 @@ function HomePageMainStories() {
   return (
     <div className="flex">
       <div
-        className="flex flex-col shadow-md rounded-lg bg-[#bfc2c7] hover:bg-gray-300"
+        className="flex flex-col shadow-sm transition-all rounded-lg bg-[#bfc2c7] hover:bg-gray-300"
         role="button"
       >
         <div className="h-[190px] w-[140px] grow">
@@ -47,7 +46,7 @@ function HomePageMain() {
   });
 
   return (
-    <div className="flex-1 flex flex-col gap-8 px-36">
+    <div className="flex flex-col gap-8">
       {createPostModal && (
         <CreatePost
           isMobile={false}
