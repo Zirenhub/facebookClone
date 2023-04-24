@@ -1,13 +1,10 @@
-import { useEffect } from 'react';
-import { TGroup } from '../../../types/Group';
-import Back from '../../../assets/back.svg';
-import useAuthContext from '../../../hooks/useAuthContext';
-import ChatFooter from '../../Chat/ChatFooter';
-import { TMessage } from '../../../types/Message';
-import ChatMessages from '../../Chat/ChatMessages';
-import stringShortener from '../../../utils/stringShortener';
-import Loading from '../../Loading';
-import useMessages from '../../../hooks/useMessages';
+import { TGroup } from '../../types/Group';
+import Back from '../../assets/back.svg';
+import useAuthContext from '../../hooks/useAuthContext';
+import ChatFooter from '../Chat/ChatFooter';
+import ChatMessages from '../Chat/ChatMessages';
+import stringShortener from '../../utils/stringShortener';
+import useMessages from '../../hooks/useMessages';
 
 type Props = {
   group: TGroup;
@@ -26,32 +23,11 @@ function GroupChat({ group, close }: Props) {
     isFetching,
     isFetchingNextPage,
     status,
-    setMessages,
   } = useMessages('group', group._id);
-
-  useEffect(() => {
-    function addMessage({ message }: { message: TMessage }) {
-      setMessages((prevState) => {
-        return [...prevState, message];
-      });
-    }
-
-    auth.socket?.emit('joinGroup', group._id);
-    auth.socket?.on('groupMessage', addMessage);
-
-    return () => {
-      auth.socket?.off('groupMessage', addMessage);
-      auth.socket?.emit('leaveGroup', group._id);
-    };
-  }, [auth, group, setMessages]);
-
-  if (status === 'loading') {
-    return <Loading />;
-  }
 
   return (
     <div className="flex flex-col h-full relative">
-      <header className="p-3 bg-gray-100 shadow-md sticky top-0 w-full flex items-center justify-between">
+      <header className="p-3 bg-gray-200 rounded-lg shadow-sm border-2 sticky top-0 w-full flex items-center justify-between">
         <div className="flex flex-col">
           <button type="button" className="h-6 w-6" onClick={close}>
             <Back height="100%" width="100%" fill="gray" />
