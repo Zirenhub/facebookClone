@@ -4,10 +4,10 @@ import postBackgrounds from '../PostBackgrounds';
 function PostStyle({ post }: { post: ModifiedPost }) {
   if (post.image) {
     return (
-      <div>
+      <>
         <p>{post.content}</p>
         <img alt="post" src={post.image} />
-      </div>
+      </>
     );
   }
   if (post.background) {
@@ -17,10 +17,10 @@ function PostStyle({ post }: { post: ModifiedPost }) {
         <img
           alt={background?.desc}
           src={background?.src}
-          className="rounded-md"
+          className="rounded-md w-full"
         />
         <div className="absolute top-2/4 left-2/4 -translate-y-2/4 -translate-x-2/4 w-full text-center">
-          <p className="text-white">{post.content}</p>
+          <p className="text-white text-2xl">{post.content}</p>
         </div>
       </div>
     );
