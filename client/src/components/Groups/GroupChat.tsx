@@ -26,7 +26,7 @@ function GroupChat({ group, close }: Props) {
   } = useMessages('group', group._id);
 
   return (
-    <div className="flex flex-col h-full relative">
+    <div className="flex flex-col h-full relative grow">
       <header className="p-3 bg-gray-200 rounded-lg shadow-sm border-2 sticky top-0 w-full flex items-center justify-between">
         <div className="flex flex-col">
           <button type="button" className="h-6 w-6" onClick={close}>
