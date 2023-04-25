@@ -35,7 +35,7 @@ function DesktopSearch({ isOpen, setSearch }: Props) {
                 const target = e.target as HTMLInputElement;
                 handleSearch(target.value);
               }}
-              className="p-2 bg-gray-100 rounded-full w-[64px] md:w-auto pl-10"
+              className="p-2 bg-gray-100 rounded-full w-[100px] md:w-auto pl-10"
             />
           </div>
         </div>
@@ -55,14 +55,14 @@ function DesktopSearch({ isOpen, setSearch }: Props) {
       <div className="h-full w-10">
         <FLogo height="100%" width="100%" />
       </div>
-      <div className="flex grow relative">
+      <div className="flex relative">
         <div className="h-full w-7 absolute left-2 top-0">
           <Search width="100%" height="100%" stroke="gray" />
         </div>
         <input
           placeholder="Search Facebook"
           onClick={() => setSearch(true)}
-          className="p-2 bg-gray-100 rounded-full w-[64px] md:w-auto pl-10"
+          className="p-2 bg-gray-100 rounded-full w-[100px] md:w-auto pl-10"
         />
       </div>
     </>

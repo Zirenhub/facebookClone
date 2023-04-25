@@ -32,7 +32,7 @@ function Header() {
 
   return (
     <>
-      <header className="grid grid-cols-3 bg-white px-3 max-h-20 shadow-md relative">
+      <header className="grid grid-cols-[1fr_2fr_1fr] px-3 shadow-lg z-30">
         <div className="flex items-center h-full gap-3 py-2">
           <DesktopSearch isOpen={!!search} setSearch={setSearch} />
         </div>
