@@ -75,7 +75,7 @@ function CreateGroupModal({ isMobile, close }: Props) {
     <form
       className={`${
         !isMobile
-          ? 'absolute shadow-md top-2/4 left-2/4 -translate-x-2/4 -translate-y-2/4 min-w-[380px] min-h-[380px] bg-white'
+          ? 'fixed shadow-md top-2/4 left-2/4 -translate-x-2/4 -translate-y-2/4 min-w-[380px] min-h-[380px] bg-white'
           : 'bg-gray-200'
       } p-3  rounded-md m-4 flex flex-col justify-center gap-5`}
       onSubmit={handleSubmit}
