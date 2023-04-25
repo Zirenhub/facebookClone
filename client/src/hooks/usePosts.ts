@@ -58,9 +58,14 @@ function usePosts({ postsType, id }: Props) {
   useEffect(() => {
     if (status === 'success' && !isFetching && data) {
       const allPosts = data.pages.flatMap((post) => post.posts);
-      const modifiedPosts = allPosts.map((post) => {
-        return createReactionDetails(post, auth.user?._id);
-      });
+      const modifiedPosts = allPosts
+        .map((post) => {
+          return createReactionDetails(post, auth.user?._id);
+        })
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt).valueOf() - new Date(a.createdAt).valueOf()
+        );
       setPosts(modifiedPosts);
     }
   }, [data, isFetching, status, auth.user]);
@@ -74,7 +79,7 @@ function usePosts({ postsType, id }: Props) {
       return postDefault(content, background, audience);
     },
     onSuccess(successData) {
-      setPosts([...posts, createReactionDetails(successData)]);
+      setPosts([createReactionDetails(successData), ...posts]);
     },
   });
 

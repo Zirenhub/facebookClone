@@ -96,25 +96,17 @@ function StangerProfile({ profileProps, postsProps }: Props) {
       </div>
       {currentPage === 'Posts' && postsProps.posts && (
         <div className="p-2">
-          {postsProps.posts
-            .sort(
-              (a, b) =>
-                new Date(b.createdAt).valueOf() -
-                new Date(a.createdAt).valueOf()
-            )
-            .map((post) => {
-              return (
-                <div
-                  key={post._id}
-                  className="mt-2 border-b-4 border-slate-400"
-                >
-                  <SingularPost
-                    post={post}
-                    mutationReactPost={postsProps.mutationReactPost}
-                  />
-                </div>
-              );
-            })}
+          {postsProps.posts.map((post) => {
+            return (
+              <div key={post._id} className="mt-2 border-b-4 border-slate-400">
+                <SingularPost
+                  isMobile
+                  post={post}
+                  mutationReactPost={postsProps.mutationReactPost}
+                />
+              </div>
+            );
+          })}
         </div>
       )}
       {/* {status === 'loading' && <p className="text-center">Loading...</p>} */}

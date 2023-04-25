@@ -1,6 +1,4 @@
 import { useState } from 'react';
-import Pfp from '../../../assets/pfp-two.svg';
-import Pictures from '../../../assets/pictures.svg';
 import CreatePostModal from '../../Posts/CreatePost';
 import SingularPost from '../../Posts/Mobile/SingularPost';
 import { ModifiedPost, ReactionTypes, TPost } from '../../../types/Post';
@@ -73,22 +71,18 @@ function OwnProfilePosts({
         <p className="font-bold">Posts</p>
         <WritePost openCreatePostModal={() => setOpenCreatePost(true)} />
       </div>
-      {posts
-        .sort(
-          (a, b) =>
-            new Date(b.createdAt).valueOf() - new Date(a.createdAt).valueOf()
-        )
-        .map((post) => {
-          return (
-            <div key={post._id} className="mt-2 border-b-4 border-slate-400">
-              <SingularPost
-                post={post}
-                mutationDeletePost={mutationDeletePost}
-                mutationReactPost={mutationReactPost}
-              />
-            </div>
-          );
-        })}
+      {posts.map((post) => {
+        return (
+          <div key={post._id} className="mt-2 border-b-4 border-slate-400">
+            <SingularPost
+              isMobile
+              post={post}
+              mutationDeletePost={mutationDeletePost}
+              mutationReactPost={mutationReactPost}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 }

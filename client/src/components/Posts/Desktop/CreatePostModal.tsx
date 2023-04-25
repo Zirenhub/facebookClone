@@ -100,7 +100,7 @@ function CreatePostModal({ post, close, canSendPost, handlePostProps }: Props) {
         <button
           type="button"
           disabled={!canSendPost}
-          onClick={() => handlePostProps.submitPost}
+          onClick={handlePostProps.submitPost}
           className={`font-bold ${
             canSendPost ? 'bg-blue-500 text-white' : 'bg-gray-200 text-dimGray'
           } rounded-md py-2`}
