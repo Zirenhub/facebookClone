@@ -49,6 +49,7 @@ function HomePage() {
         return (
           <div key={post._id} className="mt-2 border-b-4 border-slate-400">
             <SingularPost
+              isMobile
               post={post}
               mutationDeletePost={isAuthor ? mutationDeletePost : undefined}
               mutationReactPost={mutationReactPost}

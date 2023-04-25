@@ -4,6 +4,8 @@ import Pfp from '../../assets/pfp-one.svg';
 import CreatePost from '../../components/Posts/CreatePost';
 import usePosts from '../../hooks/usePosts';
 import WritePost from '../../components/HomePage/Desktop/WritePost';
+import SingularPost from '../../components/Posts/Mobile/SingularPost';
+import useAuthContext from '../../hooks/useAuthContext';
 
 type PagesT = 'Stories' | 'Reels';
 
@@ -38,15 +40,24 @@ function HomePageMain() {
   const [createPostModal, setCreatePostModal] = useState<boolean>(false);
 
   const pages: PagesT[] = ['Stories', 'Reels'];
-  const postTypes = ['Live video', 'Photo/vidoe', 'Feeling/activity'];
+  const postTypes = ['Live video', 'Photo/video', 'Feeling/activity'];
+  const auth = useAuthContext();
 
-  const { posts, mutationCreatePost } = usePosts({
+  const {
+    posts,
+    mutationCreatePost,
+    mutationDeletePost,
+    mutationReactPost,
+    handleScroll,
+  } = usePosts({
     postsType: 'timeline',
-    handleScroll: true,
   });
 
   return (
-    <div className="flex flex-col gap-8">
+    <div
+      className="flex flex-col gap-8 py-4 overflow-scroll"
+      onScroll={handleScroll}
+    >
       {createPostModal && (
         <CreatePost
           isMobile={false}
@@ -101,6 +112,23 @@ function HomePageMain() {
           })}
         </div>
       </div>
+      {posts.map((post) => {
+        const isAuthor = post.author._id === auth.user?._id;
+
+        return (
+          <div
+            key={post._id}
+            className="bg-white rounded-md shadow-md p-4 max-w-[600px] min-w-[200px]"
+          >
+            <SingularPost
+              isMobile={false}
+              post={post}
+              mutationDeletePost={isAuthor ? mutationDeletePost : undefined}
+              mutationReactPost={mutationReactPost}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 }
