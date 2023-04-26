@@ -47,7 +47,11 @@ function FullPost({
       <div className="px-4">
         <PostHeader post={post} mutationDeletePost={mutationDeletePost} />
         <PostStyle post={post} />
-        <PostFooter post={post} mutationReactPost={mutationReactPost} />
+        <PostFooter
+          isMobile={false}
+          post={post}
+          mutationReactPost={mutationReactPost}
+        />
         <PostReactions reactionsDetail={post.reactionsDetails} />
         <FullPostComments postID={post._id} />
       </div>
