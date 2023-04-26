@@ -1,10 +1,9 @@
-import { UseMutationResult } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import { TComment } from '../../../types/Post';
 import Send from '../../../assets/send.svg';
 
 type Props = {
-  sendReply: UseMutationResult<TComment, unknown, string, unknown>;
+  sendReply: (comment: string) => void;
   replyingTo: TComment | null;
 };
 
@@ -14,13 +13,13 @@ function CommentInput({ sendReply, replyingTo }: Props) {
 
   function handleSendReply() {
     if (comment) {
-      sendReply.mutate(comment);
+      sendReply(comment);
       setComment('');
     }
   }
 
   return (
-    <div className="bg-gray-100 p-2 fixed bottom-0 left-0 w-full z-50">
+    <div className="bg-gray-100 p-2 fixed bottom-0 left-0 w-full z-30">
       {replyingTo && (
         <p className="text-dimGray">
           Replying to {replyingTo.author.fullName}...

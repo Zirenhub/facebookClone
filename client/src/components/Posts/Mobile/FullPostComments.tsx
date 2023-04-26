@@ -1,25 +1,33 @@
 import useComments from '../../../hooks/useComments';
 import Loading from '../../Loading';
 import CommentInput from './CommentInput';
-
 import SingleComment from './SingleComment';
 
 function FullPostComments({ postID }: { postID: string }) {
-  const commentsHook = useComments(postID);
+  const {
+    mutateGetCommentReplies,
+    mutateReply,
+    replyingTo,
+    setReplyingTo,
+    isLoading,
+    isError,
+    error,
+    comments,
+  } = useComments(postID);
 
-  if (commentsHook.isLoading) {
+  if (isLoading) {
     return <Loading />;
   }
 
-  if (commentsHook.isError && commentsHook.error) {
-    return <p>{commentsHook.error.message}</p>;
+  if (isError && error) {
+    return <p>{error.message}</p>;
   }
 
   return (
     <div className="flex flex-col grow">
-      <div className="flex grow flex-col gap-3 border-t-2 pt-2 mb-[48px]">
-        {commentsHook.comments.length ? (
-          commentsHook.comments.map((c) => {
+      <div className="flex grow flex-col gap-3 pt-2 mb-[48px]">
+        {comments.length ? (
+          comments.map((c) => {
             return (
               <div key={c._id} className="relative">
                 {c.children && (
@@ -27,9 +35,9 @@ function FullPostComments({ postID }: { postID: string }) {
                 )}
                 <SingleComment
                   comment={c}
-                  getReplies={commentsHook.mutateGetCommentReplies}
-                  replyingTo={commentsHook.replyingTo}
-                  setReplyingTo={commentsHook.setReplyingTo}
+                  getReplies={mutateGetCommentReplies}
+                  replyingTo={replyingTo}
+                  setReplyingTo={setReplyingTo}
                   depth={0}
                 />
               </div>
@@ -39,10 +47,7 @@ function FullPostComments({ postID }: { postID: string }) {
           <p className="text-center text-dimGray">No comments here...</p>
         )}
       </div>
-      <CommentInput
-        sendReply={commentsHook.mutateReply}
-        replyingTo={commentsHook.replyingTo}
-      />
+      <CommentInput sendReply={mutateReply} replyingTo={replyingTo} />
     </div>
   );
 }

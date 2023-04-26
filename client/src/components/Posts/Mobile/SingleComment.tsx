@@ -1,14 +1,13 @@
-import { UseMutationResult } from '@tanstack/react-query';
 import { useCallback, useState } from 'react';
 import Pfp from '../../../assets/pfp-two.svg';
-import { NestedComment, TComment } from '../../../types/Post';
+import { TComment } from '../../../types/Post';
 import CommentFooter from './CommentFooter';
 
 type Props = {
   comment: TComment;
-  getReplies: UseMutationResult<NestedComment[], unknown, string, unknown>;
+  getReplies: (commentID: string) => void;
   replyingTo: TComment | null;
-  setReplyingTo: React.Dispatch<React.SetStateAction<TComment | null>>;
+  setReplyingTo: (comment: TComment | null) => void;
   depth: number;
 };
 
@@ -22,7 +21,7 @@ function SingleComment({
   const [isRepliesOpen, setIsRepliesOpen] = useState<boolean>(false);
 
   function handleOpenReplies() {
-    getReplies.mutate(comment._id);
+    getReplies(comment._id);
     setIsRepliesOpen(true);
   }
 

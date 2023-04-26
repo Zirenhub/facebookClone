@@ -53,10 +53,11 @@ function useComments(postID: string) {
     isError,
     error,
     comments,
-    mutateGetCommentReplies,
-    setReplyingTo,
+    setReplyingTo: (comment: TComment | null) => setReplyingTo(comment),
     replyingTo,
-    mutateReply,
+    mutateGetCommentReplies: (commentID: string) =>
+      mutateGetCommentReplies.mutate(commentID),
+    mutateReply: (comment: string) => mutateReply.mutate(comment),
   };
 }
 
