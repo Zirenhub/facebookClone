@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useLongPress, LongPressDetectEvents } from 'use-long-press';
+import { LongPressDetectEvents, useLongPress } from 'use-long-press';
 import { ModifiedPost, ReactionTypes } from '../../../types/Post';
 import LaughingReaction from '../../../assets/laughing-reaction.gif';
 import HeartReaction from '../../../assets/heart-reaction.gif';
@@ -11,6 +11,7 @@ import Share from '../../../assets/share.svg';
 
 type Props = {
   post: ModifiedPost;
+  isMobile: boolean;
   mutationReactPost: {
     isLoading: boolean;
     isError: boolean;
@@ -20,33 +21,56 @@ type Props = {
   setCommentsOpen?: () => void;
 };
 
-function PostFooter({ post, mutationReactPost, setCommentsOpen }: Props) {
+function PostFooter({
+  post,
+  isMobile,
+  mutationReactPost,
+  setCommentsOpen,
+}: Props) {
   const [reactionsMenu, setReactionsMenu] = useState<boolean>(false);
 
   const reaction = post.reactionsDetails.myReaction;
+  const reactions: ReactionTypes[] = ['laugh', 'heart', 'like'];
+  const threshold = 700;
 
-  function handleReaction(r: ReactionTypes) {
+  function handleReaction(r: ReactionTypes | null) {
     mutationReactPost.reactPost(post._id, r);
   }
 
-  const bind = useLongPress(
-    () => {
-      setReactionsMenu(!reactionsMenu);
-    },
-    {
-      onCancel: () => {
-        if (setReactionsMenu) setReactionsMenu(false);
-        if (post.reactionsDetails.myReaction) {
-          mutationReactPost.reactPost(post._id, null);
-        } else {
-          mutationReactPost.reactPost(post._id, 'like');
-        }
-      },
-      threshold: 700,
-      cancelOnMovement: false,
-      detect: LongPressDetectEvents.TOUCH,
+  function onClick() {
+    if (post.reactionsDetails.myReaction) {
+      handleReaction(null);
+    } else {
+      handleReaction('like');
     }
-  );
+  }
+
+  const bind = useLongPress(() => setReactionsMenu(!reactionsMenu), {
+    onCancel: onClick,
+    threshold,
+    cancelOnMovement: false,
+    detect: LongPressDetectEvents.TOUCH,
+  });
+
+  const assignTask = () => {
+    if (isMobile) {
+      return bind();
+    }
+    let timeout: number;
+    return {
+      onMouseEnter: () => {
+        timeout = setTimeout(() => {
+          setReactionsMenu(true);
+        }, threshold);
+      },
+      onMouseLeave: () => clearTimeout(timeout),
+      onMouseDown: () => {
+        clearTimeout(timeout);
+        onClick();
+      },
+    };
+  };
+
   // handle error
   if (mutationReactPost.isError) {
     console.log(mutationReactPost.error);
@@ -91,6 +115,16 @@ function PostFooter({ post, mutationReactPost, setCommentsOpen }: Props) {
     );
   }
 
+  function getReactionSrc(r: ReactionTypes) {
+    if (r === 'heart') {
+      return HeartReaction;
+    }
+    if (r === 'laugh') {
+      return LaughingReaction;
+    }
+    return LikeReaction;
+  }
+
   useEffect(() => {
     function closeReactions() {
       setReactionsMenu(false);
@@ -107,35 +141,30 @@ function PostFooter({ post, mutationReactPost, setCommentsOpen }: Props) {
   }, []);
 
   return (
-    <div className="flex relative h-12 items-center justify-between text-gray-600 px-4 mt-1 py-1 border-t-2">
+    <div className="flex relative h-12 items-center justify-between text-gray-600 px-4 mt-1 py-1 border-t">
       {reactionsMenu && (
         <div className="bg-white rounded-md flex absolute -top-12 left-10">
-          <button type="button" onTouchStart={() => handleReaction('laugh')}>
-            <img
-              src={LaughingReaction}
-              alt="laughing reaction"
-              className="bg-contain h-12 w-12 "
-            />
-          </button>
-          <button type="button" onTouchStart={() => handleReaction('heart')}>
-            <img
-              src={HeartReaction}
-              alt="heart reaction"
-              className="h-12 w-12 bg-contain"
-            />
-          </button>
-          <button type="button" onTouchStart={() => handleReaction('like')}>
-            <img
-              src={LikeReaction}
-              alt="like reaction"
-              className="h-12 w-12 bg-contain"
-            />
-          </button>
+          {reactions.map((r) => {
+            return (
+              <button
+                type="button"
+                key={r}
+                onTouchStart={() => handleReaction(r)}
+                onMouseDown={() => handleReaction(r)}
+              >
+                <img
+                  src={getReactionSrc(r)}
+                  alt={`${r} reaction`}
+                  className="bg-contain h-12 w-12"
+                />
+              </button>
+            );
+          })}
         </div>
       )}
       <button
         type="button"
-        {...bind()}
+        {...assignTask()}
         className="flex items-center h-full w-16"
       >
         {getReactionDisplay()}
