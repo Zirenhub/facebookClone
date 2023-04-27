@@ -1,10 +1,10 @@
 import XSvg from '../../../assets/x.svg';
 import { ModifiedPost, ReactionTypes } from '../../../types/Post';
-import FullPostComments from '../Mobile/FullPostComments';
-import PostFooter from '../Mobile/PostFooter';
-import PostHeader from '../Mobile/PostHeader';
-import PostReactions from '../Mobile/PostReactions';
-import PostStyle from '../Mobile/PostStyle';
+import FullPostComments from '../FullPostComments';
+import PostFooter from '../PostFooter';
+import PostHeader from '../PostHeader';
+import PostReactions from '../PostReactions';
+import PostStyle from '../PostStyle';
 
 type Props = {
   post: ModifiedPost;
@@ -30,7 +30,7 @@ function FullPost({
   mutationReactPost,
 }: Props) {
   return (
-    <div className="z-40 bg-white rounded-lg relative overflow-scroll min-w-[40%] min-h-[60%] max-h-[80%] shadow-lg">
+    <div className="z-40 bg-white rounded-lg overflow-hidden relative min-w-[40%] min-h-[60%] max-h-[80%] shadow-lg flex flex-col">
       <header className="flex items-center justify-between sticky top-0 bg-white z-30 p-3 shadow-lg w-full">
         <p className="text-xl ml-auto font-bold">
           {post.author.fullName}&apos;s Post
@@ -43,8 +43,7 @@ function FullPost({
           <XSvg height="100%" width="100%" fill="gray" />
         </button>
       </header>
-      <div className="h-px mb-2 bg-gray-300" />
-      <div className="px-4">
+      <div className="px-4 flex flex-col overflow-scroll pt-2">
         <PostHeader post={post} mutationDeletePost={mutationDeletePost} />
         <PostStyle post={post} />
         <PostFooter
@@ -53,7 +52,7 @@ function FullPost({
           mutationReactPost={mutationReactPost}
         />
         <PostReactions reactionsDetail={post.reactionsDetails} />
-        <FullPostComments postID={post._id} />
+        <FullPostComments isMobile={false} postID={post._id} />
       </div>
     </div>
   );

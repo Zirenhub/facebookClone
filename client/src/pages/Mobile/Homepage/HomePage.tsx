@@ -3,7 +3,7 @@ import { useState } from 'react';
 import Loading from '../../../components/Loading';
 import MobileWritePost from '../../../components/HomePage/Mobile/WritePost';
 import MobileAddStory from './AddStory';
-import SingularPost from '../../../components/Posts/Mobile/SingularPost';
+import SingularPost from '../../../components/Posts/SingularPost';
 import useAuthContext from '../../../hooks/useAuthContext';
 import usePosts from '../../../hooks/usePosts';
 import CreatePostModal from '../../../components/Posts/CreatePost';

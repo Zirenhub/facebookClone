@@ -2,9 +2,9 @@ import { useRef } from 'react';
 import useComments from '../../../hooks/useComments';
 import { ModifiedPost } from '../../../types/Post';
 import Loading from '../../Loading';
-import CommentInput from './CommentInput';
-import PostReactions from './PostReactions';
-import SingleComment from './SingleComment';
+import CommentInput from '../CommentInput';
+import PostReactions from '../PostReactions';
+import SingleComment from '../SingleComment';
 
 type Props = {
   post: ModifiedPost;
@@ -72,6 +72,7 @@ function PostComments({ post, close }: Props) {
           )}
         </div>
         <CommentInput
+          isMobile
           sendReply={commentsHook.mutateReply}
           replyingTo={commentsHook.replyingTo}
         />

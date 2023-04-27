@@ -4,7 +4,7 @@ import Pfp from '../../assets/pfp-one.svg';
 import CreatePost from '../../components/Posts/CreatePost';
 import usePosts from '../../hooks/usePosts';
 import WritePost from '../../components/HomePage/Desktop/WritePost';
-import SingularPost from '../../components/Posts/Mobile/SingularPost';
+import SingularPost from '../../components/Posts/SingularPost';
 import useAuthContext from '../../hooks/useAuthContext';
 
 type PagesT = 'Stories' | 'Reels';

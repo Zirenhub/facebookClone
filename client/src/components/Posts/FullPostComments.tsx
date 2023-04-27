@@ -1,9 +1,14 @@
-import useComments from '../../../hooks/useComments';
-import Loading from '../../Loading';
+import useComments from '../../hooks/useComments';
+import Loading from '../Loading';
 import CommentInput from './CommentInput';
 import SingleComment from './SingleComment';
 
-function FullPostComments({ postID }: { postID: string }) {
+type Props = {
+  isMobile: boolean;
+  postID: string;
+};
+
+function FullPostComments({ isMobile, postID }: Props) {
   const {
     mutateGetCommentReplies,
     mutateReply,
@@ -24,12 +29,12 @@ function FullPostComments({ postID }: { postID: string }) {
   }
 
   return (
-    <div className="flex flex-col grow">
-      <div className="flex grow flex-col gap-3 pt-2 mb-[48px]">
+    <>
+      <div className="flex flex-col gap-3 pt-2 mb-14">
         {comments.length ? (
           comments.map((c) => {
             return (
-              <div key={c._id} className="relative">
+              <div key={c._id} className={`${c.children ? 'relative' : ''}`}>
                 {c.children && (
                   <div className="left-0 top-5 bottom-14 bg-gray-500 absolute w-1" />
                 )}
@@ -47,8 +52,12 @@ function FullPostComments({ postID }: { postID: string }) {
           <p className="text-center text-dimGray">No comments here...</p>
         )}
       </div>
-      <CommentInput sendReply={mutateReply} replyingTo={replyingTo} />
-    </div>
+      <CommentInput
+        isMobile={isMobile}
+        sendReply={mutateReply}
+        replyingTo={replyingTo}
+      />
+    </>
   );
 }
 

@@ -1,13 +1,13 @@
 /* eslint-disable no-nested-ternary */
 import { useState } from 'react';
-import { ModifiedPost, ReactionTypes } from '../../../types/Post';
+import { ModifiedPost, ReactionTypes } from '../../types/Post';
 import PostFooter from './PostFooter';
 import PostHeader from './PostHeader';
 import PostStyle from './PostStyle';
 import PostReactions from './PostReactions';
-import FooterPostComments from './FooterPostComments';
-import FullPostDesktop from '../Desktop/FullPost';
-import FullPostMobile from './FullPost';
+import FooterPostComments from './Mobile/FooterPostComments';
+import FullPostDesktop from './Desktop/FullPost';
+import FullPostMobile from './Mobile/FullPost';
 
 type Props = {
   post: ModifiedPost;

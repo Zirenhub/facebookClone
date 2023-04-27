@@ -1,11 +1,11 @@
 import { ModifiedPost, ReactionTypes } from '../../../types/Post';
 import Back from '../../../assets/back.svg';
 import Search from '../../../assets/search.svg';
-import PostHeader from './PostHeader';
-import PostStyle from './PostStyle';
-import PostFooter from './PostFooter';
-import PostReactions from './PostReactions';
-import FullPostComments from './FullPostComments';
+import PostHeader from '../PostHeader';
+import PostStyle from '../PostStyle';
+import PostFooter from '../PostFooter';
+import PostReactions from '../PostReactions';
+import FullPostComments from '../FullPostComments';
 
 type Props = {
   post: ModifiedPost;
@@ -50,7 +50,7 @@ function FullPost({
           mutationReactPost={mutationReactPost}
         />
         <PostReactions reactionsDetail={post.reactionsDetails} />
-        <FullPostComments postID={post._id} />
+        <FullPostComments isMobile postID={post._id} />
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import CreatePostModal from '../../Posts/CreatePost';
-import SingularPost from '../../Posts/Mobile/SingularPost';
+import SingularPost from '../../Posts/SingularPost';
 import { ModifiedPost, ReactionTypes, TPost } from '../../../types/Post';
 import WritePost from '../../HomePage/Mobile/WritePost';
 

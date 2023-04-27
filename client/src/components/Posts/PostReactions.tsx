@@ -1,7 +1,7 @@
-import { ReactionsDetails } from '../../../types/Post';
-import LaughGif from '../../../assets/laughing-reaction.gif';
-import HeartGif from '../../../assets/heart-reaction.gif';
-import LikeGif from '../../../assets/like-reaction.gif';
+import { ReactionsDetails } from '../../types/Post';
+import LaughGif from '../../assets/laughing-reaction.gif';
+import HeartGif from '../../assets/heart-reaction.gif';
+import LikeGif from '../../assets/like-reaction.gif';
 
 function PostFooterReactions({
   reactionsDetail,

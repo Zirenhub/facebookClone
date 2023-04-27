@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
-import Pfp from '../../../assets/pfp-two.svg';
-import { TComment } from '../../../types/Post';
+import Pfp from '../../assets/pfp-two.svg';
+import { TComment } from '../../types/Post';
 import CommentFooter from './CommentFooter';
 
 type Props = {
@@ -36,7 +36,7 @@ function SingleComment({
   return (
     <>
       <div
-        className="flex relative"
+        className="flex"
         style={
           {
             // paddingLeft: depth >= 3 ? 30 : Number(`${depth}0`),

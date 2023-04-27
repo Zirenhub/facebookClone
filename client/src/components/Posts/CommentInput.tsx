@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { TComment } from '../../../types/Post';
-import Send from '../../../assets/send.svg';
+import { TComment } from '../../types/Post';
+import Send from '../../assets/send.svg';
 
 type Props = {
+  isMobile: boolean;
   sendReply: (comment: string) => void;
   replyingTo: TComment | null;
 };
 
-function CommentInput({ sendReply, replyingTo }: Props) {
+function CommentInput({ isMobile, sendReply, replyingTo }: Props) {
   const [comment, setComment] = useState<string>('');
   const [isWriting, setIsWriting] = useState<boolean>(false);
 
@@ -19,7 +20,11 @@ function CommentInput({ sendReply, replyingTo }: Props) {
   }
 
   return (
-    <div className="bg-gray-100 p-2 fixed bottom-0 left-0 w-full z-30">
+    <div
+      className={`bg-gray-50 p-2 ${
+        isMobile ? 'fixed' : 'absolute'
+      } left-0 bottom-0 w-full z-30`}
+    >
       {replyingTo && (
         <p className="text-dimGray">
           Replying to {replyingTo.author.fullName}...
@@ -29,7 +34,7 @@ function CommentInput({ sendReply, replyingTo }: Props) {
         type="text"
         placeholder="Write a comment..."
         value={comment}
-        className="w-full bg-gray-300 rounded-lg p-1"
+        className="w-full bg-gray-200 rounded-lg p-1"
         onFocus={() => setIsWriting(true)}
         onBlur={() => setIsWriting(false)}
         onChange={(e: React.SyntheticEvent) => {

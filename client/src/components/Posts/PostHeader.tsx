@@ -1,9 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import moment from 'moment';
-import { ModifiedPost } from '../../../types/Post';
-import Pfp from '../../../assets/pfp-two.svg';
-import stringShortener from '../../../utils/stringShortener';
+import { ModifiedPost } from '../../types/Post';
+import Pfp from '../../assets/pfp-two.svg';
+import stringShortener from '../../utils/stringShortener';
 
 type Props = {
   post: ModifiedPost;

@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { TProfile, TProfileFriend } from '../../../types/Profile';
-import SingularPost from '../../Posts/Mobile/SingularPost';
+import SingularPost from '../../Posts/SingularPost';
 import Popup from '../../Popup';
 import ProfileHeader from './ProfileHeader';
 import { ModifiedPost, ReactionTypes } from '../../../types/Post';
