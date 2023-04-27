@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import useAuthContext from '../../hooks/useAuthContext';
 import Pfp from '../../assets/pfp-two.svg';
-import useBookmarks from '../../hooks/useBookmars';
+import { homepageBookmarks } from './Bookmarks';
 
 function HomePageBookmarks() {
   const [expanded, setExpanded] = useState<boolean>(false);
   const auth = useAuthContext();
-  const { homepageBookmarks } = useBookmarks();
 
   const liClass =
     'p-3 w-full rounded-lg hover:bg-gray-200 transition-all flex gap-3 items-center';
@@ -22,7 +21,7 @@ function HomePageBookmarks() {
         .map((s) => {
           return (
             <li key={s._id} className={liClass}>
-              <s.svg height="34px" width="34px" />
+              <s.svg height="34px" width="34px" fill="gray" />
               <button type="button" className="text-start text-lg">
                 {s.section}
               </button>

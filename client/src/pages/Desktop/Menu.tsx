@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import useBookmars from '../../hooks/useBookmars';
+import { menuBookmarks, menuCreate } from './Bookmarks';
 import { TSectionButtons } from '../../types/Desktop';
 
 /* eslint-disable react/no-array-index-key */
 function DesktopMenu() {
   const [menuSearch, setMenuSearch] = useState<string | null>(null);
-  const { menuBookmarks, menuCreate } = useBookmars();
 
   function socialButton(buttons: TSectionButtons[]) {
     return buttons.map((x) => {
