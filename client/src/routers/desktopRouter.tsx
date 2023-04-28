@@ -6,6 +6,7 @@ import ErrorPage from '../pages/ErrorPage';
 import ProtectedRoute from '../components/ProtectedRoute';
 import DesktopHeader from '../components/HOC/DesktopHeader';
 import HomePage from '../pages/Desktop/HomePage';
+import Friends from '../pages/Desktop/Friends';
 
 const router = createBrowserRouter([
   {
@@ -18,6 +19,10 @@ const router = createBrowserRouter([
       {
         path: '/home',
         element: <HomePage />,
+      },
+      {
+        path: '/friends',
+        element: <Friends />,
       },
       {
         path: '/:id',
