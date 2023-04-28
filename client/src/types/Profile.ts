@@ -1,3 +1,5 @@
+import { ModifiedPost, ReactionTypes, TPost } from './Post';
+
 export type TProfileFriend = {
   __v: string;
   _id: string;
@@ -48,3 +50,28 @@ export type TProfileDefault = {
 //   createdAt: string;
 //   updatedAt: string;
 // };
+
+export type OwnProfileProps = {
+  profile: TProfile;
+  postsProps: {
+    posts: ModifiedPost[];
+    mutationCreatePost: {
+      isLoading: boolean;
+      isError: boolean;
+      error: unknown;
+      createPost: (post: TPost) => void;
+    };
+    mutationReactPost: {
+      isLoading: boolean;
+      isError: boolean;
+      error: unknown;
+      reactPost: (postId: string, r: ReactionTypes | null) => void;
+    };
+    mutationDeletePost: {
+      isLoading: boolean;
+      isError: boolean;
+      error: unknown;
+      deletePost: (postId: string) => void;
+    };
+  };
+};

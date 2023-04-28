@@ -1,36 +1,10 @@
 /* eslint-disable react/no-array-index-key */
 import { useState } from 'react';
-import { TProfile } from '../../../types/Profile';
 import OwnProfilePosts from './OwnProfilePosts';
 import ProfileHeader from './ProfileHeader';
-import { ModifiedPost, ReactionTypes, TPost } from '../../../types/Post';
+import { OwnProfileProps } from '../../../types/Profile';
 
-type Props = {
-  profile: TProfile;
-  postsProps: {
-    posts: ModifiedPost[];
-    mutationCreatePost: {
-      isLoading: boolean;
-      isError: boolean;
-      error: unknown;
-      createPost: (post: TPost) => void;
-    };
-    mutationReactPost: {
-      isLoading: boolean;
-      isError: boolean;
-      error: unknown;
-      reactPost: (postId: string, r: ReactionTypes | null) => void;
-    };
-    mutationDeletePost: {
-      isLoading: boolean;
-      isError: boolean;
-      error: unknown;
-      deletePost: (postId: string) => void;
-    };
-  };
-};
-
-function OwnProfile({ profile, postsProps }: Props) {
+function OwnProfile({ profile, postsProps }: OwnProfileProps) {
   const [currentPage, setCurrentPage] = useState<'Posts' | 'Reels'>('Posts');
   const profilePages: ['Posts', 'Reels'] = ['Posts', 'Reels'];
 

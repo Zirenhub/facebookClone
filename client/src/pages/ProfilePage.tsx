@@ -4,8 +4,9 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import { useCallback, useEffect, useState } from 'react';
 import { TFriendStatus, TProfile, TProfileFriend } from '../types/Profile';
-import OwnProfile from '../components/ProfilePages/Mobile/OwnProfile';
-import StrangerProfile from '../components/ProfilePages/Mobile/StrangerProfile';
+import OwnProfileMobile from '../components/ProfilePages/Mobile/OwnProfile';
+import StrangerProfileMobile from '../components/ProfilePages/Mobile/StrangerProfile';
+import OwnProfileDesktop from '../components/ProfilePages/Desktop/OwnProfile';
 import Loading from '../components/Loading';
 import useAuthContext from '../hooks/useAuthContext';
 import { getProfile, profileRequest } from '../api/profile';
@@ -112,7 +113,7 @@ function ProfilePage({ isMobile }: { isMobile: boolean }) {
     <>
       {isMobile ? (
         isCurrentUser ? (
-          <OwnProfile
+          <OwnProfileMobile
             profile={data}
             postsProps={{
               posts,
@@ -122,7 +123,7 @@ function ProfilePage({ isMobile }: { isMobile: boolean }) {
             }}
           />
         ) : (
-          <StrangerProfile
+          <StrangerProfileMobile
             profileProps={{
               profile: data,
               requestMutation: () => requestMutation.mutate(),
@@ -131,8 +132,18 @@ function ProfilePage({ isMobile }: { isMobile: boolean }) {
             postsProps={{ posts, mutationReactPost }}
           />
         )
+      ) : isCurrentUser ? (
+        <OwnProfileDesktop
+          profile={data}
+          postsProps={{
+            posts,
+            mutationCreatePost,
+            mutationReactPost,
+            mutationDeletePost,
+          }}
+        />
       ) : (
-        <p>Desktop Profile</p>
+        <p>Profile goes here</p>
       )}
     </>
   );
