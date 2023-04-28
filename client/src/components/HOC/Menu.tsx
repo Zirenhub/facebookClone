@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { menuBookmarks, menuCreate } from './Bookmarks';
+import { menuBookmarks, menuCreate } from '../../pages/Desktop/bookmarks';
 import { TSectionButtons } from '../../types/Desktop';
-
 /* eslint-disable react/no-array-index-key */
+
 function DesktopMenu() {
   const [menuSearch, setMenuSearch] = useState<string | null>(null);
 
@@ -60,7 +60,7 @@ function DesktopMenu() {
   }
 
   return (
-    <div className="flex flex-col absolute w-[650px] z-40 max-h-[530px] top-14 shadow-lg bg-gray-100 rounded-lg p-3 right-0">
+    <div className="flex flex-col w-[650px] z-40 max-h-[530px] shadow-lg border bg-gray-100 rounded-lg p-3">
       <h1 className="font-bold text-xl">Menu</h1>
       <div className="flex gap-2 min-h-0">
         <div className="flex flex-col gap-2 overflow-scroll min-h-0 p-3 flex-1 shadow-sm bg-white rounded-lg">
