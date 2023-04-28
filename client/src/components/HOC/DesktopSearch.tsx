@@ -7,7 +7,7 @@ import ProfileCards from '../ProfilePages/ProfileCards';
 
 type Props = {
   isOpen: boolean;
-  setSearch: React.Dispatch<React.SetStateAction<boolean>>;
+  setSearch: (bool: boolean) => void;
 };
 
 function DesktopSearch({ isOpen, setSearch }: Props) {
