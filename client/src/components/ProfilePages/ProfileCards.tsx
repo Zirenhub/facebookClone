@@ -13,27 +13,35 @@ function ProfileCards({ profiles, onClick }: Props) {
 
   return (
     <div className="flex flex-col gap-2">
-      {profiles?.map((profile) => (
-        <div key={profile._id}>
-          <button
-            type="button"
-            onClick={() => {
-              if (onClick) {
-                onClick();
-              }
-              navigate(`/${profile._id}`);
-            }}
-            className="bg-gray-200 transition-all rounded-lg hover:bg-gray-300 shadow-sm p-3 w-full"
-          >
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10">
-                <Pfp height="100%" width="100%" />
+      {profiles.length > 0 ? (
+        profiles.map((profile) => (
+          <div key={profile._id}>
+            <button
+              type="button"
+              onClick={() => {
+                if (onClick) {
+                  onClick();
+                }
+                navigate(`/${profile._id}`);
+              }}
+              className="bg-gray-200 transition-all rounded-lg hover:bg-gray-300 shadow-sm p-3 w-full"
+            >
+              <div className="flex items-center gap-2">
+                <div className="w-10 h-10">
+                  <Pfp height="100%" width="100%" />
+                </div>
+                <p className="font-bold text-xl text-dimBlack">
+                  {profile.fullName}
+                </p>
               </div>
-              <p>{profile.fullName}</p>
-            </div>
-          </button>
-        </div>
-      ))}
+            </button>
+          </div>
+        ))
+      ) : (
+        <p className="text-dimGray font-bold text-2xl text-center">
+          No profiles here.
+        </p>
+      )}
     </div>
   );
 }
