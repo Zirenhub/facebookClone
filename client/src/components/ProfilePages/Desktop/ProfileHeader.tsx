@@ -1,0 +1,93 @@
+import { useRef, useState } from 'react';
+import Pfp from '../../../assets/pfp-two.svg';
+
+type TPages =
+  | 'Posts'
+  | 'About'
+  | 'Friends'
+  | 'Photos'
+  | 'Videos'
+  | 'Check-ins'
+  | 'More';
+
+function ProfileHeader({ fullName }: { fullName: string }) {
+  const [currentPage, setCurrentPage] = useState<TPages>('Posts');
+  const headerBannerRef = useRef<HTMLDivElement>(null);
+
+  const buttons: TPages[] = [
+    'Posts',
+    'About',
+    'Friends',
+    'Photos',
+    'Videos',
+    'Check-ins',
+    'More',
+  ];
+
+  return (
+    <div className="bg-white relative flex justify-center shadow-sm pb-1">
+      <div
+        className="h-[350px] absolute w-[1200px] min-[1200px]:rounded-lg bg-gradient-to-b from-white to-gray-400"
+        ref={headerBannerRef}
+      />
+      <div className="mt-[275px] z-10 basis-[1200px] px-6">
+        <div className="flex justify-between">
+          <div className="flex items-end">
+            <div className="h-32 w-32 border-2 rounded-full bg-white border-white">
+              <Pfp height="100%" width="100%" stroke="white" />
+            </div>
+            <p className="font-bold text-2xl">{fullName}</p>
+          </div>
+          <div className="flex flex-col items-end justify-between">
+            <button
+              type="button"
+              className="rounded-lg bg-white font-bold px-4 py-2 hover:bg-gray-100"
+            >
+              Add cover photo
+            </button>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                className="bg-blue-500 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-600"
+              >
+                Add to story
+              </button>
+              <button
+                type="button"
+                className="bg-gray-200 px-4 py-2 font-bold rounded-lg hover:bg-gray-300"
+              >
+                Edit pofile
+              </button>
+            </div>
+          </div>
+        </div>
+        <div className="h-px bg-gray-300 mt-6 mb-2" />
+        <div className="flex justify-between items-center">
+          <div className="flex">
+            {buttons.map((b) => {
+              const btnClass = `p-3 ${
+                currentPage === b
+                  ? 'text-blue-500 border-b-4 border-blue-500'
+                  : 'hover:bg-gray-200 text-dimGray rounded-lg'
+              }  transition-all font-bold text-xl`;
+
+              return (
+                <button type="button" key={b} className={btnClass}>
+                  {b}
+                </button>
+              );
+            })}
+          </div>
+          <button
+            type="button"
+            className="px-3 h-fit bg-gray-200 rounded-lg text-2xl"
+          >
+            ...
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default ProfileHeader;
