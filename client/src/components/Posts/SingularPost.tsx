@@ -56,21 +56,23 @@ function SingularPost({
           </div>
         )
       ) : null}
-      <PostHeader
-        post={post}
-        setOpenPost={isMobile ? () => setIsOpen(true) : undefined}
-        mutationDeletePost={mutationDeletePost}
-      />
-      <PostStyle post={post} />
-      <PostReactions reactionsDetail={post.reactionsDetails} />
-      <PostFooter
-        post={post}
-        isMobile={isMobile}
-        mutationReactPost={mutationReactPost}
-        setCommentsOpen={
-          isMobile ? () => setCommentsOpen(true) : () => setIsOpen(true)
-        }
-      />
+      <div className="flex flex-col">
+        <PostHeader
+          post={post}
+          setOpenPost={isMobile ? () => setIsOpen(true) : undefined}
+          mutationDeletePost={mutationDeletePost}
+        />
+        <PostStyle post={post} />
+        <PostReactions reactionsDetail={post.reactionsDetails} />
+        <PostFooter
+          post={post}
+          isMobile={isMobile}
+          mutationReactPost={mutationReactPost}
+          setCommentsOpen={
+            isMobile ? () => setCommentsOpen(true) : () => setIsOpen(true)
+          }
+        />
+      </div>
       {commentsOpen && (
         <FooterPostComments post={post} close={() => setCommentsOpen(false)} />
       )}
