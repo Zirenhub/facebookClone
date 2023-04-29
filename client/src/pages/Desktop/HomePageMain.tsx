@@ -1,4 +1,3 @@
-/* eslint-disable react/no-array-index-key */
 import { useState } from 'react';
 import Pfp from '../../assets/pfp-one.svg';
 import CreatePost from '../../components/Posts/CreatePost';
@@ -6,6 +5,7 @@ import usePosts from '../../hooks/usePosts';
 import WritePost from '../../components/HomePage/Desktop/WritePost';
 import SingularPost from '../../components/Posts/SingularPost';
 import useAuthContext from '../../hooks/useAuthContext';
+/* eslint-disable react/no-array-index-key */
 
 type PagesT = 'Stories' | 'Reels';
 
@@ -40,7 +40,6 @@ function HomePageMain() {
   const [createPostModal, setCreatePostModal] = useState<boolean>(false);
 
   const pages: PagesT[] = ['Stories', 'Reels'];
-  const postTypes = ['Live video', 'Photo/video', 'Feeling/activity'];
   const auth = useAuthContext();
 
   const {
@@ -95,23 +94,7 @@ function HomePageMain() {
           )}
         </div>
       </div>
-      <div className="bg-white shadow-md flex flex-col rounded-lg p-3">
-        <WritePost openCreatePostModal={() => setCreatePostModal(true)} />
-        <div className="h-px bg-gray-200 my-2" />
-        <div className="flex text-dimGray">
-          {postTypes.map((b, i) => {
-            return (
-              <button
-                type="button"
-                className="p-3 grow font-bold rounded-lg hover:bg-gray-100"
-                key={i}
-              >
-                {b}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      <WritePost openCreatePostModal={() => setCreatePostModal(true)} />
       {posts.map((post) => {
         const isAuthor = post.author._id === auth.user?._id;
 
