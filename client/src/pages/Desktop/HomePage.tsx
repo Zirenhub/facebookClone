@@ -15,7 +15,7 @@ function HomePage() {
   const isSmallScreen = window.innerWidth <= 1415;
 
   return (
-    <div className="flex gap-3 px-6 bg-[#f0f2f5] h-full relative">
+    <div className="flex gap-3 px-6 bg-gray-100 h-full relative">
       <div className={`py-4 ${isSmallScreen ? '' : 'overflow-scroll'}`}>
         {isSmallScreen ? (
           <button

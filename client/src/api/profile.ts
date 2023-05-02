@@ -54,6 +54,5 @@ export async function profileRequest(
 export async function getFriends(): Promise<TProfileDefault[]> {
   const res = await fetch('/api/v1/profile/friends');
   const { status, data, errors, message }: GetFriendsRes = await res.json();
-  console.log(data);
   return getFinal(status, data, errors, message);
 }

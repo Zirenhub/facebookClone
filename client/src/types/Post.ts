@@ -58,7 +58,7 @@ export type TDBPost = {
 };
 
 export type ModifiedPost = {
-  __v: string;
+  __v: number;
   _id: string;
   author: PopulatedAuthor;
   audience: string;

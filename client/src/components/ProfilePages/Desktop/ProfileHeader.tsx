@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react';
+/* eslint-disable react/jsx-no-useless-fragment */
+import { useState } from 'react';
 import Pfp from '../../../assets/pfp-two.svg';
 
 type TPages =
@@ -10,9 +11,12 @@ type TPages =
   | 'Check-ins'
   | 'More';
 
-function ProfileHeader({ fullName }: { fullName: string }) {
+type Props = {
+  fullName: string;
+};
+
+function ProfileHeader({ fullName }: Props) {
   const [currentPage, setCurrentPage] = useState<TPages>('Posts');
-  const headerBannerRef = useRef<HTMLDivElement>(null);
 
   const buttons: TPages[] = [
     'Posts',
@@ -25,12 +29,9 @@ function ProfileHeader({ fullName }: { fullName: string }) {
   ];
 
   return (
-    <div className="bg-white relative flex justify-center shadow-sm pb-1">
-      <div
-        className="h-[350px] absolute w-[1200px] min-[1200px]:rounded-lg bg-gradient-to-b from-white to-gray-400"
-        ref={headerBannerRef}
-      />
-      <div className="mt-[275px] z-10 basis-[1200px] px-6">
+    <div className="flex flex-col pb-1">
+      <div className="h-[350px] w-full top-0 absolute min-[1200px]:rounded-lg bg-gradient-to-b from-white to-gray-400" />
+      <div className="mt-[275px] z-10 px-6">
         <div className="flex justify-between">
           <div className="flex items-end">
             <div className="h-32 w-32 border-2 rounded-full bg-white border-white">
@@ -61,30 +62,30 @@ function ProfileHeader({ fullName }: { fullName: string }) {
             </div>
           </div>
         </div>
-        <div className="h-px bg-gray-300 mt-6 mb-2" />
-        <div className="flex justify-between items-center">
-          <div className="flex">
-            {buttons.map((b) => {
-              const btnClass = `p-3 ${
-                currentPage === b
-                  ? 'text-blue-500 border-b-4 border-blue-500'
-                  : 'hover:bg-gray-200 text-dimGray rounded-lg'
-              }  transition-all font-bold text-xl`;
+      </div>
+      <div className="h-px bg-gray-300 mt-6 mb-2" />
+      <div className="flex justify-between items-center px-6">
+        <div className="flex">
+          {buttons.map((b) => {
+            const btnClass = `p-3 ${
+              currentPage === b
+                ? 'text-blue-500 border-b-4 border-blue-500'
+                : 'hover:bg-gray-200 text-dimGray rounded-lg'
+            }  transition-all font-bold text-xl`;
 
-              return (
-                <button type="button" key={b} className={btnClass}>
-                  {b}
-                </button>
-              );
-            })}
-          </div>
-          <button
-            type="button"
-            className="px-3 h-fit bg-gray-200 rounded-lg text-2xl"
-          >
-            ...
-          </button>
+            return (
+              <button type="button" key={b} className={btnClass}>
+                {b}
+              </button>
+            );
+          })}
         </div>
+        <button
+          type="button"
+          className="px-3 h-fit bg-gray-200 rounded-lg text-2xl"
+        >
+          ...
+        </button>
       </div>
     </div>
   );
