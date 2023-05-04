@@ -6,7 +6,11 @@ function PostStyle({ post }: { post: ModifiedPost }) {
     return (
       <>
         <p>{post.content}</p>
-        <img alt="post" src={post.image} className="h-auto w-[600px]" />
+        <img
+          alt="post"
+          src={post.image}
+          className="h-auto w-[600px] self-center"
+        />
       </>
     );
   }

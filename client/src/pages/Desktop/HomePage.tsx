@@ -44,7 +44,11 @@ function HomePage() {
       <div className="flex-1 flex justify-center">
         {openGroup ? (
           <div className="mt-1 grow">
-            <GroupChat group={openGroup} close={() => setOpenGroup(null)} />
+            <GroupChat
+              group={openGroup}
+              isMobile={false}
+              close={() => setOpenGroup(null)}
+            />
           </div>
         ) : (
           <HomePageMain />

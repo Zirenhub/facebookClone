@@ -13,7 +13,9 @@ function Groups() {
     useGroups();
 
   if (openGroup) {
-    return <GroupChat group={openGroup} close={() => setOpenGroup(null)} />;
+    return (
+      <GroupChat group={openGroup} isMobile close={() => setOpenGroup(null)} />
+    );
   }
 
   if (isLoading) {

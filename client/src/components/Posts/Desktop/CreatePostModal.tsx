@@ -40,7 +40,7 @@ function CreatePostModal({ post, close, canSendPost, handlePostProps }: Props) {
   }
 
   return (
-    <div className="absolute top-0 left-0 bottom-0 right-0 bg-gray-200/70 z-30 flex justify-center items-center">
+    <div className="fixed top-0 left-0 bottom-0 right-0 bg-gray-200/70 z-30 flex justify-center items-center">
       <div className="flex flex-col bg-white p-6 rounded-lg shadow-lg gap-3 min-w-[500px]">
         <div className="flex border-b">
           <p className="ml-auto text-2xl font-bold">Create post</p>

@@ -8,10 +8,11 @@ import useMessages from '../../hooks/useMessages';
 
 type Props = {
   group: TGroup;
+  isMobile: boolean;
   close: () => void;
 };
 
-function GroupChat({ group, close }: Props) {
+function GroupChat({ group, isMobile, close }: Props) {
   const auth = useAuthContext();
 
   const {
@@ -33,7 +34,7 @@ function GroupChat({ group, close }: Props) {
             <Back height="100%" width="100%" fill="gray" />
           </button>
           <p className="font-bold text-xl grow text-center">
-            {stringShortener(group.name, 10)}
+            {stringShortener(group.name, isMobile ? 12 : 34)}
           </p>
         </div>
         <button type="button" className="max-w-[150px] text-dimGray">
