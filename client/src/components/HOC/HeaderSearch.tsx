@@ -10,7 +10,7 @@ type Props = {
   setSearch: (bool: boolean) => void;
 };
 
-function DesktopSearch({ isOpen, setSearch }: Props) {
+function HeaderSearch({ isOpen, setSearch }: Props) {
   const { searchResults, handleSearch, error } = useSearch();
 
   if (isOpen) {
@@ -69,4 +69,4 @@ function DesktopSearch({ isOpen, setSearch }: Props) {
   );
 }
 
-export default DesktopSearch;
+export default HeaderSearch;

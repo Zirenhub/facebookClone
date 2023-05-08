@@ -4,7 +4,7 @@ import { menuBookmarks, menuCreate } from '../../pages/Desktop/bookmarks';
 import { TSectionButtons } from '../../types/Desktop';
 /* eslint-disable react/no-array-index-key */
 
-function DesktopMenu() {
+function HeaderMenu() {
   const [menuSearch, setMenuSearch] = useState<string | null>(null);
 
   function socialButton(buttons: TSectionButtons[]) {
@@ -104,4 +104,4 @@ function DesktopMenu() {
   );
 }
 
-export default DesktopMenu;
+export default HeaderMenu;
