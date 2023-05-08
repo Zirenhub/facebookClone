@@ -1,75 +1,40 @@
 import { useState } from 'react';
-import { TProfile, TProfileFriend } from '../../../types/Profile';
+import { TProfile, TStrangerProfileMutations } from '../../../types/Profile';
 import SingularPost from '../../Posts/SingularPost';
 import Popup from '../../Popup';
 import ProfileHeader from './ProfileHeader';
-import { ModifiedPost, ReactionTypes } from '../../../types/Post';
 import useAuthContext from '../../../hooks/useAuthContext';
+import ProfileRequestButton from '../ProfileRequestButton';
+import { ModifiedPost } from '../../../types/Post';
 
 type TPages = 'Posts' | 'About' | 'Photos' | 'Videos' | 'Mentions';
-
 type Props = {
-  profileProps: {
-    profile: TProfile;
-    requestMutation: () => void;
-    friendStatus: TProfileFriend | null;
-  };
-  postsProps: {
-    posts: ModifiedPost[];
-    mutationReactPost: {
-      isLoading: boolean;
-      isError: boolean;
-      error: unknown;
-      reactPost: (postId: string, r: ReactionTypes | null) => void;
-    };
-  };
+  profile: TProfile;
+  posts: ModifiedPost[];
+  mutations: TStrangerProfileMutations;
 };
 
-function StangerProfile({ profileProps, postsProps }: Props) {
+function StangerProfile({ profile, posts, mutations }: Props) {
   const [currentPage, setCurrentPage] = useState<TPages>('Posts');
   const [requestError, setRequestError] = useState<string | null>(null);
 
   const auth = useAuthContext();
+  const { requestMutation, mutationReactPost } = mutations;
   const pages: TPages[] = ['Posts', 'About', 'Photos', 'Videos', 'Mentions'];
-
-  function getRequestButton() {
-    const { friendStatus } = profileProps;
-    const btnProps = {
-      class: 'bg-blue-500',
-      text: 'Add friend',
-    };
-    if (friendStatus) {
-      const { status, friend } = friendStatus;
-      if (status === 'Accepted') {
-        btnProps.text = 'Unfriend';
-        btnProps.class = 'bg-red-500';
-      } else if (status === 'Pending' && friend === auth.user?._id) {
-        btnProps.class = 'bg-red-500';
-        btnProps.text = 'Cancel Request';
-      } else {
-        btnProps.class = 'bg-green-500';
-        btnProps.text = 'Accept Friend Request';
-      }
-    }
-    return (
-      <button
-        type="button"
-        onClick={() => profileProps.requestMutation()}
-        className={`${btnProps.class} text-white font-bold py-1 rounded-md grow`}
-      >
-        {btnProps.text}
-      </button>
-    );
-  }
 
   return (
     <div>
-      <ProfileHeader fullName={profileProps.profile.fullName} />
+      <ProfileHeader fullName={profile.fullName} />
       {requestError && (
         <Popup msg={requestError} close={() => setRequestError(null)} />
       )}
       <div className="flex gap-2 p-2">
-        {getRequestButton()}
+        <ProfileRequestButton
+          requestMutation={requestMutation}
+          friendStatus={profile.friendStatus}
+          myID={auth.user?._id || ''}
+          btnClass="py-1 grow text-white font-bold rounded-md"
+        />
         <button
           type="button"
           className="bg-gray-200 text-black font-bold py-1 rounded-md grow"
@@ -94,15 +59,15 @@ function StangerProfile({ profileProps, postsProps }: Props) {
           );
         })}
       </div>
-      {currentPage === 'Posts' && postsProps.posts && (
+      {currentPage === 'Posts' && posts && (
         <div className="p-2">
-          {postsProps.posts.map((post) => {
+          {posts.map((post) => {
             return (
               <div key={post._id} className="mt-2 border-b-4 border-slate-400">
                 <SingularPost
                   isMobile
                   post={post}
-                  mutationReactPost={postsProps.mutationReactPost}
+                  mutationReactPost={mutationReactPost}
                 />
               </div>
             );
