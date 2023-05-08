@@ -1,24 +1,27 @@
 /* eslint-disable react/jsx-no-useless-fragment */
-import { useState } from 'react';
 import Pfp from '../../../assets/pfp-two.svg';
-
-type TPages =
-  | 'Posts'
-  | 'About'
-  | 'Friends'
-  | 'Photos'
-  | 'Videos'
-  | 'Check-ins'
-  | 'More';
+import ProfileRequestButton from '../ProfileRequestButton';
+import { DesktopHeaderButtons, TProfileFriend } from '../../../types/Profile';
+import useAuthContext from '../../../hooks/useAuthContext';
 
 type Props = {
   fullName: string;
+  currentPage: DesktopHeaderButtons;
+  setCurrentPage: React.Dispatch<React.SetStateAction<DesktopHeaderButtons>>;
+  friendStatus?: TProfileFriend | null;
+  requestMutation?: () => void;
 };
 
-function ProfileHeader({ fullName }: Props) {
-  const [currentPage, setCurrentPage] = useState<TPages>('Posts');
+function ProfileHeader({
+  fullName,
+  currentPage,
+  setCurrentPage,
+  friendStatus,
+  requestMutation,
+}: Props) {
+  const auth = useAuthContext();
 
-  const buttons: TPages[] = [
+  const buttons: DesktopHeaderButtons[] = [
     'Posts',
     'About',
     'Friends',
@@ -27,6 +30,55 @@ function ProfileHeader({ fullName }: Props) {
     'Check-ins',
     'More',
   ];
+
+  function myProfileHeader() {
+    return (
+      <div className="flex flex-col items-end justify-between">
+        <button
+          type="button"
+          className="rounded-lg bg-white font-bold px-4 py-2 hover:bg-gray-100"
+        >
+          Add cover photo
+        </button>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-600"
+          >
+            Add to story
+          </button>
+          <button
+            type="button"
+            className="bg-gray-200 px-4 py-2 font-bold rounded-lg hover:bg-gray-300"
+          >
+            Edit pofile
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  function strangerProfileHeader() {
+    if (requestMutation) {
+      return (
+        <div className="flex items-end gap-3">
+          <ProfileRequestButton
+            friendStatus={friendStatus || null}
+            requestMutation={requestMutation}
+            myID={auth.user?._id || ''}
+            btnClass="px-4 py-2 rounded-lg text-white font-bold"
+          />
+          <button
+            type="button"
+            className="bg-gray-200 px-4 py-2 font-bold rounded-lg hover:bg-gray-300"
+          >
+            Message
+          </button>
+        </div>
+      );
+    }
+    return null;
+  }
 
   return (
     <div className="flex flex-col pb-1">
@@ -39,28 +91,7 @@ function ProfileHeader({ fullName }: Props) {
             </div>
             <p className="font-bold text-2xl">{fullName}</p>
           </div>
-          <div className="flex flex-col items-end justify-between">
-            <button
-              type="button"
-              className="rounded-lg bg-white font-bold px-4 py-2 hover:bg-gray-100"
-            >
-              Add cover photo
-            </button>
-            <div className="flex gap-3">
-              <button
-                type="button"
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-600"
-              >
-                Add to story
-              </button>
-              <button
-                type="button"
-                className="bg-gray-200 px-4 py-2 font-bold rounded-lg hover:bg-gray-300"
-              >
-                Edit pofile
-              </button>
-            </div>
-          </div>
+          {requestMutation ? strangerProfileHeader() : myProfileHeader()}
         </div>
       </div>
       <div className="h-px bg-gray-300 mt-6 mb-2" />
@@ -74,7 +105,12 @@ function ProfileHeader({ fullName }: Props) {
             }  transition-all font-bold text-xl`;
 
             return (
-              <button type="button" key={b} className={btnClass}>
+              <button
+                type="button"
+                key={b}
+                className={btnClass}
+                onClick={() => setCurrentPage(b)}
+              >
                 {b}
               </button>
             );
@@ -90,5 +126,10 @@ function ProfileHeader({ fullName }: Props) {
     </div>
   );
 }
+
+ProfileHeader.defaultProps = {
+  friendStatus: undefined,
+  requestMutation: undefined,
+};
 
 export default ProfileHeader;

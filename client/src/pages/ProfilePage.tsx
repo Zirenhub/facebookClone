@@ -1,23 +1,33 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable react/jsx-no-useless-fragment */
-/* eslint-disable no-nested-ternary */
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
-import { useCallback, useEffect, useState } from 'react';
-import { TFriendStatus, TProfile, TProfileFriend } from '../types/Profile';
-import OwnProfileMobile from '../components/ProfilePages/Mobile/OwnProfile';
-import StrangerProfileMobile from '../components/ProfilePages/Mobile/StrangerProfile';
-import OwnProfileDesktop from '../components/ProfilePages/Desktop/OwnProfile';
+import React, { Suspense, useCallback, useEffect, useState } from 'react';
+import {
+  MutationReactPost,
+  TOwnProfileMutations,
+  TProfile,
+  TProfileFriend,
+  TStrangerProfileMutations,
+} from '../types/Profile';
 import Loading from '../components/Loading';
 import useAuthContext from '../hooks/useAuthContext';
 import { getProfile, profileRequest } from '../api/profile';
 import usePosts from '../hooks/usePosts';
 
+const ProfileDesktop = React.lazy(
+  () => import('../components/ProfilePages/Desktop/Profile')
+);
+const OwnProfileMobile = React.lazy(
+  () => import('../components/ProfilePages/Mobile/OwnProfile')
+);
+const StrangerProfileMobile = React.lazy(
+  () => import('../components/ProfilePages/Mobile/StrangerProfile')
+);
+
 function ProfilePage({ isMobile }: { isMobile: boolean }) {
   const { id } = useParams() as { id: string };
-  const [relationshipStatus, setRelationshipStatus] = useState<{
-    status: TProfileFriend | null;
-    request: TFriendStatus;
-  }>({ status: null, request: 'request' });
+  const [profile, setProfile] = useState<TProfile | null>(null);
   const auth = useAuthContext();
 
   const { data, isLoading, isError, error } = useQuery<TProfile, Error>({
@@ -30,6 +40,9 @@ function ProfilePage({ isMobile }: { isMobile: boolean }) {
     },
     retry: false,
     refetchOnWindowFocus: false,
+    onSuccess(successData) {
+      setProfile(successData);
+    },
   });
 
   const checkStatus = useCallback(
@@ -48,34 +61,24 @@ function ProfilePage({ isMobile }: { isMobile: boolean }) {
 
   const requestMutation = useMutation({
     mutationFn: () => {
-      const reqId = relationshipStatus.status
-        ? relationshipStatus.status._id
-        : id;
-      return profileRequest(reqId, relationshipStatus.request);
+      if (profile) {
+        const { friendStatus } = profile;
+        if (friendStatus) {
+          return profileRequest(friendStatus._id, checkStatus(friendStatus));
+        }
+        return profileRequest(profile._id, 'request');
+      }
+      throw new Error('Profile was not found');
     },
     onSuccess(successData) {
-      setRelationshipStatus({
-        status: successData,
-        request: successData ? checkStatus(successData) : 'request',
-      });
+      if (profile) {
+        setProfile({ ...profile, friendStatus: successData });
+      }
     },
     onError(errorData: Error) {
       // handle error
     },
   });
-
-  useEffect(() => {
-    if (!isLoading && !isError) {
-      const { friendStatus } = data;
-      if (friendStatus) {
-        const currentReq = checkStatus(friendStatus);
-        setRelationshipStatus({
-          status: friendStatus,
-          request: currentReq,
-        });
-      }
-    }
-  }, [checkStatus, data, isLoading, isError]);
 
   const {
     posts,
@@ -87,10 +90,9 @@ function ProfilePage({ isMobile }: { isMobile: boolean }) {
 
   useEffect(() => {
     const container = document.querySelector('main');
-    const handleScrollFn = (e: Event) => handleScroll(e);
-    container?.addEventListener('scroll', handleScrollFn);
+    container?.addEventListener('scroll', handleScroll);
     return () => {
-      container?.removeEventListener('scroll', handleScrollFn);
+      container?.removeEventListener('scroll', handleScroll);
     };
   }, [handleScroll]);
 
@@ -107,46 +109,52 @@ function ProfilePage({ isMobile }: { isMobile: boolean }) {
     );
   }
 
-  const isCurrentUser = data._id === auth.user?._id;
+  const isMe = data._id === auth.user?._id;
+  const props: {
+    ownProfile: TOwnProfileMutations;
+    strangerProfile: TStrangerProfileMutations;
+    mutationReactPost: MutationReactPost;
+  } = {
+    ownProfile: {
+      mutationCreatePost,
+      mutationDeletePost,
+    },
+    strangerProfile: {
+      requestMutation: () => requestMutation.mutate(),
+    },
+    mutationReactPost,
+  };
 
-  return (
-    <>
-      {isMobile ? (
-        isCurrentUser ? (
+  function getProfilePage() {
+    if (profile) {
+      if (isMobile) {
+        return isMe ? (
           <OwnProfileMobile
-            profile={data}
-            postsProps={{
-              posts,
-              mutationCreatePost,
-              mutationReactPost,
-              mutationDeletePost,
-            }}
+            profile={profile}
+            posts={posts}
+            mutations={props.ownProfile}
           />
         ) : (
           <StrangerProfileMobile
-            profileProps={{
-              profile: data,
-              requestMutation: () => requestMutation.mutate(),
-              friendStatus: relationshipStatus.status,
-            }}
-            postsProps={{ posts, mutationReactPost }}
+            profile={profile}
+            posts={posts}
+            mutations={props.strangerProfile}
           />
-        )
-      ) : isCurrentUser ? (
-        <OwnProfileDesktop
-          profile={data}
-          postsProps={{
-            posts,
-            mutationCreatePost,
-            mutationReactPost,
-            mutationDeletePost,
-          }}
+        );
+      }
+      return (
+        <ProfileDesktop
+          profile={profile}
+          posts={posts}
+          isMe={isMe}
+          mutations={props}
         />
-      ) : (
-        <p>Profile goes here</p>
-      )}
-    </>
-  );
+      );
+    }
+    return <p className="text-center">Something went wrong</p>;
+  }
+
+  return <Suspense fallback={<Loading />}>{getProfilePage()}</Suspense>;
 }
 
 export default ProfilePage;
