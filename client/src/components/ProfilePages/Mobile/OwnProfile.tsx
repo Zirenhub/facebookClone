@@ -2,11 +2,20 @@
 import { useState } from 'react';
 import OwnProfilePosts from './OwnProfilePosts';
 import ProfileHeader from './ProfileHeader';
-import { OwnProfileProps } from '../../../types/Profile';
+import { TOwnProfileMutations, TProfile } from '../../../types/Profile';
+import { ModifiedPost } from '../../../types/Post';
 
-function OwnProfile({ profile, postsProps }: OwnProfileProps) {
+type Props = {
+  profile: TProfile;
+  posts: ModifiedPost[];
+  mutations: TOwnProfileMutations;
+};
+
+function OwnProfile({ profile, posts, mutations }: Props) {
   const [currentPage, setCurrentPage] = useState<'Posts' | 'Reels'>('Posts');
   const profilePages: ['Posts', 'Reels'] = ['Posts', 'Reels'];
+  const { mutationCreatePost, mutationDeletePost, mutationReactPost } =
+    mutations;
 
   return (
     <>
@@ -51,10 +60,10 @@ function OwnProfile({ profile, postsProps }: OwnProfileProps) {
       </div>
       {currentPage === 'Posts' && (
         <OwnProfilePosts
-          posts={postsProps.posts}
-          mutationCreatePost={postsProps.mutationCreatePost}
-          mutationReactPost={postsProps.mutationReactPost}
-          mutationDeletePost={postsProps.mutationDeletePost}
+          posts={posts}
+          mutationCreatePost={mutationCreatePost}
+          mutationReactPost={mutationReactPost}
+          mutationDeletePost={mutationDeletePost}
         />
       )}
     </>
