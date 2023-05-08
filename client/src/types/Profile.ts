@@ -39,39 +39,41 @@ export type TProfileDefault = {
   fullName: string;
 };
 
-// export type TProfileWithoutFullName = {
-//   __v: string;
-//   _id: string;
-//   firstName: string;
-//   lastName: string;
-//   birthday: string;
-//   gender: string;
-//   customGender?: string;
-//   createdAt: string;
-//   updatedAt: string;
-// };
-
-export type OwnProfileProps = {
-  profile: TProfile;
-  postsProps: {
-    posts: ModifiedPost[];
-    mutationCreatePost: {
-      isLoading: boolean;
-      isError: boolean;
-      error: unknown;
-      createPost: (post: TPost) => void;
-    };
-    mutationReactPost: {
-      isLoading: boolean;
-      isError: boolean;
-      error: unknown;
-      reactPost: (postId: string, r: ReactionTypes | null) => void;
-    };
-    mutationDeletePost: {
-      isLoading: boolean;
-      isError: boolean;
-      error: unknown;
-      deletePost: (postId: string) => void;
-    };
-  };
+export type MutationReactPost = {
+  isLoading: boolean;
+  isError: boolean;
+  error: unknown;
+  reactPost: (postId: string, r: ReactionTypes | null) => void;
 };
+
+type MutationCreatePost = {
+  isLoading: boolean;
+  isError: boolean;
+  error: unknown;
+  createPost: (post: TPost) => void;
+};
+
+type MutationDeletePost = {
+  isLoading: boolean;
+  isError: boolean;
+  error: unknown;
+  deletePost: (postId: string) => void;
+};
+
+export type TOwnProfileMutations = {
+  mutationCreatePost: MutationCreatePost;
+  mutationDeletePost: MutationDeletePost;
+};
+
+export type TStrangerProfileMutations = {
+  requestMutation: () => void;
+};
+
+export type DesktopHeaderButtons =
+  | 'Posts'
+  | 'About'
+  | 'Friends'
+  | 'Photos'
+  | 'Videos'
+  | 'Check-ins'
+  | 'More';

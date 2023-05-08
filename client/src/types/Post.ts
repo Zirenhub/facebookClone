@@ -45,7 +45,7 @@ type PopulatedAuthor = {
 };
 
 export type TDBPost = {
-  __v: string;
+  __v: number;
   _id: string;
   author: PopulatedAuthor;
   audience: 'public' | 'friends';
