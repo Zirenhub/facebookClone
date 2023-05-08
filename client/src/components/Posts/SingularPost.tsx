@@ -46,7 +46,7 @@ function SingularPost({
             mutationReactPost={mutationReactPost}
           />
         ) : (
-          <div className="absolute flex justify-center items-center top-0 left-0 z-30 h-full w-full bg-gray-200/50">
+          <div className="fixed flex justify-center items-center top-0 left-0 z-30 h-full w-full bg-gray-200/50">
             <FullPostDesktop
               post={post}
               close={() => setIsOpen(false)}
