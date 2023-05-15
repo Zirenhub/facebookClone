@@ -9,7 +9,7 @@ function PostStyle({ post }: { post: ModifiedPost }) {
         <img
           alt="post"
           src={post.image}
-          className="h-auto w-[600px] self-center"
+          className="h-auto w-[550px] self-center"
         />
       </>
     );
