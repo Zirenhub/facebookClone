@@ -35,12 +35,13 @@ export async function getGroups(): Promise<TGroup[]> {
 export async function postMessage(
   id: string,
   query: 'group' | 'private',
-  messageContent: string
+  messageContent: string,
+  roomID: string
 ): Promise<null> {
   const res = await fetch(`/api/v1/messages/${query}/${id}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message: messageContent }),
+    body: JSON.stringify({ message: messageContent, roomID }),
   });
   const { status, data, errors, message }: PostMessageRes = await res.json();
   return getFinal(status, data, errors, message);
