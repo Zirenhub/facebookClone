@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { TMessage } from '../../types/Message';
 
 type Props = {
@@ -15,6 +15,7 @@ type Props = {
 
 function ChatMessages({ userID, messages, queryStatus }: Props) {
   const [lastMessage, setLastMessage] = useState<string | null>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // only scroll down on initial chat open or if new message is sent
@@ -22,15 +23,17 @@ function ChatMessages({ userID, messages, queryStatus }: Props) {
       messages.length > 0 &&
       lastMessage !== messages[messages.length - 1]._id
     ) {
-      const chatMessagesElement = document.getElementById('chatMessages');
-      const lastMessageElement = chatMessagesElement?.lastElementChild;
+      const lastMessageElement = chatContainerRef.current?.lastElementChild;
       lastMessageElement?.scrollIntoView({ behavior: 'smooth' });
       setLastMessage(messages[messages.length - 1]._id);
     }
   }, [messages, lastMessage]);
 
   return (
-    <div className="grow flex flex-col p-3 overflow-scroll" id="chatMessages">
+    <div
+      className="grow flex flex-col p-3 overflow-scroll"
+      ref={chatContainerRef}
+    >
       {queryStatus.hasNextPage && (
         <button
           type="button"
