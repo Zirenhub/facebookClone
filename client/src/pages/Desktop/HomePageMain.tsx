@@ -99,7 +99,10 @@ function HomePageMain() {
         const isAuthor = post.author._id === auth.user?._id;
 
         return (
-          <div key={post._id} className="bg-white rounded-md shadow-md p-4">
+          <div
+            key={post._id}
+            className="bg-white rounded-md shadow-md p-4 h-auto"
+          >
             <SingularPost
               isMobile={false}
               post={post}

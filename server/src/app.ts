@@ -55,16 +55,16 @@ io.on('connection', (socket) => {
   const id = socket.handshake.auth.id;
   if (!id) {
     socket.disconnect();
+    return;
   }
-  // this room is used for notifications
-  socket.join(id);
 
   if (!onlineUsers.some((onlineID) => onlineID === id)) {
     onlineUsers.push(id);
+    // this room is used for notifications
+    socket.join(id);
+    socket.leave(socket.id); // Leave the default room
+    console.log('a user connected', onlineUsers);
   }
-
-  console.log('a user connected', onlineUsers);
-
   // these rooms are used for gorups
   socket.on('joinGroup', (groupID) => {
     socket.join(groupID);

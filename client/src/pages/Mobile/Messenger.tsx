@@ -5,7 +5,7 @@ import Close from '../../assets/x.svg';
 import Loading from '../../components/Loading';
 import { TProfileDefault } from '../../types/Profile';
 import Pfp from '../../assets/pfp-two.svg';
-import Chat from '../../components/Chat/Chat';
+import Chat from '../../components/Chat/Mobile/Chat';
 import getOnlineFriends from '../../api/onlineFriends';
 
 function Messenger({ close }: { close: () => void }) {
