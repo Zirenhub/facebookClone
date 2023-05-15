@@ -1,10 +1,12 @@
-import { UseMutationResult } from '@tanstack/react-query';
 import { useState } from 'react';
 import Send from '../../assets/send.svg';
-import TMessage from '../../types/Message';
 
 type Props = {
-  send: UseMutationResult<TMessage, unknown, string, unknown>;
+  send: {
+    send: (message: string) => void;
+    error: unknown;
+    loading: boolean;
+  };
 };
 
 function ChatFooter({ send }: Props) {
@@ -20,7 +22,7 @@ function ChatFooter({ send }: Props) {
       <form
         onSubmit={(e: React.SyntheticEvent) => {
           e.preventDefault();
-          send.mutate(message);
+          send.send(message);
           setMessage('');
         }}
         className="flex items-center"
