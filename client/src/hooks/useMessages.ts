@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useMutation } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { getMessages, postMessage } from '../api/messages';
 import { TMessage } from '../types/Message';
 import useAuthContext from './useAuthContext';
@@ -29,6 +29,10 @@ function useMessages(query: 'private' | 'group', id: string) {
     refetchOnWindowFocus: false,
   });
 
+  const getRoomID = useCallback(() => {
+    return query === 'group' ? id : [auth.user?._id, id].sort().join('_');
+  }, [auth.user, id, query]);
+
   function handleLoadPrevious() {
     if (hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
@@ -38,7 +42,7 @@ function useMessages(query: 'private' | 'group', id: string) {
   const handleSend = useMutation({
     mutationFn: (message: string) => {
       if (message) {
-        return postMessage(id, query, message);
+        return postMessage(id, query, message, getRoomID());
       }
       throw new Error("Message can't be empty");
     },
@@ -52,24 +56,44 @@ function useMessages(query: 'private' | 'group', id: string) {
   }, [data, isFetching, status]);
 
   useEffect(() => {
-    function addMessage({ message }: { message: TMessage }) {
-      setMessages((prevState) => {
-        return [...prevState, message];
-      });
+    const roomID = getRoomID();
+    const socketProps = {
+      roomID,
+      emit: query === 'group' ? 'joinGroup' : 'joinChat',
+      on: 'receiveMessage',
+      leave: query === 'group' ? 'leaveGroup' : 'leaveChat',
+    };
+    function addMessage({
+      message,
+      msgRoomID,
+    }: {
+      message: TMessage;
+      msgRoomID: string;
+    }) {
+      if (msgRoomID === roomID) {
+        setMessages((prevState) => {
+          return [...prevState, message];
+        });
+      }
     }
-
-    auth.socket?.emit('joinGroup', id);
-    auth.socket?.on('groupMessage', addMessage);
+    auth.socket?.emit(socketProps.emit, socketProps.roomID);
+    auth.socket?.on(socketProps.on, addMessage);
 
     return () => {
-      auth.socket?.off('groupMessage', addMessage);
-      auth.socket?.emit('leaveGroup', id);
+      auth.socket?.off(socketProps.on, addMessage);
+      auth.socket?.emit(socketProps.leave, socketProps.roomID);
     };
-  }, [auth, id]);
+  }, [auth, id, query, getRoomID]);
 
   return {
     handleLoadPrevious,
-    handleSend,
+    handleSend: {
+      send: (message: string) => {
+        handleSend.mutate(message);
+      },
+      error: handleSend.error,
+      loading: handleSend.isLoading,
+    },
     messages,
     error,
     hasNextPage,
