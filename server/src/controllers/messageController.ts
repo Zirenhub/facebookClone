@@ -55,7 +55,7 @@ export const postMessage = (io: Server) => [
       }
 
       const { id } = req.params;
-      const { message } = req.body;
+      const { message, roomID } = req.body;
 
       const newMessage = new MessageModel({
         sender: req.user._id,
@@ -63,16 +63,23 @@ export const postMessage = (io: Server) => [
         message,
       });
 
+      if (!roomID.includes(req.user._id)) {
+        return res.status(400).json({
+          status: 'error',
+          errors: null,
+          message: 'Unauthorized.',
+        });
+      }
+
       const updatedUser = getUpdatedUser(req.user);
       await newMessage.save();
-
-      const roomID = [req.user._id, id].sort().join('_');
 
       io.to(roomID).emit('receiveMessage', {
         message: {
           ...newMessage.toObject(),
           sender: updatedUser,
         },
+        msgRoomID: roomID,
       });
       io.to(id).emit('notification', {
         type: 'message',
@@ -234,7 +241,7 @@ export const sendGroupMessage = (io: Server) => [
       }
 
       const { id } = req.params;
-      const { message } = req.body;
+      const { message, roomID } = req.body;
 
       const group = await GroupModel.findById(id);
 
@@ -269,12 +276,14 @@ export const sendGroupMessage = (io: Server) => [
       const savedMessage = await newMessage.save();
 
       const updatedUser = getUpdatedUser(req.user);
+      const groupID = group._id.toString();
 
-      io.to(group._id.toString()).emit('groupMessage', {
+      io.to(groupID).emit('receiveMessage', {
         message: {
           ...savedMessage.toObject(),
           sender: updatedUser,
         },
+        msgRoomID: groupID,
       });
 
       // data is null since everyone in the group will get the message using socketio.
