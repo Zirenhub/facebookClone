@@ -1,5 +1,5 @@
 import { Outlet } from 'react-router-dom';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import useRoute from '../../hooks/useRoute';
 import Messenger from '../../assets/messenger.svg';
 import Menu from '../../assets/menu.svg';
@@ -12,51 +12,96 @@ import { TProfileDefault } from '../../types/Profile';
 import HeaderMessenger from './HeaderMessenger';
 import DesktopChats from './DesktopChats';
 
-type TModal = 'menu' | 'profile' | 'messenger';
+type TModal = 'menu' | 'profile' | 'messenger' | 'bell';
+type TChats = {
+  active: TProfileDefault[];
+  minimized: TProfileDefault[];
+};
+type THeaderModals = {
+  modal: TModal;
+  Src: React.FC<React.SVGProps<SVGElement>>;
+  Comp: JSX.Element;
+}[];
 
 function Header() {
   const [currentModal, setCurrentModal] = useState<TModal | 'search' | null>(
     null
   );
-  const [activeChats, setActiveChats] = useState<TProfileDefault[]>([]);
-
+  const [chats, setChats] = useState<TChats>({ active: [], minimized: [] });
   const mainRef = useRef<HTMLDivElement>(null);
-  const headerBtnClass =
-    'bg-gray-200 h-full w-10 rounded-full flex justify-center items-center cursor-pointer hover:bg-gray-300';
-  const headerModals: {
-    modal: TModal;
-    Src: React.FC<React.SVGProps<SVGElement>>;
-  }[] = [
-    { modal: 'menu', Src: Menu },
-    { modal: 'profile', Src: Pfp },
-    { modal: 'messenger', Src: Messenger },
-  ];
 
   const addChat = (profile: TProfileDefault) => {
-    const isOpen = activeChats.find((p) => p._id === profile._id);
-    if (!isOpen) {
-      setActiveChats([...activeChats, profile]);
+    const isActive = chats.active.some((x) => x._id === profile._id);
+    if (!isActive) {
+      setChats((prevChats) => {
+        const isMinimized = prevChats.minimized.some(
+          (x) => x._id === profile._id
+        );
+        return {
+          minimized: isMinimized
+            ? prevChats.minimized.filter((c) => c._id !== profile._id)
+            : prevChats.minimized,
+          active: [...prevChats.active, profile],
+        };
+      });
     }
   };
 
-  const closeChat = (profileID: string) => {
-    const modifiedChats = activeChats.filter((x) => x._id !== profileID);
-    setActiveChats(modifiedChats);
+  const closeChat = (profileID: string, state: 'active' | 'minimized') => {
+    setChats((prevChats) => {
+      const modifiedChats = prevChats[state].filter((c) => c._id !== profileID);
+      return {
+        ...prevChats,
+        [state]: modifiedChats,
+      };
+    });
+  };
+
+  const minimizeChat = (profileID: string) => {
+    const profile = chats.active.find((p) => p._id === profileID);
+    if (profile) {
+      const modifiedActive = chats.active.filter((c) => c._id !== profileID);
+      setChats({
+        active: modifiedActive,
+        minimized: [...chats.minimized, profile],
+      });
+    }
   };
 
   useEffect(() => {
+    // useEffect for when clicking on main container, close any modal that might be open.
     function closePopups() {
-      setCurrentModal(null);
+      if (currentModal) {
+        setCurrentModal(null);
+      }
     }
     const { current } = mainRef;
     current?.addEventListener('click', closePopups);
     return () => {
       current?.removeEventListener('click', closePopups);
     };
-  }, []);
+  }, [currentModal]);
 
-  const { pages, notifications, latestNotif, currentPage, setNotifications } =
-    useRoute(false);
+  const { pages, notifications, latestNotif, currentPage } = useRoute(false);
+
+  const activeChats = useMemo(() => chats.active, [chats.active]);
+  const minimizedChats = useMemo(() => chats.minimized, [chats.minimized]);
+
+  const headerModals: THeaderModals = [
+    { modal: 'menu', Src: Menu, Comp: <HeaderMenu /> },
+    { modal: 'profile', Src: Pfp, Comp: <HeaderProfile /> },
+    {
+      modal: 'messenger',
+      Src: Messenger,
+      Comp: <HeaderMessenger addChat={addChat} />,
+    },
+    { modal: 'bell', Src: Bell, Comp: <p>Test</p> },
+  ];
+
+  function getOpenModal() {
+    const modal = headerModals.find((m) => m.modal === currentModal);
+    return modal ? modal.Comp : null;
+  }
 
   return (
     <>
@@ -96,7 +141,7 @@ function Header() {
               <button
                 type="button"
                 key={modal}
-                className={`${headerBtnClass} ${
+                className={`bg-gray-200 h-full w-10 rounded-full flex justify-center items-center cursor-pointer hover:bg-gray-300 ${
                   currentModal === modal ? 'bg-blue-200 hover:bg-blue-300' : ''
                 } ${modal === 'profile' ? '' : 'p-2'}`}
                 onClick={() =>
@@ -107,34 +152,20 @@ function Header() {
               </button>
             );
           })}
-          <div className={`${headerBtnClass} p-2`}>
-            <Bell height="100%" width="100%" />
-          </div>
         </div>
-        {currentModal && (
-          <div className="absolute top-12 right-2">
-            {currentModal === 'menu' && <HeaderMenu />}
-            {currentModal === 'messenger' && (
-              <HeaderMessenger addChat={addChat} />
-            )}
-            {currentModal === 'profile' && <HeaderProfile />}
-          </div>
+        {currentModal && currentModal !== 'search' && (
+          <div className="absolute top-12 right-2">{getOpenModal()}</div>
         )}
       </header>
       <main className="overflow-auto grow" ref={mainRef}>
-        <Outlet
-          context={{
-            notifications,
-            clearNotifications: () => {
-              if (notifications.length > 0) setNotifications([]);
-            },
-          }}
-        />
+        <Outlet />
       </main>
       <DesktopChats
         activeChats={activeChats}
+        minimizedChats={minimizedChats}
         closeChat={closeChat}
         addChat={addChat}
+        minimizeChat={minimizeChat}
       />
     </>
   );

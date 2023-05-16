@@ -8,7 +8,7 @@ import ChatFooter from '../ChatFooter';
 type Props = {
   profile: TProfileDefault;
   closeChat: (profileID: string) => void;
-  minimizeChat: (profile: TProfileDefault) => void;
+  minimizeChat: (profileID: string) => void;
 };
 
 function Chat({ profile, closeChat, minimizeChat }: Props) {
@@ -26,7 +26,7 @@ function Chat({ profile, closeChat, minimizeChat }: Props) {
   } = useMessages('private', profile._id);
 
   return (
-    <div className="flex flex-col bg-white h-[450px] min-w-[350px] grow rounded-t-lg shadow-lg border">
+    <div className="flex flex-col bg-white h-[450px] z-20 min-w-[350px] grow rounded-t-lg shadow-lg border">
       <div className="flex justify-between p-2 border-b shadow-sm">
         <div className="flex items-center gap-2">
           <div className="h-8 w-8">
@@ -35,7 +35,7 @@ function Chat({ profile, closeChat, minimizeChat }: Props) {
           <p>{profile.fullName}</p>
         </div>
         <div className="flex gap-4 text-lg">
-          <button type="button" onClick={() => minimizeChat(profile)}>
+          <button type="button" onClick={() => minimizeChat(profile._id)}>
             -
           </button>
           <button type="button" onClick={() => closeChat(profile._id)}>
