@@ -41,7 +41,8 @@ export const login = [
           message: 'User not found.',
         });
       }
-
+      
+      // very bad, fix this later
       const checkPassword = bcrypt.compareSync(
         password,
         user.password
